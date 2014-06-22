@@ -16,3 +16,204 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "console.h"
+const char *v_console_styles[] = {
+	"\033[0m",
+	"\033[1m",
+	"\033[4m",
+	"\033[5m",
+	"\033[31m",
+	"\033[32m",
+	"\033[33m",
+	"\033[34m",
+	"\033[37m"
+};
+
+int f_console_init(struct s_console **console, struct s_console_command *commands, int descriptor) {
+	int result = d_false;
+	if ((*console = (struct s_console *) d_malloc(sizeof(struct s_console)))) {
+		memset((*console), 0, sizeof(struct s_console));
+		(*console)->commands = commands;
+		(*console)->descriptor = descriptor;
+		if (tcgetattr(descriptor, &((*console)->old_configuration)) == 0) {
+			memcpy(&((*console)->current_configuration), &((*console)->old_configuration), sizeof(struct termios));
+			(*console)->current_configuration.c_lflag &= ~(ECHO|ICANON);
+			(*console)->current_configuration.c_cc[VMIN] = 1;
+			(*console)->current_configuration.c_cc[VTIME] = 0;
+			if (tcsetattr(descriptor, TCSAFLUSH, &((*console)->current_configuration)) == 0)
+				result = d_true;
+		}
+	} else
+		d_die(d_error_malloc);
+	return result;
+}
+
+int f_console_destroy(struct s_console **console) {
+	int result = d_false;
+	if (*console) {
+		if (tcsetattr((*console)->descriptor, TCSAFLUSH, &((*console)->old_configuration)) == 0)
+			result = d_true;
+		d_free(*console);
+	}
+	*console = NULL;
+	return result;
+}
+
+void f_console_write(struct s_console *console, const char *buffer, int output) {
+	if (output != d_console_descriptor_null) {
+		write(output, d_console_clean_line, f_string_strlen(d_console_clean_line));
+		write(output, console->prefix, f_string_strlen(console->prefix));
+		write(output, buffer, f_string_strlen(buffer));
+		fsync(output);
+	}
+}
+
+void p_console_append_history(struct s_console *console, const char *buffer) {
+	int index;
+	if (console->history_last >= d_console_history_size) {
+		for (index = (console->history_last-1); index > 0; index--)
+			strcpy(console->history[index-1], console->history[index]);
+		console->history_last--;
+	}
+	strncpy(console->history[console->history_last++], buffer, d_string_buffer_size);
+	console->history_pointer = console->history_last;
+}
+
+
+
+void p_console_write_history(struct s_console *console, struct s_console_input *input, int output) {
+	int change = d_false;
+	if (output != d_console_descriptor_null)
+		switch (input->special[2]) {
+			case 66:
+				change = d_true;
+				if (console->history_pointer <= console->history_last)
+					console->history_pointer++;
+				break;
+			case 65:
+				change = d_true;
+				if (console->history_pointer > 0)
+					console->history_pointer--;
+		}
+	if ((console->history_pointer <= console->history_last) && (change)) {
+		f_console_write(console, console->history[console->history_pointer], output);
+		strcpy(input->input, console->history[console->history_pointer]);
+		input->data_pointer = f_string_strlen(console->history[console->history_pointer]);
+	}
+}
+
+void p_console_write_suggestion(struct s_console *console, struct s_console_input *input, int output) {
+	char buffer[d_string_buffer_size] = {0}, backup[d_string_buffer_size], common_substring[d_string_buffer_size] = {0};
+	int index, match, last_match, current_match;
+	if ((output != d_console_descriptor_null) && (console->commands)) {
+		for (index = 0, match = 0; console->commands[index].initialized; index++)
+			if (console->commands[index].level <= console->level)
+				if (f_string_strncmp(input->input, console->commands[index].command, input->data_pointer) == 0) {
+					if (match == 0)
+						strcpy(common_substring, console->commands[index].command);
+					else {
+						current_match = 0;
+						while (console->commands[index].command[current_match] != '\0') {
+							if (console->commands[index].command[current_match] != common_substring[current_match]) {
+								common_substring[current_match] = '\0';
+								break;
+							}
+							current_match++;
+						}
+					}
+					last_match = index;
+					snprintf(backup, d_string_buffer_size, "%c%s", ((match%d_console_suggestion_columns) == 0)?'\n':'\t',
+							console->commands[index].command);
+					strncat(buffer, backup, (d_string_buffer_size-f_string_strlen(buffer))-1);
+					match++;
+				}
+		if (match > 0) {
+			strcpy(input->input, common_substring);
+			input->data_pointer = f_string_strlen(common_substring);
+			if (match == 1) {
+				snprintf(buffer, d_string_buffer_size, "\n%s%sCOMMAND:\n\t%s%s\n%s%sDESCRIPTION:\n\t%s%s",
+						v_console_styles[e_console_style_bold], v_console_styles[e_console_style_yellow],
+						v_console_styles[e_console_style_reset], console->commands[last_match].command,
+						v_console_styles[e_console_style_bold], v_console_styles[e_console_style_yellow],
+						v_console_styles[e_console_style_reset], console->commands[last_match].description);
+				if (console->commands[last_match].parameters) {
+					snprintf(backup, d_string_buffer_size, "\n%s%sPARAMETERS:%s", v_console_styles[e_console_style_bold],
+							v_console_styles[e_console_style_yellow], v_console_styles[e_console_style_reset]);
+					strcat(buffer, backup);
+					for (index = 0; console->commands[last_match].parameters[index].initialized; index++) {
+						snprintf(backup, d_string_buffer_size, "\n\t[%s%s%s]%s %s", v_console_styles[e_console_style_bold],
+								console->commands[last_match].parameters[index].parameter,
+								v_console_styles[e_console_style_reset],
+								(console->commands[last_match].parameters[index].optional)?"":"[*]",
+								console->commands[last_match].parameters[index].description);
+						strcat(buffer, backup);
+					}
+				}
+			}
+			write(output, buffer, f_string_strlen(buffer));
+			write(output, "\n", sizeof(char));
+			f_console_write(console, input->input, output);
+		} else
+			write(output, "\a", sizeof(char));
+	}
+}
+
+int f_console_read(struct s_console *console, struct s_console_input *input, int output, time_t sec, time_t usec) {
+	struct timeval timeout = {sec, usec};
+	char incoming_character;
+	fd_set descriptor_set;
+	if (input->ready) {
+		memset(input, 0, sizeof(struct s_console_input));
+		if (output != d_console_descriptor_null) {
+			write(output, (void *)console->prefix, f_string_strlen(console->prefix));
+			fsync(output);
+		}
+	}
+	FD_ZERO(&descriptor_set);
+	FD_SET(console->descriptor, &descriptor_set);
+	if (select(console->descriptor+1, &descriptor_set, NULL, NULL, &timeout) > 0) {
+		if ((read(console->descriptor, &incoming_character, sizeof(char))) > 0) {
+			if (input->special_pointer > 0) {
+				input->special[input->special_pointer++] = incoming_character;
+				if (input->special_pointer >= d_console_special_size) {
+					p_console_write_history(console, input, output);
+					input->special_pointer = 0; /* reset special pointer */
+				}
+			} else {
+				switch(incoming_character) {
+					case '\t':
+						p_console_write_suggestion(console, input, output);
+						break;
+					case 127:
+						if (input->data_pointer > 0) {
+							input->input[--(input->data_pointer)] = '\0';
+							f_console_write(console, input->input, output);
+						}
+						break;
+					case 27:
+						input->special[input->special_pointer++] = incoming_character;
+						break;
+					case 10:
+						if (input->data_pointer > 0) {
+							input->ready = d_true;
+							if (output != d_console_descriptor_null)
+								write(output, (void *)&incoming_character, sizeof(char));
+							p_console_append_history(console, input->input);
+						}
+						break;
+					default:
+						if (input->data_pointer < d_string_buffer_size) {
+							input->input[input->data_pointer++] = incoming_character;
+							if (output != d_console_descriptor_null)
+								write(output, (void *)&incoming_character, sizeof(char));
+						}
+				}
+			}
+			if (output != d_console_descriptor_null)
+				fsync(output);
+		}
+	}
+	return input->ready;
+}
+
+int f_console_execute(struct s_console *console, struct s_console_input *input, int output) {
+}
