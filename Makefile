@@ -1,4 +1,4 @@
-objects = rs232.o console.o magrathea.o
+objects = rs232.o console.o commands.o magrathea.o
 name = magrathea
 cc = gcc -g
 headers = -I.. -I../miranda/
@@ -16,7 +16,10 @@ rs232.o: rs232.c rs232.h
 console.o: console.c console.h
 	$(cc) $(cflags) console.c
 
-magrathea.o: magrathea.c console.h rs232.h
+commands.o: commands.c commands.o rs232.h
+	$(cc) $(cflags) commands.c
+
+magrathea.o: magrathea.c magrathea.h console.h commands.h
 	$(cc) $(cflags) magrathea.c
 
 clean:
