@@ -216,4 +216,5 @@ int f_console_read(struct s_console *console, struct s_console_input *input, int
 }
 
 int f_console_execute(struct s_console *console, struct s_console_input *input, int output) {
+	return 0;
 }
