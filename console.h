@@ -20,8 +20,9 @@
 #include <termios.h>
 #include <unistd.h>
 #include <miranda/ground.h>
-#define d_console_parameter_size 5
+#define d_console_parameter_size 8
 #define d_console_command_size 16
+#define d_console_output_size 1024
 #define d_console_history_size 256
 #define d_console_special_size 3
 #define d_console_descriptor_null -1

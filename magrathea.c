@@ -17,30 +17,41 @@
  */
 #include "console.h"
 #include "rs232.h"
+int f_command_send(struct s_console *console, struct s_console_command *command, char **tokens, size_t elements, int output) {
+	int result = 0;
+	return result;
+}
+
 int main (int argc, char *argv[]) {
 	struct s_console *console;
-	struct s_console_input input;
+	struct s_console_input input = { .ready = d_true };
 	struct s_console_command commands[] = {
 		{
 			e_console_level_guest,
 			(struct s_console_parameter[]){
-				{"-t", "temperature", d_false, d_false, d_true},
-				{"-A", "apprendistato", d_false, d_false, d_true},
+				{"-trbX", "(with X number) specify which TRB has to be selected", d_true, d_false, d_true},
+				{"-x", "(string) send hexadecimal values to specified TRB (i.e. 040200)", d_false, d_false, d_true},
 				{"", "", d_false, d_false, d_false}
 			},
-			"prova", "comando prova, qui ci metti una descrizione", NULL, d_true
-		},
-		{e_console_level_guest, NULL, "ancora", "comando ancora, qui ci metti una descrizione", NULL, d_true},
-		{e_console_level_guest, NULL, "ancona", "comando ancona, qui ci metti una descrizione", NULL, d_true},
-		{e_console_level_guest, NULL, "", "", NULL, d_false}
+			"send",
+			"usage: send -trbX -x <string>\n\tsends a formatted hexadecimal data to a TRB and read the formatted output",
+			&f_command_send,
+			d_true
+		},{ e_console_level_guest, NULL, "", "", NULL, d_false }
 	};
 	f_memory_init();
 	f_console_init(&console, commands, STDIN_FILENO);
-	strcpy(console->prefix, "\rCMD>");
+	strcpy(console->prefix, "\r[input]>");
 	console->level = e_console_level_guest;
 	while (d_true) {
 		f_console_read(console, &input, STDOUT_FILENO, 0, 10);
+		if (input.ready) {
+			if ((f_string_strcmp(input.input, "quit") == 0) || (f_string_strcmp(input.input, "exit") == 0))
+				break;
+			f_console_execute(console, &input, STDOUT_FILENO);
+		}
 	}
+	f_console_destroy(&console);
 	f_memory_destroy();
 	return 0;
 }

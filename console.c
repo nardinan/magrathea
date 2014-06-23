@@ -102,7 +102,7 @@ void p_console_write_history(struct s_console *console, struct s_console_input *
 }
 
 void p_console_write_suggestion(struct s_console *console, struct s_console_input *input, int output) {
-	char buffer[d_string_buffer_size] = {0}, backup[d_string_buffer_size], common_substring[d_string_buffer_size] = {0};
+	char buffer[d_console_output_size] = {0}, backup[d_string_buffer_size], common_substring[d_console_command_size] = {0};
 	int index, match, last_match, current_match;
 	if ((output != d_console_descriptor_null) && (console->commands)) {
 		for (index = 0, match = 0; console->commands[index].initialized; index++)
@@ -123,14 +123,14 @@ void p_console_write_suggestion(struct s_console *console, struct s_console_inpu
 					last_match = index;
 					snprintf(backup, d_string_buffer_size, "%c%s", ((match%d_console_suggestion_columns) == 0)?'\n':'\t',
 							console->commands[index].command);
-					strncat(buffer, backup, (d_string_buffer_size-f_string_strlen(buffer))-1);
+					strncat(buffer, backup, (d_console_output_size-f_string_strlen(buffer))-1);
 					match++;
 				}
 		if (match > 0) {
 			strcpy(input->input, common_substring);
 			input->data_pointer = f_string_strlen(common_substring);
 			if (match == 1) {
-				snprintf(buffer, d_string_buffer_size, "\n%s%sCOMMAND:\n\t%s%s\n%s%sDESCRIPTION:\n\t%s%s",
+				snprintf(buffer, d_console_output_size, "\n%s%sCOMMAND:\n\t%s%s\n%s%sDESCRIPTION:\n\t%s%s",
 						v_console_styles[e_console_style_bold], v_console_styles[e_console_style_yellow],
 						v_console_styles[e_console_style_reset], console->commands[last_match].command,
 						v_console_styles[e_console_style_bold], v_console_styles[e_console_style_yellow],
@@ -138,14 +138,14 @@ void p_console_write_suggestion(struct s_console *console, struct s_console_inpu
 				if (console->commands[last_match].parameters) {
 					snprintf(backup, d_string_buffer_size, "\n%s%sPARAMETERS:%s", v_console_styles[e_console_style_bold],
 							v_console_styles[e_console_style_yellow], v_console_styles[e_console_style_reset]);
-					strcat(buffer, backup);
+					strncat(buffer, backup, (d_console_output_size-f_string_strlen(buffer))-1);
 					for (index = 0; console->commands[last_match].parameters[index].initialized; index++) {
 						snprintf(backup, d_string_buffer_size, "\n\t[%s%s%s]%s %s", v_console_styles[e_console_style_bold],
 								console->commands[last_match].parameters[index].parameter,
 								v_console_styles[e_console_style_reset],
 								(console->commands[last_match].parameters[index].optional)?"":"[*]",
 								console->commands[last_match].parameters[index].description);
-						strcat(buffer, backup);
+						strncat(buffer, backup, (d_console_output_size-f_string_strlen(buffer))-1);
 					}
 				}
 			}
@@ -216,5 +216,56 @@ int f_console_read(struct s_console *console, struct s_console_input *input, int
 }
 
 int f_console_execute(struct s_console *console, struct s_console_input *input, int output) {
+	char **tokens, *pointer, *next, buffer[d_string_buffer_size];
+	int index = 0, arguments = 1, match;
+	size_t length;
+	if ((input->data_pointer > 0) && (input->ready)) {
+		pointer = input->input;
+		while ((next = strchr(pointer, ' '))) {
+			if ((next-pointer) > 0)
+				arguments++;
+			pointer = next+1;
+		}
+		if ((tokens = (char **) d_malloc(arguments*(sizeof(char *))))) {
+			pointer = input->input;
+			while ((next = strchr(pointer, ' '))) {
+				if ((length = (next-pointer)) > 0) {
+					*next = '\0';
+					if ((tokens[index] = (char *) d_malloc(length+1))) {
+						memcpy(tokens[index], pointer, length);
+						f_string_trim(tokens[index]);
+						index++;
+					} else
+						d_die(d_error_malloc);
+				}
+				pointer = next+1;
+			}
+			if ((length = f_string_strlen(pointer)) > 0) {
+				if ((tokens[index] = (char *) d_malloc(length+1))) {
+					memcpy(tokens[index], pointer, length);
+					f_string_trim(tokens[index]);
+				} else
+					d_die(d_error_malloc);
+			}
+			if (console->commands) {
+				for (index = 0, match = 0; console->commands[index].initialized; index++)
+					if (f_string_strcmp(tokens[0], console->commands[index].command) == 0) {
+						if (console->commands[index].recall)
+							console->commands[index].recall(console, &(console->commands[index]), tokens, arguments, output);
+						match++;
+					}
+				if ((match == 0) && (output != d_console_descriptor_null)) {
+					snprintf(buffer, d_string_buffer_size, "ehm .. what does '%s%s%s' mean?\n", v_console_styles[e_console_style_bold],
+							tokens[0], v_console_styles[e_console_style_reset]);
+					write(output, buffer, f_string_strlen(buffer));
+					fsync(output);
+				}
+			}
+			for (index = 0; index < arguments; index++)
+				d_free(tokens[index]);
+			d_free(tokens);
+		}
+	}
 	return 0;
 }
+
