@@ -18,12 +18,13 @@
 #ifndef magrathea_commands_h
 #define magrathea_commands_h
 #include "console.h"
-#include "rs232.h"
+#include "trb.h"
 #define d_define_command(sym) int f_commands_##sym(struct s_console *console, struct s_console_command *command, char **tokens, size_t elements, int output)
 #define d_declare_command(sym) extern d_define_command(sym)
 #define d_commands_argument(sym,tok,ele,msg,oput) (f_commands_get_parameter_index((sym),(tok),(ele),e_commands_parameter_argument,(msg),(oput)))
 #define d_commands_flag(sym,tok,ele,msg,oput) (f_commands_get_parameter_index((sym),(tok),(ele),e_commands_parameter_flag,(msg),(oput)))
 #define d_commands_argument_null -1
+#define d_commands_hexadecimal_size 2
 typedef enum e_commands_parameter {
 	e_commands_parameter_flag,
 	e_commands_parameter_argument

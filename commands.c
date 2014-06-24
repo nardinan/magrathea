@@ -54,7 +54,33 @@ d_define_command(open) {
 }
 
 d_define_command(send) {
-	int result = 0;
-	/* not yet implemented */
+	static const char *error_descriptor = "sorry, you have to initialize a TRB before\n";
+	unsigned char packet[d_trb_command_size];
+	char *string, singleton[(d_commands_hexadecimal_size+1)], buffer[d_string_buffer_size];
+	int result = d_false, index, index_hexadecimal_string;
+	if ((index = d_commands_argument("-x", tokens, elements, "parameter '-x' not found\n", output)) != d_commands_argument_null) {
+		string = tokens[index];
+		singleton[d_commands_hexadecimal_size] = '\0';
+		if (v_magrathea_descriptor != d_rs232_null) {
+			for (index = 0; index < d_trb_command_size; index++) {
+				for (index_hexadecimal_string = 0; index_hexadecimal_string < d_commands_hexadecimal_size; index_hexadecimal_string++)
+					if (*string) {
+						singleton[index_hexadecimal_string] = *string;
+						string++;
+					} else
+						singleton[index_hexadecimal_string] = 0;
+					packet[index] = (unsigned char)strtol(singleton, NULL, 16);
+			}
+			if(f_rs232_write(v_magrathea_descriptor, packet, d_trb_command_size) == d_trb_command_size)
+				snprintf(buffer, d_string_buffer_size, "packet '0x%02x 0x%02x 0x%02x 0x%02x [...?]' has been sent", packet[0], packet[1],
+						packet[2], packet[3]);
+			else
+				snprintf(buffer, d_string_buffer_size, "%sSIGH!%s it's impossible to send data packet", v_console_styles[e_console_style_red],
+						v_console_styles[e_console_style_reset]);
+			if (output != d_console_descriptor_null)
+				write(output, buffer, f_string_strlen(buffer));
+		} else if (output != d_console_descriptor_null)
+			write(output, error_descriptor, f_string_strlen(error_descriptor));
+	}
 	return result;
 }
