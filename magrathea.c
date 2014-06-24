@@ -44,7 +44,7 @@ int main (int argc, char *argv[]) {
 	};
 	f_memory_init();
 	f_console_init(&console, commands, STDIN_FILENO);
-	strcpy(console->prefix, "\r[input]>");
+	strcpy(console->prefix, "\r[input]> ");
 	console->level = e_console_level_guest;
 	while (d_true) {
 		f_console_read(console, &input, STDOUT_FILENO, 0, 10);
