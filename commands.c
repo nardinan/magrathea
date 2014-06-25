@@ -16,7 +16,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "commands.h"
-int v_magrathea_descriptor = d_console_descriptor_null;
+const char *v_commands_errors[] = {
+	"there isn't any open TRB connected"
+};
 int f_commands_get_parameter_index(const char *symbol, char **tokens, size_t elements, enum e_commands_parameter kind, const char *message, int output) {
 	int result = d_commands_argument_null, index;
 	for (index = 0; index < elements; index++)
@@ -37,12 +39,12 @@ d_define_command(open) {
 	int result = d_false, index;
 	if ((index = d_commands_argument("-t", tokens, elements, "parameter '-t' not found\n", output)) != d_commands_argument_null) {
 		channel = tokens[index];
-		if (v_magrathea_descriptor != d_console_descriptor_null) {
-			f_rs232_close(v_magrathea_descriptor);
-			v_magrathea_descriptor = d_console_descriptor_null;
+		if (v_trb_descriptor != d_rs232_null) {
+			f_rs232_close(v_trb_descriptor);
+			v_trb_descriptor = d_rs232_null;
 		}
 		if ((result = f_rs232_open(channel, e_rs232_baud_115200, e_rs232_bits_8, e_rs232_stops_2_bit, e_rs232_parity_odd, d_false,
-						&v_magrathea_descriptor, NULL)))
+						&v_trb_descriptor, NULL)))
 			snprintf(buffer, d_string_buffer_size, "channel %s has been opened\n", channel);
 		else
 			snprintf(buffer, d_string_buffer_size, "%sYECK!%s unable to open channel %s\n", v_console_styles[e_console_style_red],
@@ -54,14 +56,13 @@ d_define_command(open) {
 }
 
 d_define_command(send) {
-	static const char *error_descriptor = "sorry, you have to initialize a TRB before\n";
 	unsigned char packet[d_trb_command_size];
 	char *string, singleton[(d_commands_hexadecimal_size+1)], buffer[d_string_buffer_size];
 	int result = d_false, index, index_hexadecimal_string;
 	if ((index = d_commands_argument("-x", tokens, elements, "parameter '-x' not found\n", output)) != d_commands_argument_null) {
 		string = tokens[index];
 		singleton[d_commands_hexadecimal_size] = '\0';
-		if (v_magrathea_descriptor != d_rs232_null) {
+		if (v_trb_descriptor != d_rs232_null) {
 			for (index = 0; index < d_trb_command_size; index++) {
 				for (index_hexadecimal_string = 0; index_hexadecimal_string < d_commands_hexadecimal_size; index_hexadecimal_string++)
 					if (*string) {
@@ -71,16 +72,47 @@ d_define_command(send) {
 						singleton[index_hexadecimal_string] = 0;
 					packet[index] = (unsigned char)strtol(singleton, NULL, 16);
 			}
-			if(f_rs232_write(v_magrathea_descriptor, packet, d_trb_command_size) == d_trb_command_size)
-				snprintf(buffer, d_string_buffer_size, "packet '0x%02x 0x%02x 0x%02x 0x%02x [...?]' has been sent", packet[0], packet[1],
+			if(f_rs232_write(v_trb_descriptor, packet, d_trb_command_size) == d_trb_command_size) {
+				snprintf(buffer, d_string_buffer_size, "packet '0x%02x 0x%02x 0x%02x 0x%02x [...?]' has been sent\n", packet[0], packet[1],
 						packet[2], packet[3]);
-			else
-				snprintf(buffer, d_string_buffer_size, "%sSIGH!%s it's impossible to send data packet", v_console_styles[e_console_style_red],
+				result = d_true;
+			} else
+				snprintf(buffer, d_string_buffer_size, "%sSIGH!%s it's impossible to send data packet\n", v_console_styles[e_console_style_red],
 						v_console_styles[e_console_style_reset]);
 			if (output != d_console_descriptor_null)
 				write(output, buffer, f_string_strlen(buffer));
 		} else if (output != d_console_descriptor_null)
-			write(output, error_descriptor, f_string_strlen(error_descriptor));
+			write(output, v_commands_errors[e_commands_error_socket_close], f_string_strlen(v_commands_errors[e_commands_error_socket_close]));
 	}
+	return result;
+}
+
+d_define_command(recv) {
+	unsigned char input[d_string_buffer_size];
+	char buffer[d_string_buffer_size], backup[d_string_buffer_size];
+	int result = d_false, index, timeout, readed;
+	if ((index = d_commands_argument("-t", tokens, elements, "parameter '-t' not found\n", output)) != d_commands_argument_null) {
+		timeout = atoi(tokens[index]);
+		if (v_trb_descriptor != d_rs232_null) {
+			if ((readed = f_rs232_read_timeout(v_trb_descriptor, input, d_string_buffer_size, timeout) > 0)) {
+				snprintf(buffer, d_string_buffer_size, "%d bytes readed (hexadecimal output):\n", readed);
+				for (index = 0; index < readed; index++) {
+					snprintf(backup, d_string_buffer_size, "%02x ", buffer, input[index]);
+					strcat(buffer, backup);
+				}
+				strcat(buffer, "\n");
+			} else
+				snprintf(buffer, d_string_buffer_size, "strout of slow TRB channels is %sempty%s\n", v_console_styles[e_console_style_bold],
+						v_console_styles[e_console_style_reset]);
+			if (output != d_console_descriptor_null)
+				write(output, buffer, f_string_strlen(buffer));
+		} else if (output != d_console_descriptor_null)
+			write(output, v_commands_errors[e_commands_error_socket_close], f_string_strlen(v_commands_errors[e_commands_error_socket_close]));
+	}
+	return result;
+}
+
+d_define_command(trigger) {
+	int result = d_false;
 	return result;
 }

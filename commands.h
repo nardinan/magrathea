@@ -29,7 +29,13 @@ typedef enum e_commands_parameter {
 	e_commands_parameter_flag,
 	e_commands_parameter_argument
 } e_commands_parameter;
-int f_commands_get_parameter_index(const char *symbol, char **tokens, size_t elements, enum e_commands_parameter kind, const char *message, int output);
+typedef enum e_commands_error {
+	e_commands_error_socket_close = 0
+} e_command_error;
+extern const char *v_commands_errors[];
+extern int f_commands_get_parameter_index(const char *symbol, char **tokens, size_t elements, enum e_commands_parameter kind, const char *message, int output);
 d_declare_command(open);
 d_declare_command(send);
+d_declare_command(recv);
+d_declare_command(trigger);
 #endif
