@@ -65,5 +65,6 @@ extern void f_rs232_close_termios(int device, struct termios before_tty);
 extern void f_rs232_close(int device);
 extern int f_rs232_write(int device, const unsigned char *message, size_t size);
 extern int f_rs232_read(int device, unsigned char *message, size_t size);
+extern int f_rs232_read_timeout(int device, unsigned char *message, size_t size, time_t timeout);
 #endif
 
