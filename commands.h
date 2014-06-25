@@ -19,6 +19,7 @@
 #define magrathea_commands_h
 #include "console.h"
 #include "trb.h"
+#include "plx.h"
 #define d_define_command(sym) int f_commands_##sym(struct s_console *console, struct s_console_command *command, char **tokens, size_t elements, int output)
 #define d_declare_command(sym) extern d_define_command(sym)
 #define d_commands_argument(sym,tok,ele,msg,oput) (f_commands_get_parameter_index((sym),(tok),(ele),e_commands_parameter_argument,(msg),(oput)))
