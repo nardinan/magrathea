@@ -23,8 +23,18 @@ int main (int argc, char *argv[]) {
 		{
 			e_console_level_guest,
 			(struct s_console_parameter[]){
+				{"-t", "(int) readout timeout in microseconds", d_false, d_false, d_true},
+				{0}
+			},
+			"recv",
+			"usage: recv -t <int>\n\treads output channel from the RS232 module and writes it on screen (hex)",
+			&f_command_recv,
+			d_true
+		},{
+			e_console_level_guest,
+			(struct s_console_parameter[]){
 				{"-x", "(string) send hexadecimal values to specified TRB (i.e. 040200)", d_false, d_false, d_true},
-				{"", "", d_false, d_false, d_false}
+				{0}
 			},
 			"send",
 			"usage: send -x <string>\n\tsends a formatted hexadecimal data to a TRB and read the formatted output",
@@ -40,7 +50,7 @@ int main (int argc, char *argv[]) {
 			"usage: open -t <string>\n\topen a stream between the machine and the TRB (replacing an already opened channel if exists)",
 			&f_commands_open,
 			d_true
-		},{ e_console_level_guest, NULL, "", "", NULL, d_false }
+		},{0}
 	};
 	f_memory_init();
 	f_console_init(&console, commands, STDIN_FILENO);
