@@ -19,4 +19,5 @@
 #define magrathea_trb_h
 #include "rs232.h"
 #define d_trb_command_size 4
+extern int v_trb_descriptor;
 #endif

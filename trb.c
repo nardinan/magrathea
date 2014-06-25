@@ -16,3 +16,4 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "trb.h"
+int v_trb_descriptor = d_rs232_null;
