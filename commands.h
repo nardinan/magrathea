@@ -38,5 +38,4 @@ extern int f_commands_get_parameter_index(const char *symbol, char **tokens, siz
 d_declare_command(open);
 d_declare_command(send);
 d_declare_command(recv);
-d_declare_command(trigger);
 #endif

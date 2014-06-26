@@ -56,25 +56,30 @@ d_define_command(open) {
 }
 
 d_define_command(send) {
-	unsigned char packet[d_trb_command_size];
-	char *string, singleton[(d_commands_hexadecimal_size+1)], buffer[d_string_buffer_size];
-	int result = d_false, index, index_hexadecimal_string;
+	unsigned char packet[d_trb_command_size], raw_command[d_trb_raw_command_size];
+	char *string, singleton[(d_commands_hexadecimal_size+1)], buffer[d_string_buffer_size], backup[d_string_buffer_size];
+	int result = d_false, index, index_hexadecimal, written;
 	if ((index = d_commands_argument("-x", tokens, elements, "parameter '-x' not found\n", output)) != d_commands_argument_null) {
 		string = tokens[index];
 		singleton[d_commands_hexadecimal_size] = '\0';
 		if (v_trb_descriptor != d_rs232_null) {
 			for (index = 0; index < d_trb_command_size; index++) {
-				for (index_hexadecimal_string = 0; index_hexadecimal_string < d_commands_hexadecimal_size; index_hexadecimal_string++)
+				for (index_hexadecimal = 0; index_hexadecimal < d_commands_hexadecimal_size; index_hexadecimal++)
 					if (*string) {
-						singleton[index_hexadecimal_string] = *string;
+						singleton[index_hexadecimal] = *string;
 						string++;
 					} else
-						singleton[index_hexadecimal_string] = 0;
-					packet[index] = (unsigned char)strtol(singleton, NULL, 16);
+						singleton[index_hexadecimal] = 0;
+				packet[index] = (unsigned char)strtol(singleton, NULL, 16);
 			}
-			if(f_rs232_write(v_trb_descriptor, packet, d_trb_command_size) == d_trb_command_size) {
-				snprintf(buffer, d_string_buffer_size, "packet '0x%02x 0x%02x 0x%02x 0x%02x [...?]' has been sent\n", packet[0], packet[1],
-						packet[2], packet[3]);
+			f_trb_command_packet(raw_command, packet[0], packet[1], packet[2], packet[3]);
+			if((written = f_rs232_write(v_trb_descriptor, raw_command, d_trb_raw_command_size)) == d_trb_raw_command_size) {
+				snprintf(buffer, d_string_buffer_size, "%d bytes sent (hexadecimal input):\n", written);
+				for (index = 0; index < written; index++) {
+					snprintf(backup, d_string_buffer_size, "0x%02x ", raw_command[index]);
+					strcat(buffer, backup);
+				}
+				strcat(buffer, "\n");
 				result = d_true;
 			} else
 				snprintf(buffer, d_string_buffer_size, "%sSIGH!%s it's impossible to send data packet\n", v_console_styles[e_console_style_red],
@@ -94,15 +99,17 @@ d_define_command(recv) {
 	if ((index = d_commands_argument("-t", tokens, elements, "parameter '-t' not found\n", output)) != d_commands_argument_null) {
 		timeout = atoi(tokens[index]);
 		if (v_trb_descriptor != d_rs232_null) {
-			if ((readed = f_rs232_read_timeout(v_trb_descriptor, input, d_string_buffer_size, timeout) > 0)) {
+			if ((readed = f_rs232_read_packet(v_trb_descriptor, input, d_string_buffer_size, timeout, v_trb_raw_head, v_trb_raw_tail,
+							v_trb_sentinel_size)) > 0) {
 				snprintf(buffer, d_string_buffer_size, "%d bytes readed (hexadecimal output):\n", readed);
 				for (index = 0; index < readed; index++) {
-					snprintf(backup, d_string_buffer_size, "%02x ", buffer, input[index]);
+					snprintf(backup, d_string_buffer_size, "%02x ", input[index]);
 					strcat(buffer, backup);
 				}
 				strcat(buffer, "\n");
+				result = d_true;
 			} else
-				snprintf(buffer, d_string_buffer_size, "strout of slow TRB channels is %sempty%s\n", v_console_styles[e_console_style_bold],
+				snprintf(buffer, d_string_buffer_size, "stdout of slow TRB channel is %sempty%s\n", v_console_styles[e_console_style_bold],
 						v_console_styles[e_console_style_reset]);
 			if (output != d_console_descriptor_null)
 				write(output, buffer, f_string_strlen(buffer));
@@ -112,7 +119,3 @@ d_define_command(recv) {
 	return result;
 }
 
-d_define_command(trigger) {
-	int result = d_false;
-	return result;
-}
