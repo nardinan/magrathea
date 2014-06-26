@@ -1,10 +1,10 @@
-objects = rs232.o plx.o trb.o console.o commands.o magrathea.o
+objects = rs232.o trb.o console.o commands.o magrathea.o
 name = magrathea
 cc = gcc -g
-headers = -I.. -I../miranda/
-libraries = -L../miranda/
+headers = -I.. -I../miranda/ -I/plx/
+libraries = -L../miranda/ -L/plx/Library
 cflags = -Wall -Wno-variadic-macros -Wno-pointer-arith -c $(headers)
-lflags = -Wall $(libraries) -lmiranda_ground
+lflags = -Wall $(libraries) -lmiranda_ground -lmagrathea_plx
 executable = $(name).bin
 
 all: $(objects)
@@ -13,16 +13,13 @@ all: $(objects)
 rs232.o: rs232.c rs232.h
 	$(cc) $(cflags) rs232.c
 
-plx.o: plx.c plx.h
-	$(cc) $(cflags) plx.c
-
 trb.o: trb.c trb.h rs232.h
 	$(cc) $(cflags) trb.c
 
 console.o: console.c console.h
 	$(cc) $(cflags) console.c
 
-commands.o: commands.c commands.o trb.h plx.h
+commands.o: commands.c commands.o trb.h
 	$(cc) $(cflags) commands.c
 
 magrathea.o: magrathea.c magrathea.h console.h commands.h

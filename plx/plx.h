@@ -17,11 +17,14 @@
  */
 #ifndef magrathea_plx_h
 #define magrathea_plx_h
-#include <miranda/ground.h>
-#include "PlxApi.h"
+#include <stdio.h>
+#include <sys/time.h>
+#include <plxapi.h>
 #define d_plx_1mb (8*(1024*1024))
 #define d_plx_alignment 4
 #define d_plx_word_size 4
+#define d_true 1
+#define d_false 0
 export PLX_STATUS f_plx_select(unsigned short vendor, unsigned short ID, PLX_DEVICE_OBJECT *device);
 export PLX_STATUS f_plx_destroy(PLX_DEVICE_OBJECT *device, int channel, PLX_NOTIFY_OBJECT *notification, void **raw_plx_buffer);
 export PLX_STATUS f_plx_prepare_dma(PLX_DEVICE_OBJECT *device, int channel, PLX_PHYSICAL_MEM *device_buffer, PLX_NOTIFY_OBJECT *notification,
