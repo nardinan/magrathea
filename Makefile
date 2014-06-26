@@ -1,30 +1,17 @@
-objects = rs232.o trb.o console.o commands.o magrathea.o
-name = magrathea
-cc = gcc -g
-headers = -I.. -I../miranda/ -I./plx/
-libraries = -L../miranda/ -L./plx/Library
-cflags = -Wall -Wno-variadic-macros -Wno-pointer-arith -c $(headers)
-lflags = -Wall $(libraries) -lmiranda_ground -lmagrathea_plx
-executable = $(name).bin
+ImageName = magrathea
 
-all: $(objects)
-	$(cc) $(lflags) $(objects) -o $(executable)
+TGT_TYPE  = App
+EXTRA_CFLAGS += -I.. -I../miranda/
+LFLAGS += -L../miranda/ -lmiranda_ground
+PLX_OBJECTS = \
+	$(OBJ_DIR)/rs232.o \
+	$(OBJ_DIR)/plx.o \
+	$(OBJ_DIR)/trb.o \
+	$(OBJ_DIR)/console.o \
+	$(OBJ_DIR)/commands.o \
+	$(OBJ_DIR)/magrathea.o
 
-rs232.o: rs232.c rs232.h
-	$(cc) $(cflags) rs232.c
-
-trb.o: trb.c trb.h rs232.h
-	$(cc) $(cflags) trb.c
-
-console.o: console.c console.h
-	$(cc) $(cflags) console.c
-
-commands.o: commands.c commands.o trb.h
-	$(cc) $(cflags) commands.c
-
-magrathea.o: magrathea.c magrathea.h console.h commands.h
-	$(cc) $(cflags) magrathea.c
-
-clean:
-	rm -f *.o
-	rm -f $(executable)
+#=============================================================================
+# Include shared PLX makefile
+#=============================================================================
+include $(PLX_SDK_DIR)/Makefiles/PlxMake.def
