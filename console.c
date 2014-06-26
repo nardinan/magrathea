@@ -103,7 +103,7 @@ void p_console_write_history(struct s_console *console, struct s_console_input *
 
 void p_console_write_suggestion(struct s_console *console, struct s_console_input *input, int output) {
 	char buffer[d_console_output_size] = {0}, backup[d_string_buffer_size], common_substring[d_console_command_size] = {0};
-	int index, match, last_match, current_match;
+	int index, match, last_match = 0, current_match;
 	if ((output != d_console_descriptor_null) && (console->commands)) {
 		for (index = 0, match = 0; console->commands[index].initialized; index++)
 			if (console->commands[index].level <= console->level)
