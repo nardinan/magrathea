@@ -19,5 +19,9 @@
 #define magrathea_trb_h
 #include "rs232.h"
 #define d_trb_command_size 4
+#define d_trb_raw_command_size 12
 extern int v_trb_descriptor;
+extern unsigned char v_trb_raw_head[], v_trb_raw_tail[];
+extern size_t v_trb_sentinel_size;
+extern void f_trb_command_packet(unsigned char *supplied, unsigned char trb_code, unsigned char type, unsigned char high_byte, unsigned char low_byte);
 #endif
