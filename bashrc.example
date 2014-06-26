@@ -1,0 +1,10 @@
+# .bashrc
+# [...]
+
+# prepare the environment for PLX_SDK devices
+export PLX_SDK_DIR="$HOME/PLX_SDK"
+export LD_LIBRARY_PATH="/usr/local/lib:$PLX_SDK_DIR/PlxApi/Library:$LD_LIBRARY_PATH"
+export C_INCLUDE_PATH="$PLX_SDK_DIR/Include:$C_INCLUDE_PATH"
+
+# User specific aliases and functions
+# [...]
