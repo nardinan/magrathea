@@ -103,9 +103,9 @@ d_define_command(send) {
 		snprintf(buffer, d_string_buffer_size, "%d bytes sent (hexadecimal input):\n", written);
 		for (index = 0; index < written; index++) {
 			snprintf(backup, d_string_buffer_size, "0x%02x", raw_command[index]);
-			strcat(buffer, backup);
+			strncat(buffer, backup, (d_string_buffer_size-f_string_strlen(buffer)));
 		}
-		strcat(buffer, "\n");
+		strncat(buffer, "\n", (d_string_buffer_size-f_string_strlen(buffer)));
 		result = d_true;
 		if (output != d_console_descriptor_null)
 			write(output, buffer, f_string_strlen(buffer));
@@ -115,27 +115,25 @@ d_define_command(send) {
 
 d_define_command(recv) {
 	unsigned char input[d_string_buffer_size];
-	char buffer[d_string_buffer_size], backup[d_string_buffer_size];
+	char buffer[d_commands_buffer_size], backup[d_string_buffer_size];
 	int result = d_false, index, timeout, readed;
 	if ((index = d_commands_argument("-t", tokens, elements, "parameter '-t' not found\n", output)) != d_commands_argument_null) {
 		timeout = atoi(tokens[index]);
-		if (v_trb_descriptor != d_rs232_null) {
-			if ((readed = f_rs232_read_packet(v_trb_descriptor, input, d_string_buffer_size, timeout, v_trb_raw_head, v_trb_raw_tail,
-							v_trb_sentinel_size)) > 0) {
-				snprintf(buffer, d_string_buffer_size, "%d bytes readed (hexadecimal output):\n", readed);
-				for (index = 0; index < readed; index++) {
-					snprintf(backup, d_string_buffer_size, "%02x ", input[index]);
-					strcat(buffer, backup);
+		for (index = 0; index < d_trb_boards; index++)
+			if ((v_trb_boards[index].ready) && (v_trb_boards[index].selected))
+				if ((readed = f_rs232_read_packet(v_trb_boards[index].descriptor, input, d_string_buffer_size, timeout, v_trb_raw_head,
+								v_trb_raw_tail, v_trb_sentinel_size)) > 0) {
+					snprintf(buffer, d_commands_buffer_size, "[%s] %d bytes readed (hexadecimal output): ", v_trb_boards[index].location, 
+							readed);
+					for (index = 0; index < readed; index++) {
+						snprintf(backup, d_string_buffer_size, "%02x ", input[index]);
+						strncat(buffer, backup, (d_commands_buffer_size-f_string_strlen(buffer)));
+					}
+					strncat(buffer, "\n", (d_commands_buffer_size-f_string_strlen(buffer)));
+					result = d_true;
 				}
-				strcat(buffer, "\n");
-				result = d_true;
-			} else
-				snprintf(buffer, d_string_buffer_size, "stdout of slow TRB channel is %sempty%s\n", v_console_styles[e_console_style_bold],
-						v_console_styles[e_console_style_reset]);
-			if (output != d_console_descriptor_null)
-				write(output, buffer, f_string_strlen(buffer));
-		} else if (output != d_console_descriptor_null)
-			write(output, v_commands_errors[e_commands_error_socket_close], f_string_strlen(v_commands_errors[e_commands_error_socket_close]));
+		if (output != d_console_descriptor_null)
+			write(output, buffer, f_string_strlen(buffer));
 	}
 	return result;
 }

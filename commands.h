@@ -26,6 +26,7 @@
 #define d_commands_flag(sym,tok,ele,msg,oput) (f_commands_get_parameter_index((sym),(tok),(ele),e_commands_parameter_flag,(msg),(oput)))
 #define d_commands_argument_null -1
 #define d_commands_hexadecimal_size 2
+#define d_commands_buffer_size 1024
 typedef enum e_commands_parameter {
 	e_commands_parameter_flag,
 	e_commands_parameter_argument
@@ -35,7 +36,8 @@ typedef enum e_commands_error {
 } e_command_error;
 extern const char *v_commands_errors[];
 extern int f_commands_get_parameter_index(const char *symbol, char **tokens, size_t elements, enum e_commands_parameter kind, const char *message, int output);
-d_declare_command(open);
+d_declare_command(ls);
+d_declare_command(mask);
 d_declare_command(send);
 d_declare_command(recv);
 #endif

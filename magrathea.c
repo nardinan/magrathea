@@ -18,15 +18,23 @@
 #include "magrathea.h"
 struct s_console *console;
 struct s_console_input input = { .ready = d_true };
-struct s_console_commans commands[] = {
-	{
+struct s_console_commands commands[] = {
+	{ 
+		e_console_level_guest,
+		(struct s_console_parameter[]){{0}},
+		"ls",
+		"usage: ls\n\tlists all trb connected (and disconnected ones) and their status",
+		&f_commands_ls,
+		d_true
+	},{
 		e_console_level_guest,
 		(struct s_console_parameter[]){
-			{"-t", "(int) readout timeout in microseconds", d_false, d_false, d_true},{0}
+			{"-m", "(string) mask expressed as 8 bits (i.e. 10110000 selects first, third and forth TRB)", d_false, d_true, d_true},
+			{"-a", "[or -A] (flag) mark all TRB as selected", d_true, d_true, d_true},{0}
 		},
-		"recv",
-		"usage: recv -t <int>\n\treads output channel from the RS232 module and writes it on screen (hex)",
-		&f_commands_recv,
+		"mask",
+		"usage: mask -m <string of bits> | mask -A\n\tmarks TRBs that must be used during broadcasting & configuration processes",
+		&f_commands_mark,
 		d_true
 	},{
 		e_console_level_guest,
@@ -40,11 +48,11 @@ struct s_console_commans commands[] = {
 	},{
 		e_console_level_guest,
 		(struct s_console_parameter[]){
-			{"-t", "(string) open TRB channel (i.e. /dev/ttyL0)", d_false, d_false, d_true},{0}
+			{"-t", "(int) readout timeout in microseconds", d_false, d_false, d_true},{0}
 		},
-		"open",
-		"usage: open -t <string>\n\topen a stream between the machine and the TRB (replacing an already opened channel if exists)",
-		&f_commands_open,
+		"recv",
+		"usage: recv -t <int>\n\treads output channel from the RS232 module and writes it on screen (hex)",
+		&f_commands_recv,
 		d_true
 	},{0}
 };
