@@ -34,24 +34,51 @@ int f_commands_get_parameter_index(const char *symbol, char **tokens, size_t ele
 	return result;
 }
 
-d_define_command(open) {
-	char *channel, buffer[d_string_buffer_size];
-	int result = d_false, index;
-	if ((index = d_commands_argument("-t", tokens, elements, "parameter '-t' not found\n", output)) != d_commands_argument_null) {
-		channel = tokens[index];
-		if (v_trb_descriptor != d_rs232_null) {
-			f_rs232_close(v_trb_descriptor);
-			v_trb_descriptor = d_rs232_null;
-		}
-		if ((result = f_rs232_open(channel, e_rs232_baud_115200, e_rs232_bits_8, e_rs232_stops_2_bit, e_rs232_parity_odd, d_false,
-						&v_trb_descriptor, NULL)))
-			snprintf(buffer, d_string_buffer_size, "channel %s has been opened\n", channel);
-		else
-			snprintf(buffer, d_string_buffer_size, "%sYECK!%s unable to open channel %s\n", v_console_styles[e_console_style_red],
-					v_console_styles[e_console_style_reset], channel);
-		if (output != d_console_descriptor_null)
-			write(output, buffer, f_string_strlen(buffer));
+d_define_command(ls) {
+	char buffer[d_string_buffer_size] = {0}, backup[d_string_buffer_size], status[d_string_buffer_size];
+	int index, result = 0;
+	f_trb_wake_up(d_trb_common_timeout);
+	for (index = 0; index < d_trb_boards; index++) {
+		snprintf(backup, d_string_buffer_size, "[%s]%s TRB 0x%02x ", v_trb_boards[index].location, (v_trb_boards[index].selected)?"[*]":"",
+				v_trb_boards[index].code);
+		if (v_trb_boards[index].ready) {
+			result++;
+			snprintf(status, d_string_buffer_size, "[%sready%s]\n", v_console_styles[e_console_style_green],
+					v_console_styles[e_console_style_reset]);
+		} else
+			snprintf(status, d_string_buffer_size, "[%soffline%s]\n", v_console_styles[e_console_style_red],
+					v_console_styles[e_console_style_reset]);
+		strncat(buffer, backup, (f_string_strlen(buffer)-d_string_buffer_size));
 	}
+	if (output != d_console_descriptor_null)
+		write(output, buffer, f_string_strlen(buffer));
+	return result;
+}
+
+d_define_command(mask) {
+	unsigned char mask = 0x00;
+	char *string, buffer[d_string_buffer_size];
+	int index, status;
+	if ((index = d_commands_argument("-m", tokens, elements, NULL, d_console_descriptor_null)) != d_commands_argument_null) {
+		string = tokens[index];
+		for (index = 0; index < d_trb_boards; index++) {
+			status = d_false;
+			if (*string) {
+				if ((*string) == '1')
+					status = d_true;
+				string++;
+			}
+			if (status)
+				mask = ((unsigned char)(0x01))<<index;
+		}
+	} else if ((d_commands_flag("-a", tokens, elements, NULL, d_console_descriptor_null) != d_commands_argument_null) ||
+			(d_commands_flag("-A", tokens, elements, NULL, d_console_descriptor_null) != d_commands_argument_null))
+		mask = 0xFF;
+	f_trb_apply_mask(mask);
+	snprintf(buffer, d_string_buffer_size, "mask %s0x%02x%s applied\n", v_console_styles[e_console_style_bold], mask,
+			v_console_styles[e_console_style_reset]);
+	if (output != d_console_descriptor_null)
+		write(output, buffer, f_string_strlen(buffer));
 	return result;
 }
 
@@ -62,32 +89,26 @@ d_define_command(send) {
 	if ((index = d_commands_argument("-x", tokens, elements, "parameter '-x' not found\n", output)) != d_commands_argument_null) {
 		string = tokens[index];
 		singleton[d_commands_hexadecimal_size] = '\0';
-		if (v_trb_descriptor != d_rs232_null) {
-			for (index = 0; index < d_trb_command_size; index++) {
-				for (index_hexadecimal = 0; index_hexadecimal < d_commands_hexadecimal_size; index_hexadecimal++)
-					if (*string) {
-						singleton[index_hexadecimal] = *string;
-						string++;
-					} else
-						singleton[index_hexadecimal] = 0;
-				packet[index] = (unsigned char)strtol(singleton, NULL, 16);
-			}
-			f_trb_command_packet(raw_command, packet[0], packet[1], packet[2], packet[3]);
-			if((written = f_rs232_write(v_trb_descriptor, raw_command, d_trb_raw_command_size)) == d_trb_raw_command_size) {
-				snprintf(buffer, d_string_buffer_size, "%d bytes sent (hexadecimal input):\n", written);
-				for (index = 0; index < written; index++) {
-					snprintf(backup, d_string_buffer_size, "0x%02x ", raw_command[index]);
-					strcat(buffer, backup);
-				}
-				strcat(buffer, "\n");
-				result = d_true;
-			} else
-				snprintf(buffer, d_string_buffer_size, "%sSIGH!%s it's impossible to send data packet\n", v_console_styles[e_console_style_red],
-						v_console_styles[e_console_style_reset]);
-			if (output != d_console_descriptor_null)
-				write(output, buffer, f_string_strlen(buffer));
-		} else if (output != d_console_descriptor_null)
-			write(output, v_commands_errors[e_commands_error_socket_close], f_string_strlen(v_commands_errors[e_commands_error_socket_close]));
+		for (index = 0; index < d_trb_command_size; index++) {
+			for (index_hexadecimal = 0; index_hexadecimal < d_commands_hexadecimal_size; index_hexadecimal++)
+				if (*string) {
+					singleton[index_hexadecimal] = *string;
+					string++;
+				} else
+					singleton[index_hexadecimal] = 0;
+			packet[index] = (unsigned char)strtol(singleton, NULL, 16);
+		}
+		f_trb_command_packet(raw_command, packet[0], packet[1], packet[2], packet[3]);
+		f_trb_broadcast(command, d_trb_raw_command_size);
+		snprintf(buffer, d_string_buffer_size, "%d bytes sent (hexadecimal input):\n", written);
+		for (index = 0; index < written; index++) {
+			snprintf(backup, d_string_buffer_size, "0x%02x", raw_command[index]);
+			strcat(buffer, backup);
+		}
+		strcat(buffer, "\n");
+		result = d_true;
+		if (output != d_console_descriptor_null)
+			write(output, buffer, f_string_strlen(buffer));
 	}
 	return result;
 }
