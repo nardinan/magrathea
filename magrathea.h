@@ -19,4 +19,9 @@
 #define magrathea_magrathea_h
 #include "console.h"
 #include "commands.h"
+#define d_magrathea_module_begin(st,ds,mod)\
+	if((st)==d_true){\
+		p_magrathea_init_verbose((ds),(mod));\
+		do
+#define d_magrathea_module_end while(0)
 #endif
