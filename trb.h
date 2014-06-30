@@ -23,6 +23,7 @@
 #define d_trb_raw_command_size 12
 #define d_trb_sentinel_size 2
 #define d_trb_boards 8
+#define d_trb_common_trigger 50
 typedef struct s_trb {
 	int descriptor, ready:1, selected:1;
 	unsigned char code;
