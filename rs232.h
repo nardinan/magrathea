@@ -28,6 +28,7 @@
 #define d_rs232_null -1
 #define d_rs232_vtime 1
 #define d_rs232_vmin 60
+#define d_rs232_byte_timeout 1000
 typedef enum e_rs232_baud {
 	e_rs232_baud_1200 = 1200,
 	e_rs232_baud_1800 = 1800,

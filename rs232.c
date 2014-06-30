@@ -19,8 +19,9 @@
 int f_rs232_open(const char *port, enum e_rs232_baud baud, enum e_rs232_bits bits, enum e_rs232_stops stops, enum e_rs232_parity parity,
 		enum e_rs232_flow_control flow_control, int *device, struct termios *before_tty) {
 	struct termios tty;
-	int result = d_false;
-	if ((*device = open(port, O_RDWR|O_NDELAY)) >= 0) {
+	int result = d_false, flags = 0;
+	if ((*device = open(port, O_RDWR|O_NOCTTY|O_NDELAY)) >= 0) {
+		tcflush((*device), TCIOFLUSH);
 		memset(&tty, 0, sizeof(struct termios));
 		if (tcgetattr(*device, &tty) == 0) {
 			if (before_tty)
@@ -28,10 +29,10 @@ int f_rs232_open(const char *port, enum e_rs232_baud baud, enum e_rs232_bits bit
 			cfsetospeed(&tty, (speed_t)baud);
 			cfsetispeed(&tty, (speed_t)baud);
 			tty.c_cflag &= ~CSIZE;
-			tty.c_cflag |= (CS8|CLOCAL|CREAD);
+			tty.c_cflag |= (bits|CLOCAL|CREAD);
 			switch (parity) {
 				case e_rs232_parity_no:
-					tty.c_cflag &= ~PARENB;
+					tty.c_cflag &= ~(PARENB|PARODD);
 					break;
 				case e_rs232_parity_even:
 					tty.c_cflag |= PARENB;
@@ -40,20 +41,6 @@ int f_rs232_open(const char *port, enum e_rs232_baud baud, enum e_rs232_bits bit
 				case e_rs232_parity_odd:
 					tty.c_cflag |= (PARENB|PARODD);
 			}
-			tty.c_iflag = IGNBRK;
-			switch (flow_control) {
-				case e_rs232_flow_control_no:
-					tty.c_cflag &= ~CRTSCTS;
-					tty.c_iflag &= ~(IXOFF|IXON|IXANY);
-					break;
-				case e_rs232_flow_control_hardware:
-					tty.c_cflag |= CRTSCTS;
-					tty.c_iflag &= ~(IXOFF|IXON|IXANY);
-					break;
-				case e_rs232_flow_control_software:
-					tty.c_cflag &= ~CRTSCTS;
-					tty.c_iflag |= (IXOFF|IXON|IXANY);
-			}
 			switch (stops) {
 				case e_rs232_stops_1_bit:
 					tty.c_cflag &= ~CSTOPB;
@@ -61,13 +48,27 @@ int f_rs232_open(const char *port, enum e_rs232_baud baud, enum e_rs232_bits bit
 				case e_rs232_stops_2_bit:
 					tty.c_cflag |= CSTOPB;
 			}
+			tty.c_iflag = IGNBRK;
+			switch (flow_control) {
+				case e_rs232_flow_control_hardware:
+					tty.c_cflag |= CRTSCTS;
+					tty.c_iflag &= ~(IXOFF|IXON|IXANY);
+					break;
+				case e_rs232_flow_control_software:
+					tty.c_cflag &= ~CRTSCTS;
+					tty.c_iflag |= (IXOFF|IXON|IXANY);
+					break;
+				case e_rs232_flow_control_no:
+					tty.c_cflag &= ~CRTSCTS;
+					tty.c_iflag &= ~(IXON|IXOFF|IXANY);
+			}
 			tty.c_lflag = 0;
 			tty.c_oflag = 0;
 			tty.c_cc[VTIME] = d_rs232_vtime;
 			tty.c_cc[VMIN] = d_rs232_vmin;
-			if (!(result = (tcsetattr(*device, TCSANOW, &tty) == 0)))
-				close(*device);
-		} else
+			result = (tcsetattr(*device, TCSANOW, &tty) == 0);
+		}
+		if (!result)
 			close(*device);
 	}
 	return result;
@@ -106,7 +107,7 @@ int f_rs232_read_packet(int device, unsigned char *message, size_t size, time_t 
 				if (tail)
 					tail_checked = (memcmp((message+(readed-sentry_size)), tail, sentry_size) == 0);
 			}
-		} else if ((result == -1) && (errno != EAGAIN)) {
+		} else if (((result == -1) && (errno != EAGAIN)) || (result == 0)) {
 			readed = -1;
 			break;
 		}
