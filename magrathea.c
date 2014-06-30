@@ -23,7 +23,7 @@ struct s_console_command commands[] = {
 		e_console_level_guest,
 		(struct s_console_parameter[]){{.initialized = d_false}},
 		"ls",
-		"usage: ls\n\tlists all trb connected (and disconnected ones) and their status",
+		"(usage: ls) lists all trb connected (and disconnected ones) and their current status",
 		&f_commands_ls,
 		d_true
 	},{
@@ -34,17 +34,17 @@ struct s_console_command commands[] = {
 			{.initialized = d_false}
 		},
 		"mask",
-		"usage: mask -m <string of bits> | mask -A\n\tmarks TRBs that must be used during broadcasting & configuration processes",
+		"(usage: mask -m <string of bits> | mask -A) marks TRBs that must be used during broadcasting & configuration processes",
 		&f_commands_mask,
 		d_true
 	},{
 		e_console_level_guest,
 		(struct s_console_parameter[]){
-			{"-x", "(string) send hexadecimal values to specified TRB (i.e. 0200)", d_false, d_false, d_true},
+			{"-x", "(string) send hexadecimal values to specified TRB (i.e. 020200)", d_false, d_false, d_true},
 			{.initialized = d_false}
 		},
 		"send",
-		"usage: send -x <string>\n\tsends a formatted hexadecimal data to a TRB and read the formatted output",
+		"(usage: send -x <string>) sends a formatted hexadecimal data to a TRB and read the formatted output",
 		&f_commands_send,
 		d_true
 	},{
@@ -54,7 +54,7 @@ struct s_console_command commands[] = {
 			{.initialized = d_false}
 		},
 		"recv",
-		"usage: recv -t <int>\n\treads output channel from the RS232 module and writes it on screen (hex)",
+		"(usage: recv -t <int>) reads output channel from the RS232 module and writes it on screen (hex)",
 		&f_commands_recv,
 		d_true
 	},{.initialized = d_false}
