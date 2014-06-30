@@ -34,6 +34,6 @@ extern unsigned char v_trb_raw_head[d_trb_sentinel_size], v_trb_raw_tail[d_trb_s
 extern void f_trb_disconnect(int trb);
 extern void f_trb_wake_up(time_t timeout);
 extern void f_trb_apply_mask(unsigned char flag);
-extern void f_trb_broadcast(unsigned char *command, size_t size);
-extern void f_trb_command_packet(unsigned char *supplied, unsigned int trb, unsigned char type, unsigned char high_byte, unsigned char low_byte);
+extern void f_trb_command_packet(unsigned char *supplied, unsigned char trb, unsigned char type, unsigned char high_byte, unsigned char low_byte);
+extern void f_trb_broadcast(unsigned char type, unsigned char high_byte, unsigned char low_byte);
 #endif
