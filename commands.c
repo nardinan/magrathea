@@ -67,7 +67,7 @@ d_define_command(mask) {
 				string++;
 			}
 			if (status)
-				mask = ((unsigned char)(0x01))<<index;
+				mask |= ((unsigned char)(0x01))<<index;
 		}
 	} else if ((d_commands_flag("-a", tokens, elements, NULL, d_console_descriptor_null) != d_commands_argument_null) ||
 			(d_commands_flag("-A", tokens, elements, NULL, d_console_descriptor_null) != d_commands_argument_null))
