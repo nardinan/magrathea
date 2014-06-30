@@ -29,7 +29,7 @@ struct s_console_command commands[] = {
 	},{
 		e_console_level_guest,
 		(struct s_console_parameter[]){
-			{"-m", "(string) mask expressed as 8 reversed bits (i.e. 10000011 selects last, first and second TRB)", d_false, d_true, d_true},
+			{"-m", "(string) mask expressed as 8 reversed bits (i.e. 11000000 selects first and second TRB)", d_false, d_true, d_true},
 			{"-a", "[or -A] (flag) mark all TRB as selected", d_true, d_true, d_true},
 			{.initialized = d_false}
 		},
@@ -87,6 +87,7 @@ int f_magrathea_init(int descriptor) {
 }
 
 int main (int argc, char *argv[]) {
+	int index;
 	f_memory_init();
 	if (f_magrathea_init(STDOUT_FILENO)) {
 		while (d_true) {
@@ -97,6 +98,8 @@ int main (int argc, char *argv[]) {
 				f_console_execute(console, &input, STDOUT_FILENO);
 			}
 		}
+		for (index = 0; index < d_trb_boards; index++)
+			f_trb_disconnect(index);
 		f_console_destroy(&console);
 	}
 	f_memory_destroy();
