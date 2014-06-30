@@ -30,20 +30,15 @@
 #define d_rs232_vmin 60
 #define d_rs232_byte_timeout 1000
 typedef enum e_rs232_baud {
-	e_rs232_baud_1200 = 1200,
-	e_rs232_baud_1800 = 1800,
-	e_rs232_baud_2400 = 2400,
-	e_rs232_baud_3600 = 3600,
-	e_rs232_baud_4800 = 4800,
-	e_rs232_baud_7200 = 7200,
-	e_rs232_baud_9600 = 9600,
-	e_rs232_baud_14400 = 14400,
-	e_rs232_baud_19200 = 19200,
-	e_rs232_baud_28800 = 28800,
-	e_rs232_baud_38400 = 38400,
-	e_rs232_baud_56000 = 56000,
-	e_rs232_baud_57600 = 57600,
-	e_rs232_baud_115200 = 115200
+	e_rs232_baud_1200 = B1200,
+	e_rs232_baud_1800 = B1800,
+	e_rs232_baud_2400 = B2400,
+	e_rs232_baud_4800 = B4800,
+	e_rs232_baud_9600 = B9600,
+	e_rs232_baud_19200 = B19200,
+	e_rs232_baud_38400 = B38400,
+	e_rs232_baud_57600 = B57600,
+	e_rs232_baud_115200 = B115200
 } e_rs232_baud;
 typedef enum e_rs232_parity {
 	e_rs232_parity_no,
