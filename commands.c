@@ -16,12 +16,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "commands.h"
-const char *v_commands_errors[] = {
-	"there isn't any open TRB connected"
-};
 int f_commands_get_parameter_index(const char *symbol, char **tokens, size_t elements, enum e_commands_parameter kind, const char *message, int output) {
 	int result = d_commands_argument_null, index;
-	for (index = 0; index < elements; index++)
+	for (index = 0; index < elements; ++index)
 		if (f_string_strcmp(tokens[index], symbol) == 0) {
 			if (kind == e_commands_parameter_flag)
 				result = index;
@@ -35,12 +32,12 @@ int f_commands_get_parameter_index(const char *symbol, char **tokens, size_t ele
 }
 
 d_define_command(ls) {
-	char buffer[d_string_buffer_size] = {0}, backup[d_string_buffer_size], status[d_string_buffer_size];
-	int index, result = 0;
+	char buffer[d_commands_buffer_size] = {0}, backup[d_string_buffer_size], status[d_string_buffer_size];
+	int result = d_false, index;
 	f_trb_wake_up(d_trb_common_timeout);
-	for (index = 0; index < d_trb_boards; index++) {
-		snprintf(backup, d_string_buffer_size, "[%s]%s TRB 0x%02x ", v_trb_boards[index].location, (v_trb_boards[index].selected)?"[*]":"",
-				v_trb_boards[index].code);
+	for (index = 0; index < d_trb_boards; ++index) {
+		snprintf(backup, d_string_buffer_size, "#%d [%s]%s TRB 0x%02x ", (index+1), v_trb_boards[index].location,
+				(v_trb_boards[index].selected)?"[*]":"", v_trb_boards[index].code);
 		if (v_trb_boards[index].ready) {
 			result++;
 			snprintf(status, d_string_buffer_size, "[%sready%s]\n", v_console_styles[e_console_style_green],
@@ -48,7 +45,8 @@ d_define_command(ls) {
 		} else
 			snprintf(status, d_string_buffer_size, "[%soffline%s]\n", v_console_styles[e_console_style_red],
 					v_console_styles[e_console_style_reset]);
-		strncat(buffer, backup, (f_string_strlen(buffer)-d_string_buffer_size));
+		strncat(buffer, backup, (f_string_strlen(buffer)-d_commands_buffer_size));
+		strncat(buffer, status, (f_string_strlen(buffer)-d_commands_buffer_size));
 	}
 	if (output != d_console_descriptor_null)
 		write(output, buffer, f_string_strlen(buffer));
@@ -58,10 +56,10 @@ d_define_command(ls) {
 d_define_command(mask) {
 	unsigned char mask = 0x00;
 	char *string, buffer[d_string_buffer_size];
-	int index, status;
+	int result = d_true, index, status;
 	if ((index = d_commands_argument("-m", tokens, elements, NULL, d_console_descriptor_null)) != d_commands_argument_null) {
 		string = tokens[index];
-		for (index = 0; index < d_trb_boards; index++) {
+		for (index = 0; index < d_trb_boards; ++index) {
 			status = d_false;
 			if (*string) {
 				if ((*string) == '1')
@@ -83,58 +81,56 @@ d_define_command(mask) {
 }
 
 d_define_command(send) {
-	unsigned char packet[d_trb_command_size], raw_command[d_trb_raw_command_size];
-	char *string, singleton[(d_commands_hexadecimal_size+1)], buffer[d_string_buffer_size], backup[d_string_buffer_size];
-	int result = d_false, index, index_hexadecimal, written;
+	unsigned char packet[d_trb_command_size-1];
+	char *string, singleton[(d_commands_hexadecimal_size+1)], buffer[d_string_buffer_size];
+	int result = d_false, index, index_hexadecimal;
 	if ((index = d_commands_argument("-x", tokens, elements, "parameter '-x' not found\n", output)) != d_commands_argument_null) {
 		string = tokens[index];
 		singleton[d_commands_hexadecimal_size] = '\0';
-		for (index = 0; index < d_trb_command_size; index++) {
-			for (index_hexadecimal = 0; index_hexadecimal < d_commands_hexadecimal_size; index_hexadecimal++)
+		for (index = 0; index < d_trb_command_size; ++index) {
+			for (index_hexadecimal = 0; index_hexadecimal < d_commands_hexadecimal_size; ++index_hexadecimal)
 				if (*string) {
 					singleton[index_hexadecimal] = *string;
 					string++;
 				} else
 					singleton[index_hexadecimal] = 0;
-			packet[index] = (unsigned char)strtol(singleton, NULL, 16);
+				packet[index] = (unsigned char)strtol(singleton, NULL, 16);
 		}
-		f_trb_command_packet(raw_command, packet[0], packet[1], packet[2], packet[3]);
-		f_trb_broadcast(command, d_trb_raw_command_size);
-		snprintf(buffer, d_string_buffer_size, "%d bytes sent (hexadecimal input):\n", written);
-		for (index = 0; index < written; index++) {
-			snprintf(backup, d_string_buffer_size, "0x%02x", raw_command[index]);
-			strncat(buffer, backup, (d_string_buffer_size-f_string_strlen(buffer)));
-		}
-		strncat(buffer, "\n", (d_string_buffer_size-f_string_strlen(buffer)));
-		result = d_true;
+		f_trb_broadcast(packet[0], packet[1], packet[2]);
+		snprintf(buffer, d_string_buffer_size, "%d bytes sent (hexadecimal output):\n0x%02x 0x%02x 0x%02x\n", d_trb_command_size, packet[0], packet[1],
+				packet[2]);
 		if (output != d_console_descriptor_null)
 			write(output, buffer, f_string_strlen(buffer));
+		result = d_true;
 	}
 	return result;
 }
 
 d_define_command(recv) {
 	unsigned char input[d_string_buffer_size];
-	char buffer[d_commands_buffer_size], backup[d_string_buffer_size];
-	int result = d_false, index, timeout, readed;
-	if ((index = d_commands_argument("-t", tokens, elements, "parameter '-t' not found\n", output)) != d_commands_argument_null) {
+	char buffer[d_commands_buffer_size] = {0}, backup[d_string_buffer_size], status[d_string_buffer_size];
+	int result = d_false, index, index_hexadecimal, timeout = d_trb_common_timeout, readed;
+	if ((index = d_commands_argument("-t", tokens, elements, NULL, d_console_descriptor_null)) != d_commands_argument_null)
 		timeout = atoi(tokens[index]);
-		for (index = 0; index < d_trb_boards; index++)
-			if ((v_trb_boards[index].ready) && (v_trb_boards[index].selected))
-				if ((readed = f_rs232_read_packet(v_trb_boards[index].descriptor, input, d_string_buffer_size, timeout, v_trb_raw_head,
-								v_trb_raw_tail, v_trb_sentinel_size)) > 0) {
-					snprintf(buffer, d_commands_buffer_size, "[%s] %d bytes readed (hexadecimal output): ", v_trb_boards[index].location, 
-							readed);
-					for (index = 0; index < readed; index++) {
-						snprintf(backup, d_string_buffer_size, "%02x ", input[index]);
-						strncat(buffer, backup, (d_commands_buffer_size-f_string_strlen(buffer)));
-					}
-					strncat(buffer, "\n", (d_commands_buffer_size-f_string_strlen(buffer)));
-					result = d_true;
+	for (index = 0; index < d_trb_boards; ++index)
+		if ((v_trb_boards[index].ready) && (v_trb_boards[index].selected)) {
+			if ((readed = f_rs232_read_packet(v_trb_boards[index].descriptor, input, d_string_buffer_size, timeout, v_trb_raw_head,
+							v_trb_raw_tail, d_trb_sentinel_size)) > 0) {
+				snprintf(status, d_string_buffer_size, "#%d [%s] %d bytes readed (hexadecimal output):\n", index, v_trb_boards[index].location,
+						readed);
+				strncat(buffer, status, (d_commands_buffer_size-f_string_strlen(buffer)));
+				for (index_hexadecimal = 0; index_hexadecimal < readed; ++index_hexadecimal) {
+					snprintf(backup, d_string_buffer_size, "%02x ", input[index_hexadecimal]);
+					strncat(buffer, backup, (d_commands_buffer_size-f_string_strlen(buffer)));
 				}
-		if (output != d_console_descriptor_null)
-			write(output, buffer, f_string_strlen(buffer));
-	}
+				strncat(buffer, "\n", (d_commands_buffer_size-f_string_strlen(buffer)));
+			} else {
+				snprintf(status, d_string_buffer_size, "#%d [%s] is empty\n", index, v_trb_boards[index].location);
+				strncat(buffer, status, (d_commands_buffer_size-f_string_strlen(buffer)));
+			}
+		}
+	if (output != d_console_descriptor_null)
+		write(output, buffer, f_string_strlen(buffer));
 	return result;
 }
 
