@@ -18,60 +18,6 @@
 #include "magrathea.h"
 struct s_console *console;
 struct s_console_input input = { .ready = d_true };
-struct s_console_command commands[] = {
-	{
-		e_console_level_guest,
-		(struct s_console_parameter[]){{.initialized = d_false}},
-		"ls",
-		"(usage: ls) lists all trb connected (and disconnected ones) and their current status",
-		&f_commands_ls,
-		d_true
-	},{
-		e_console_level_guest,
-		(struct s_console_parameter[]){
-			{"-m", "(string) mask expressed as 8 reversed bits (i.e. 11000000 selects first and second TRB)", d_false, d_true, d_true},
-			{"-a", "[or -A] (flag) mark all TRB as selected", d_true, d_true, d_true},
-			{.initialized = d_false}
-		},
-		"mask",
-		"(usage: mask -m <string of bits> | mask -A) marks TRBs that must be used during broadcasting & configuration processes",
-		&f_commands_mask,
-		d_true
-	},{
-		e_console_level_guest,
-		(struct s_console_parameter[]){
-			{"-x", "(string) send hexadecimal values to specified TRB (i.e. 020200)", d_false, d_false, d_true},
-			{.initialized = d_false}
-		},
-		"send",
-		"(usage: send -x <string>) sends a formatted hexadecimal data to a TRB and read the formatted output",
-		&f_commands_send,
-		d_true
-	},{
-		e_console_level_guest,
-		(struct s_console_parameter[]){
-			{"-t", "(int) readout timeout in microseconds", d_false, d_true, d_true},
-			{.initialized = d_false}
-		},
-		"recv",
-		"(usage: recv -t <int>) reads output channel from the RS232 module and writes it on screen (hex)",
-		&f_commands_recv,
-		d_true
-	},{
-		e_console_level_guest,
-		(struct s_console_parameter[]){
-			{"-off", "(flag) shuts off the trigger board output", d_false, d_true, d_true},
-			{"-ext", "(flag) sets the trigger board output as a redirect of the input trigger", d_false, d_true, d_true},
-			{"-s", "<50,100,200 or 300> sets the trigger to a certain speed", d_false, d_true, d_true},
-			{.initialized = d_false}
-		},
-		"trigger",
-		"(usage: trigger -off | trigger -s 50) defines the trigger board speed and criterias",
-		&f_commands_trigger,
-		d_true
-	},{.initialized = d_false}
-};
-
 int p_magrathea_init_verbose(int descriptor, const char *subsystem) {
 	char buffer[d_string_buffer_size];
 	int result = d_true;
@@ -85,10 +31,15 @@ int p_magrathea_init_verbose(int descriptor, const char *subsystem) {
 }
 
 int f_magrathea_init(int descriptor) {
+	char buffer[d_string_buffer_size];
 	int status = d_true;
+	if (descriptor != d_console_descriptor_null) {
+		snprintf(buffer, d_string_buffer_size, "Magrathea - TRB data acquisition system (verision %s)\n", d_magrathea_version);
+		write(descriptor, buffer, f_string_strlen(buffer));
+	}
 	d_magrathea_module(status, descriptor, "console") {
-		if ((status = f_console_init(&console, commands, STDIN_FILENO))) {
-			strcpy(console->prefix, "\r[input]>");
+		if ((status = f_console_init(&console, v_commands, STDIN_FILENO))) {
+			strcpy(console->prefix, "\r[?]>");
 			console->level = e_console_level_guest;
 		}
 	}
@@ -109,9 +60,13 @@ int main (int argc, char *argv[]) {
 					break;
 				f_console_execute(console, &input, STDOUT_FILENO);
 			}
+			usleep(d_magrathea_loop_sleep);
+			f_trb_acquire(d_trb_read_timeout);
 		}
 		for (index = 0; index < d_trb_boards; ++index)
 			f_trb_disconnect(index);
+		f_adlink_destroy(e_adlink_boards_trigger);
+		f_adlink_destroy(e_adlink_boards_data);
 		f_console_destroy(&console);
 	}
 	f_memory_destroy();
