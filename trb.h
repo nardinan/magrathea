@@ -18,28 +18,23 @@
 #ifndef magrathea_trb_h
 #define magrathea_trb_h
 #include "rs232.h"
-#include "plx.h"
+#include "adlink.h"
 #define d_trb_common_timeout 50000
+#define d_trb_read_timeout 250
 #define d_trb_command_size 4
 #define d_trb_raw_command_size 12
 #define d_trb_sentinel_size 2
 #define d_trb_boards 8
-#define d_trb_common_trigger 50
-#define d_trb_vendor_code 0x10b5
-#define d_trb_product_code_trigger 0x5406
-typedef enum e_trb_trigger {
-	e_trb_trigger_disabled,
-	e_trb_trigger_external,
-	e_trb_trigger_50 = 50,
-	e_trb_trigger_100 = 100,
-	e_trb_trigger_200 = 200,
-	e_trb_trigger_300 = 300
-} e_trb_trigger;
 typedef struct s_trb {
+	/* + initialized values */
 	int descriptor, ready:1, selected:1;
 	unsigned char code;
 	const char *location;
+	/* - initialized values */
 	struct termios old_configuration;
+	char destination[d_string_buffer_size];
+	FILE *stream;
+	size_t written_bytes;
 } s_trb;
 extern struct s_trb v_trb_boards[d_trb_boards];
 extern unsigned char v_trb_raw_head[d_trb_sentinel_size], v_trb_raw_tail[d_trb_sentinel_size];
@@ -48,5 +43,6 @@ extern void f_trb_wake_up(time_t timeout);
 extern void f_trb_apply_mask(unsigned char flag);
 extern void f_trb_command_packet(unsigned char *supplied, unsigned char trb, unsigned char type, unsigned char high_byte, unsigned char low_byte);
 extern void f_trb_broadcast(unsigned char type, unsigned char high_byte, unsigned char low_byte);
-extern int f_trb_trigger(enum e_trb_trigger trigger);
+extern int f_trb_set_stream(int trb, const char *destination);
+extern void f_trb_acquire(time_t timeout);
 #endif
