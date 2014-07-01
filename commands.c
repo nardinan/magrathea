@@ -16,6 +16,80 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "commands.h"
+struct s_console_command v_commands[] = {
+	{
+		e_console_level_guest,
+		(struct s_console_parameter[]){
+			{.initialized = d_false}
+		},
+		"ls",
+		"(usage: ls) lists all trb connected (and disconnected ones) and their current status",
+		&f_commands_ls,
+		d_true
+	},{
+		e_console_level_guest,
+		(struct s_console_parameter[]){
+			{"-m", "(string) mask expressed as 8 reversed bits (i.e. 11000000 selects first and second TRB)", d_false, d_true, d_true},
+			{"-a", "[or -A] (flag) mark all TRB as selected", d_true, d_true, d_true},
+			{.initialized = d_false}
+		},
+		"mask",
+		"(usage: mask -m <string of bits> | mask -A) marks TRBs that must be used during broadcasting & configuration processes",
+		&f_commands_mask,
+		d_true
+	},{
+		e_console_level_guest,
+		(struct s_console_parameter[]){
+			{"-x", "(string) send hexadecimal values to specified TRB (i.e. 020200)", d_false, d_false, d_true},
+			{.initialized = d_false}
+		},
+		"send",
+		"(usage: send -x <string>) sends a formatted hexadecimal data to a TRB and read the formatted output",
+		&f_commands_send,
+		d_true
+	},{
+		e_console_level_guest,
+		(struct s_console_parameter[]){
+			{"-t", "(int) readout timeout in microseconds", d_false, d_true, d_true},
+			{.initialized = d_false}
+		},
+		"recv",
+		"(usage: recv -t <int>) reads output channel from the RS232 module and writes it on screen (hex)",
+		&f_commands_recv,
+		d_true
+	},{
+		e_console_level_guest,
+		(struct s_console_parameter[]){
+			{"-off", "(flag) shuts off the trigger board output", d_false, d_true, d_true},
+			{"-ext", "(flag) sets the trigger board output as a redirect of the input trigger", d_false, d_true, d_true},
+			{"-s", "<50,100,200 or 300> sets the trigger to a certain speed", d_false, d_true, d_true},
+			{.initialized = d_false}
+		},
+		"trigger",
+		"(usage: trigger -off | trigger -s 50) defines the trigger board speed and criterias",
+		&f_commands_trigger,
+		d_true
+	},{
+		e_console_level_guest,
+		(struct s_console_parameter[]){
+			{"-o", "(string) define the prefix of output filenames (i.e. /tmp/output)", d_false, d_false, d_true},
+			{.initialized = d_false}
+		},
+		"store",
+		"(usage: store -o /tmp/cosmics_10.7.14) defines where the system have to store the output foreach TRB",
+		&f_commands_store,
+		d_true
+	},{.initialized = d_false}
+};
+const char *v_commands_bytes_extensions[] = {
+	"B",
+	"kB",
+	"MB",
+	"GB",
+	"TB",
+	"YB",
+	NULL
+};
 int f_commands_get_parameter_index(const char *symbol, char **tokens, size_t elements, enum e_commands_parameter kind, const char *message, int output) {
 	int result = d_commands_argument_null, index;
 	for (index = 0; index < elements; ++index)
@@ -31,17 +105,38 @@ int f_commands_get_parameter_index(const char *symbol, char **tokens, size_t ele
 	return result;
 }
 
+const char *f_commands_bytes_extension(float *value) {
+	int result;
+	for (result = 0; v_commands_bytes_extensions[result+1]; result++)
+		if ((*value) >= 1024.0)
+			(*value) /= 1024.0;
+		else
+			break;
+	return v_commands_bytes_extensions[result];
+}
+
 d_define_command(ls) {
-	char buffer[d_commands_buffer_size] = {0}, backup[d_string_buffer_size], status[d_string_buffer_size];
+	const char *postfix;
+	char buffer[d_commands_buffer_size] = {0}, backup[d_string_buffer_size], status[d_string_buffer_size], stream[d_string_buffer_size];
 	int result = d_false, index;
+	float value;
 	f_trb_wake_up(d_trb_common_timeout);
 	for (index = 0; index < d_trb_boards; ++index) {
 		snprintf(backup, d_string_buffer_size, "#%d [%s]%s TRB 0x%02x ", (index+1), v_trb_boards[index].location,
 				(v_trb_boards[index].selected)?"[*]":"", v_trb_boards[index].code);
 		if (v_trb_boards[index].ready) {
 			result++;
-			snprintf(status, d_string_buffer_size, "[%sready%s]\n", v_console_styles[e_console_style_green],
+			snprintf(status, d_string_buffer_size, "[%sready%s]", v_console_styles[e_console_style_green],
 					v_console_styles[e_console_style_reset]);
+			if (v_trb_boards[index].stream) {
+				value = v_trb_boards[index].written_bytes;
+				postfix = f_commands_bytes_extension(&value);
+				snprintf(stream, d_string_buffer_size, "{output: %sopen%s}[%.02f %s | %s]\n", v_console_styles[e_console_style_green],
+						v_console_styles[e_console_style_reset], value, postfix, v_trb_boards[index].destination);
+			} else
+				snprintf(stream, d_string_buffer_size, "{output: %sclose%s}\n", v_console_styles[e_console_style_red],
+						v_console_styles[e_console_style_reset]);
+			strncat(status, stream, (f_string_strlen(status)-d_string_buffer_size));
 		} else
 			snprintf(status, d_string_buffer_size, "[%soffline%s]\n", v_console_styles[e_console_style_red],
 					v_console_styles[e_console_style_reset]);
@@ -134,41 +229,58 @@ d_define_command(recv) {
 	return result;
 }
 
+d_define_command(store) {
+	char *string, nomenclature[d_string_buffer_size], buffer[d_string_buffer_size];
+	int index, result = d_false;
+	if ((index = d_commands_argument("-o", tokens, elements, "parameter '-o' not found", d_console_descriptor_null)) != d_commands_argument_null) {
+		string = tokens[index];
+		for (index = 0; index < d_trb_boards; ++index)
+			if ((v_trb_boards[index].ready) && (v_trb_boards[index].selected)) {
+				snprintf(nomenclature, d_string_buffer_size, "%s_TRB%d.bin", string, index);
+				f_trb_set_stream(index, nomenclature);
+			}
+		snprintf(buffer, d_string_buffer_size, "output has been redirected to %s_TRBX.bin\n", string);
+		if (output != d_console_descriptor_null)
+			write(output, buffer, f_string_strlen(buffer));
+	}
+	return result;
+}
+
 d_define_command(trigger) {
 	char buffer[d_string_buffer_size] = {0};
-	enum e_trb_trigger trigger = e_trb_trigger_50;
+	enum e_adlink_trigger trigger = e_adlink_trigger_50;
 	int result = d_false, index, speed;
 	if (d_commands_flag("-off", tokens, elements, NULL, d_console_descriptor_null) != d_commands_argument_null)
-		trigger = e_trb_trigger_disabled;
+		trigger = e_adlink_trigger_disabled;
 	else if (d_commands_flag("-ext", tokens, elements, NULL, d_console_descriptor_null) != d_commands_argument_null)
-		trigger = e_trb_trigger_external;
+		trigger = e_adlink_trigger_external;
 	else if ((index = d_commands_argument("-s", tokens, elements, NULL, d_console_descriptor_null)) != d_commands_argument_null)
 		switch ((speed = atoi(tokens[index]))) {
 			case 100:
-				trigger = e_trb_trigger_100;
+				trigger = e_adlink_trigger_100;
 				break;
 			case 200:
-				trigger = e_trb_trigger_200;
+				trigger = e_adlink_trigger_200;
 				break;
 			case 300:
-				trigger = e_trb_trigger_300;
+				trigger = e_adlink_trigger_300;
 				break;
 			case 50:
 			default:
-				trigger = e_trb_trigger_50;
+				trigger = e_adlink_trigger_50;
 		}
-	if ((result = f_trb_trigger(trigger)))
+	if ((result = f_adlink_trigger_setup(trigger)))
 		switch (trigger) {
-			case e_trb_trigger_disabled:
+			case e_adlink_trigger_disabled:
 				strncat(buffer, "trigger has been disabled\n", d_string_buffer_size);
 				break;
-			case e_trb_trigger_external:
+			case e_adlink_trigger_external:
 				strncat(buffer, "running external trigger\n", d_string_buffer_size);
 				break;
-			case e_trb_trigger_50:
-			case e_trb_trigger_100:
-			case e_trb_trigger_200:
-			case e_trb_trigger_300:
+			case e_adlink_trigger_50:
+			case e_adlink_trigger_100:
+			case e_adlink_trigger_200:
+			case e_adlink_trigger_300:
 				snprintf(buffer, d_string_buffer_size, "running trigger @ %dHz\n", trigger);
 		}
 	else

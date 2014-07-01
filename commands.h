@@ -19,6 +19,7 @@
 #define magrathea_commands_h
 #include "console.h"
 #include "trb.h"
+#include "adlink.h"
 #define d_define_command(sym) int f_commands_##sym(struct s_console *console, struct s_console_command *command, char **tokens, size_t elements, int output)
 #define d_declare_command(sym) extern d_define_command(sym)
 #define d_commands_argument(sym,tok,ele,msg,oput) (f_commands_get_parameter_index((sym),(tok),(ele),e_commands_parameter_argument,(msg),(oput)))
@@ -30,10 +31,16 @@ typedef enum e_commands_parameter {
 	e_commands_parameter_flag,
 	e_commands_parameter_argument
 } e_commands_parameter;
+extern struct s_console_command v_commands[];
+extern const char *v_commands_bytes_extensions[];
 extern int f_commands_get_parameter_index(const char *symbol, char **tokens, size_t elements, enum e_commands_parameter kind, const char *message, int output);
+extern const char *f_commands_bytes_extension(float *value);
+/* TRB boards control commands */
 d_declare_command(ls);
 d_declare_command(mask);
 d_declare_command(send);
 d_declare_command(recv);
+d_declare_command(store);
+/* ADLink boards control commands */
 d_declare_command(trigger);
 #endif
