@@ -34,14 +34,18 @@ int f_magrathea_init(int descriptor) {
 	char buffer[d_string_buffer_size];
 	int status = d_true;
 	if (descriptor != d_console_descriptor_null) {
-		snprintf(buffer, d_string_buffer_size, "Magrathea - TRB data acquisition system (verision %s)\n", d_magrathea_version);
+		snprintf(buffer, d_string_buffer_size, "Magrathea - TRB data acquisition system (version %s)\n", d_magrathea_version);
 		write(descriptor, buffer, f_string_strlen(buffer));
 	}
 	d_magrathea_module(status, descriptor, "console") {
 		if ((status = f_console_init(&console, v_commands, STDIN_FILENO))) {
-			strcpy(console->prefix, "\r[?]>");
+			strcpy(console->prefix, "\r[input]>");
 			console->level = e_console_level_guest;
 		}
+	}
+	d_magrathea_module(status, descriptor, "ADLink") {
+		f_adlink_connect(e_adlink_boards_trigger);
+		f_adlink_connect(e_adlink_boards_data);
 	}
 	d_magrathea_module(status, descriptor, "TRBs") {
 		f_trb_wake_up(d_trb_common_timeout);
