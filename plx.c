@@ -118,7 +118,7 @@ PLX_STATUS f_plx_read(PLX_DEVICE_OBJECT *device, size_t size, size_t *readed, PL
 	if ((available = f_plx_bytes_available(device, words_register_address)) > 0) {
 		required = (size>available)?available:size;
 		if ((status = f_plx_write_register(device, words_register_address, (required/4))) == ApiSuccess)
-			status = f_plx_read_dma(device, required, readed, device_buffer, notification, dma_address, dma_channel, timeout);
+			status = f_plx_read_dma(device, required, readed, device_buffer, notification, dma_address, dma_channel, timeout /* millisec */);
 	}
 	return status;
 }
