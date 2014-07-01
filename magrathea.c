@@ -57,6 +57,18 @@ struct s_console_command commands[] = {
 		"(usage: recv -t <int>) reads output channel from the RS232 module and writes it on screen (hex)",
 		&f_commands_recv,
 		d_true
+	},{
+		e_console_level_guest,
+		(struct s_console_parameter[]){
+			{"-off", "(flag) shuts off the trigger board output", d_false, d_true, d_true},
+			{"-ext", "(flag) sets the trigger board output as a redirect of the input trigger", d_false, d_true, d_true},
+			{"-s", "<50,100,200 or 300> sets the trigger to a certain speed", d_false, d_true, d_true},
+			{.initialized = d_false}
+		},
+		"trigger",
+		"(usage: trigger -off | trigger -s 50) defines the trigger board speed and criterias",
+		&f_commands_trigger,
+		d_true
 	},{.initialized = d_false}
 };
 
@@ -98,7 +110,7 @@ int main (int argc, char *argv[]) {
 				f_console_execute(console, &input, STDOUT_FILENO);
 			}
 		}
-		for (index = 0; index < d_trb_boards; index++)
+		for (index = 0; index < d_trb_boards; ++index)
 			f_trb_disconnect(index);
 		f_console_destroy(&console);
 	}
