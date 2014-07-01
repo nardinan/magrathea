@@ -134,3 +134,47 @@ d_define_command(recv) {
 	return result;
 }
 
+d_define_command(trigger) {
+	char buffer[d_string_buffer_size] = {0};
+	enum e_trb_trigger trigger = e_trb_trigger_50;
+	int result = d_false, index, speed;
+	if (d_commands_flag("-off", tokens, elements, NULL, d_console_descriptor_null) != d_commands_argument_null)
+		trigger = e_trb_trigger_disabled;
+	else if (d_commands_flag("-ext", tokens, elements, NULL, d_console_descriptor_null) != d_commands_argument_null)
+		trigger = e_trb_trigger_external;
+	else if ((index = d_commands_argument("-s", tokens, elements, NULL, d_console_descriptor_null)) != d_commands_argument_null)
+		switch ((speed = atoi(tokens[index]))) {
+			case 100:
+				trigger = e_trb_trigger_100;
+				break;
+			case 200:
+				trigger = e_trb_trigger_200;
+				break;
+			case 300:
+				trigger = e_trb_trigger_300;
+				break;
+			case 50:
+			default:
+				trigger = e_trb_trigger_50;
+		}
+	if ((result = f_trb_trigger(trigger)))
+		switch (trigger) {
+			case e_trb_trigger_disabled:
+				strncat(buffer, "trigger has been disabled\n", d_string_buffer_size);
+				break;
+			case e_trb_trigger_external:
+				strncat(buffer, "running external trigger\n", d_string_buffer_size);
+				break;
+			case e_trb_trigger_50:
+			case e_trb_trigger_100:
+			case e_trb_trigger_200:
+			case e_trb_trigger_300:
+				snprintf(buffer, d_string_buffer_size, "running trigger @ %dHz\n", trigger);
+		}
+	else
+		snprintf(buffer, d_string_buffer_size, "%sYEK!%s 404 on trigger board\n", v_console_styles[e_console_style_red],
+				v_console_styles[e_console_style_reset]);
+	if (output != d_console_descriptor_null)
+		write(output, buffer, f_string_strlen(buffer));
+	return result;
+}
