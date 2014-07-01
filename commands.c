@@ -128,11 +128,11 @@ d_define_command(ls) {
 			result++;
 			snprintf(status, d_string_buffer_size, "[%sready%s]", v_console_styles[e_console_style_green],
 					v_console_styles[e_console_style_reset]);
-			if (v_trb_boards[index].stream) {
-				value = v_trb_boards[index].written_bytes;
+			if (v_trb_boards[index].stream.stream) {
+				value = v_trb_boards[index].stream.written_bytes;
 				postfix = f_commands_bytes_extension(&value);
 				snprintf(stream, d_string_buffer_size, "{output: %sopen%s}[%.02f %s | %s]\n", v_console_styles[e_console_style_green],
-						v_console_styles[e_console_style_reset], value, postfix, v_trb_boards[index].destination);
+						v_console_styles[e_console_style_reset], value, postfix, v_trb_boards[index].stream.destination);
 			} else
 				snprintf(stream, d_string_buffer_size, "{output: %sclose%s}\n", v_console_styles[e_console_style_red],
 						v_console_styles[e_console_style_reset]);
@@ -211,6 +211,7 @@ d_define_command(recv) {
 		if ((v_trb_boards[index].ready) && (v_trb_boards[index].selected)) {
 			if ((readed = f_rs232_read_packet(v_trb_boards[index].descriptor, input, d_string_buffer_size, timeout, v_trb_raw_head,
 							v_trb_raw_tail, d_trb_sentinel_size)) > 0) {
+				f_trb_check_status(input, readed);
 				snprintf(status, d_string_buffer_size, "#%d [%s] %d bytes readed (hexadecimal output):\n", index, v_trb_boards[index].location,
 						readed);
 				strncat(buffer, status, (d_commands_buffer_size-f_string_strlen(buffer)));
