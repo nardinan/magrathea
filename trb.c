@@ -83,4 +83,38 @@ void f_trb_broadcast(unsigned char type, unsigned char high_byte, unsigned char 
 		}
 }
 
+int f_trb_trigger(enum e_trb_trigger trigger) {
+	struct {
+		unsigned int default_level, type, repeat_counter, width, interval;
+	} pulse_properties = {
+		/* real Zhangfei's configuration */
+		.default_level = 1,
+		.type = 2,
+		.repeat_counter = (1<<12),
+		.width = 5
+	};
+	PLX_DEVICE_OBJECT trigger_device;
+	unsigned int value;
+	int speed = e_trb_trigger_50, result = d_false;
+	if ((trigger != e_trb_trigger_disabled) && (trigger != e_trb_trigger_external))
+		speed = trigger;
+	if (f_plx_select(d_trb_vendor_code, d_trb_product_code_trigger, &trigger_device) == ApiSuccess) {
+		pulse_properties.interval = (1E7/speed)-pulse_properties.width;
+		if (trigger != e_trb_trigger_disabled) {
+			f_plx_write_register(&trigger_device, 40, pulse_properties.interval);
+			value = ((pulse_properties.default_level&0x0001)<<31)|
+				((pulse_properties.type&0x0003)<<29)|
+				((pulse_properties.repeat_counter&0x1FFF)<<16)|
+				((pulse_properties.width&0x7FFF));
+			if (trigger == e_trb_trigger_external)
+				value |= 0x8000;
+			f_plx_write_register(&trigger_device, 44, value);
+			f_plx_write_register(&trigger_device, 0, 0x00);
+		} else
+			f_plx_write_register(&trigger_device, 0, 0x0F);
+		f_plx_destroy(&trigger_device, -1, NULL, NULL);
+		result = d_true;
+	}
+	return result;
+}
 
