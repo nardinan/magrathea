@@ -25,21 +25,44 @@
 #define d_trb_raw_command_size 12
 #define d_trb_sentinel_size 2
 #define d_trb_boards 8
+#define B(a) v_trb_bytes[a]
+typedef enum e_trb_currents {
+	e_trb_currents_34 = 0,
+	e_trb_currents_33,
+	e_trb_currents_57,
+	e_trb_currents_12,
+	e_trb_currents_null
+} e_trb_currents;
+typedef enum e_trb_bytes {
+	e_trb_bytes_board_code = 0,
+	e_trb_bytes_command,
+	e_trb_bytes_0x05,
+	e_trb_bytes_0x05_current_34,
+	e_trb_bytes_0x05_current_33,
+	e_trb_bytes_0x05_current_57,
+	e_trb_bytes_0x05_current_12
+} e_trb_bytes;
 typedef struct s_trb {
-	/* + initialized values */
 	int descriptor, ready:1, selected:1;
 	unsigned char code;
 	const char *location;
-	/* - initialized values */
 	struct termios old_configuration;
-	char destination[d_string_buffer_size];
-	FILE *stream;
-	size_t written_bytes;
+	struct s_trb_stream {
+		char destination[d_string_buffer_size];
+		FILE *stream;
+		size_t written_bytes;
+	} stream;
+	struct s_trb_status {
+		float currents[e_trb_currents_null];
+	} status;
+
 } s_trb;
 extern struct s_trb v_trb_boards[d_trb_boards];
+extern unsigned int v_trb_bytes[];
 extern unsigned char v_trb_raw_head[d_trb_sentinel_size], v_trb_raw_tail[d_trb_sentinel_size];
 extern void f_trb_disconnect(int trb);
 extern void f_trb_wake_up(time_t timeout);
+extern void f_trb_check_status(unsigned char *buffer, size_t size);
 extern void f_trb_apply_mask(unsigned char flag);
 extern void f_trb_command_packet(unsigned char *supplied, unsigned char trb, unsigned char type, unsigned char high_byte, unsigned char low_byte);
 extern void f_trb_broadcast(unsigned char type, unsigned char high_byte, unsigned char low_byte);

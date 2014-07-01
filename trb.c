@@ -26,6 +26,15 @@ struct s_trb v_trb_boards[d_trb_boards] = {
 	{d_rs232_null, d_false, d_false, 0x0C, "/dev/ttyL5"},
 	{d_rs232_null, d_false, d_false, 0x0D, "/dev/ttyL6"}
 };
+unsigned int v_trb_bytes[] = {
+	4, 	/* board_code 			*/
+	5, 	/* command code 		*/
+	10,	/* 0x05 			*/
+	6, 	/* 0x05 - current @ 3.4V	*/
+	7, 	/* 0x05 - current @ -3.3V	*/
+	8, 	/* 0x05 - current @ 5.7V	*/
+	9  	/* 0x05 - current @ 12.0V	*/
+};
 unsigned char v_trb_raw_head[d_trb_sentinel_size] = {0x55, 0xaa}, v_trb_raw_tail[d_trb_sentinel_size] = {0x5a, 0xa5};
 void f_trb_disconnect(int trb) {
 	if (v_trb_boards[trb].ready) {
@@ -50,6 +59,39 @@ void f_trb_wake_up(time_t timeout) {
 			if (f_rs232_read_packet(v_trb_boards[index].descriptor, loopback_reply, d_trb_raw_command_size, timeout,
 						v_trb_raw_head, v_trb_raw_tail, d_trb_sentinel_size) <= 0)
 				f_trb_disconnect(index);
+		}
+	}
+}
+
+void f_trb_check_status(unsigned char *buffer, size_t size) {
+	int trb, value, index;
+	float current;
+	if (size > B(e_trb_bytes_board_code)) {
+		for (trb = 0; trb < d_trb_boards; trb++)
+			if (v_trb_boards[trb].code == buffer[B(e_trb_bytes_board_code)])
+				break;
+		if ((trb < d_trb_boards) && (size > B(e_trb_bytes_command))) {
+			switch (buffer[B(e_trb_bytes_command)]) {
+				case 0x05:
+					if (size > e_trb_bytes_0x05) {
+						value = (int)(buffer[B(e_trb_bytes_0x05_current_34)]);
+						current = (value*8.0f)+25.0f;
+						v_trb_boards[trb].status.currents[e_trb_currents_34] = (value==0)?value:current;
+						value = (int)(buffer[B(e_trb_bytes_0x05_current_33)]);
+						current = (value*8.0f);
+						v_trb_boards[trb].status.currents[e_trb_currents_33] = (current<0.0f)?0.0f:current;
+						value = (int)(buffer[B(e_trb_bytes_0x05_current_57)]);
+						current = (value*0.8f)-4.0f;
+						v_trb_boards[trb].status.currents[e_trb_currents_57] = (current<0.0f)?0.0f:current;
+						value = (int)(buffer[B(e_trb_bytes_0x05_current_12)]);
+						current = (value*0.8f)-2.7f;
+						v_trb_boards[trb].status.currents[e_trb_currents_12] = (current<0.0f)?0.0f:current;
+					}
+					break;
+				case 0x06:
+				case 0x07:
+					break;
+			}
 		}
 	}
 }
@@ -86,16 +128,16 @@ void f_trb_broadcast(unsigned char type, unsigned char high_byte, unsigned char 
 
 int f_trb_set_stream(int trb, const char *destination) {
 	int result = d_true;
-	if (v_trb_boards[trb].stream) {
-		fclose(v_trb_boards[trb].stream);
-		v_trb_boards[trb].stream = NULL;
+	if (v_trb_boards[trb].stream.stream) {
+		fclose(v_trb_boards[trb].stream.stream);
+		v_trb_boards[trb].stream.stream = NULL;
 	}
-	v_trb_boards[trb].written_bytes = 0;
+	v_trb_boards[trb].stream.written_bytes = 0;
 	if (destination) {
-		if ((result = ((v_trb_boards[trb].stream = fopen(destination, "w")) != NULL)))
-			strncpy(v_trb_boards[trb].destination, destination, d_string_buffer_size);
+		if ((result = ((v_trb_boards[trb].stream.stream = fopen(destination, "w")) != NULL)))
+			strncpy(v_trb_boards[trb].stream.destination, destination, d_string_buffer_size);
 	} else
-		memset(v_trb_boards[trb].destination, 0, d_string_buffer_size);
+		memset(v_trb_boards[trb].stream.destination, 0, d_string_buffer_size);
 	return result;
 }
 
@@ -103,8 +145,8 @@ void f_trb_acquire(time_t timeout) {
 	int index;
 	size_t readed;
 	for (index = 0; index < d_trb_boards; index++)
-		if ((v_trb_boards[index].ready) && (f_adlink_data_read(index, &readed, v_trb_boards[index].stream, timeout)))
-			if (v_trb_boards[index].stream)
-				v_trb_boards[index].written_bytes += readed;
+		if ((v_trb_boards[index].ready) && (f_adlink_data_read(index, &readed, v_trb_boards[index].stream.stream, timeout)))
+			if (v_trb_boards[index].stream.stream)
+				v_trb_boards[index].stream.written_bytes += readed;
 }
 
