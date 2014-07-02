@@ -20,7 +20,7 @@
 #include "rs232.h"
 #include "adlink.h"
 #define d_trb_common_timeout 50000
-#define d_trb_read_timeout 250
+#define d_trb_read_timeout 1000
 #define d_trb_command_size 4
 #define d_trb_raw_command_size 12
 #define d_trb_sentinel_size 2

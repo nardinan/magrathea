@@ -64,7 +64,7 @@ void f_trb_wake_up(time_t timeout) {
 }
 
 void f_trb_check_status(unsigned char *buffer, size_t size) {
-	int trb, value, index;
+	int trb, value;
 	float current;
 	if (size > B(e_trb_bytes_board_code)) {
 		for (trb = 0; trb < d_trb_boards; trb++)
