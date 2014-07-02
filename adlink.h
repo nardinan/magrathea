@@ -22,7 +22,6 @@
 #define d_adlink_bucket_size (2*(1024*1024))
 #define d_adlink_1mb (8*(1024*1024))
 #define d_adlink_alignment 4
-#define d_adlink_word_size 4
 #define d_adlink_vendor_code 0x10b5
 #define d_adlink_product_code_trigger 0x5406
 #define d_adlink_product_code_data 0x9601
