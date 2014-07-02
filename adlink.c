@@ -91,7 +91,6 @@ int f_adlink_trigger_setup(enum e_adlink_trigger trigger) {
 			f_plx_write_register(&(v_adlink_system.trigger_device), 0, 0x00);
 		} else
 			f_plx_write_register(&(v_adlink_system.trigger_device), 0, 0xFF);
-		f_adlink_destroy(e_adlink_boards_trigger);
 		result = d_true;
 	}
 	return result;
