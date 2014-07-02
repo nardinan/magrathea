@@ -270,6 +270,7 @@ d_define_command(trigger) {
 			default:
 				trigger = e_adlink_trigger_50;
 		}
+	//f_adlink_destroy(e_adlink_boards_data);
 	if ((result = f_adlink_trigger_setup(trigger)))
 		switch (trigger) {
 			case e_adlink_trigger_disabled:
