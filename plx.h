@@ -22,6 +22,7 @@
 #define d_plx_1mb (8*(1024*1024))
 #define d_plx_alignment 4
 #define d_plx_word_size 4
+#define d_plx_min(a,b) (((a)>(b))?(b):(a))
 extern PLX_STATUS f_plx_select(unsigned short vendor, unsigned short ID, PLX_DEVICE_OBJECT *device);
 extern PLX_STATUS f_plx_destroy(PLX_DEVICE_OBJECT *device, int channel, PLX_NOTIFY_OBJECT *notification, void **raw_plx_buffer);
 extern PLX_STATUS f_plx_prepare_dma(PLX_DEVICE_OBJECT *device, int channel, PLX_PHYSICAL_MEM *device_buffer, PLX_NOTIFY_OBJECT *notification,
