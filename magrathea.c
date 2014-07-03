@@ -32,7 +32,7 @@ int p_magrathea_init_verbose(int descriptor, const char *subsystem) {
 
 int f_magrathea_init(int descriptor) {
 	char buffer[d_string_buffer_size];
-	int status = d_true;
+	int index, status = d_true;
 	if (descriptor != d_console_descriptor_null) {
 		snprintf(buffer, d_string_buffer_size, "Magrathea - TRB data acquisition system (version %s)\n", d_magrathea_version);
 		write(descriptor, buffer, f_string_strlen(buffer));
@@ -47,9 +47,9 @@ int f_magrathea_init(int descriptor) {
 		f_adlink_connect(e_adlink_boards_trigger);
 		f_adlink_connect(e_adlink_boards_data);
 	}
-	d_magrathea_module(status, descriptor, "TRBs") {
-		f_trb_wake_up(d_trb_common_timeout);
-	}
+	d_magrathea_module(status, descriptor, "TRBs")
+		for (index = 0; index < d_trb_boards; index++)
+			f_trb_connect(index, d_trb_common_timeout);
 	return status;
 }
 
