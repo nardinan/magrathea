@@ -27,7 +27,6 @@ const char *v_console_styles[] = {
 	"\033[34m",
 	"\033[37m"
 };
-
 int f_console_init(struct s_console **console, struct s_console_command *commands, int descriptor) {
 	int result = d_false;
 	if ((*console = (struct s_console *) d_malloc(sizeof(struct s_console)))) {
