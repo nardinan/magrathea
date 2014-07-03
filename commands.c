@@ -120,7 +120,8 @@ d_define_command(ls) {
 	char buffer[d_commands_buffer_size] = {0}, backup[d_string_buffer_size], status[d_string_buffer_size], stream[d_string_buffer_size];
 	int result = d_false, index;
 	float value;
-	f_trb_wake_up(d_trb_common_timeout);
+	for (index = 0; index < d_trb_boards; index++)
+		f_trb_connect(index, d_trb_common_timeout);
 	for (index = 0; index < d_trb_boards; ++index) {
 		snprintf(backup, d_string_buffer_size, "#%d [%s]%s TRB 0x%02x ", (index+1), v_trb_boards[index].location,
 				(v_trb_boards[index].selected)?"[*]":"", v_trb_boards[index].code);
@@ -167,7 +168,7 @@ d_define_command(mask) {
 	} else if ((d_commands_flag("-a", tokens, elements, NULL, d_console_descriptor_null) != d_commands_argument_null) ||
 			(d_commands_flag("-A", tokens, elements, NULL, d_console_descriptor_null) != d_commands_argument_null))
 		mask = 0xFF;
-	f_trb_apply_mask(mask);
+	f_trb_set_mask(mask);
 	snprintf(buffer, d_string_buffer_size, "mask %s0x%02x%s applied\n", v_console_styles[e_console_style_bold], mask,
 			v_console_styles[e_console_style_reset]);
 	if (output != d_console_descriptor_null)
@@ -211,7 +212,7 @@ d_define_command(recv) {
 		if ((v_trb_boards[index].ready) && (v_trb_boards[index].selected)) {
 			if ((readed = f_rs232_read_packet(v_trb_boards[index].descriptor, input, d_string_buffer_size, timeout, v_trb_raw_head,
 							v_trb_raw_tail, d_trb_sentinel_size)) > 0) {
-				f_trb_check_status(input, readed);
+				f_trb_output_interpreter(input, readed);
 				snprintf(status, d_string_buffer_size, "#%d [%s] %d bytes readed (hexadecimal output):\n", index, v_trb_boards[index].location,
 						readed);
 				strncat(buffer, status, (d_commands_buffer_size-f_string_strlen(buffer)));
@@ -270,7 +271,6 @@ d_define_command(trigger) {
 			default:
 				trigger = e_adlink_trigger_50;
 		}
-	//f_adlink_destroy(e_adlink_boards_data);
 	if ((result = f_adlink_trigger_setup(trigger)))
 		switch (trigger) {
 			case e_adlink_trigger_disabled:
