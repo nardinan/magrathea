@@ -60,12 +60,13 @@ typedef struct s_trb {
 extern struct s_trb v_trb_boards[d_trb_boards];
 extern unsigned int v_trb_bytes[];
 extern unsigned char v_trb_raw_head[d_trb_sentinel_size], v_trb_raw_tail[d_trb_sentinel_size];
-extern void f_trb_disconnect(int trb);
-extern void f_trb_wake_up(time_t timeout);
-extern void f_trb_check_status(unsigned char *buffer, size_t size);
-extern void f_trb_apply_mask(unsigned char flag);
-extern void f_trb_command_packet(unsigned char *supplied, unsigned char trb, unsigned char type, unsigned char high_byte, unsigned char low_byte);
-extern void f_trb_broadcast(unsigned char type, unsigned char high_byte, unsigned char low_byte);
+extern void f_trb_set_mask(unsigned char flag);
+extern void f_trb_set_packet(unsigned char *supplied, unsigned char trb, unsigned char type, unsigned char high_byte, unsigned char low_byte);
 extern int f_trb_set_stream(int trb, const char *destination);
+extern void p_trb_output_interpreter(int trb, unsigned char command, unsigned char *buffer, size_t size);
+extern void f_trb_output_interpreter(unsigned char *buffer, size_t size);
+extern void f_trb_connect(int trb, time_t timeout);
+extern void f_trb_disconnect(int trb);
+extern void f_trb_broadcast(unsigned char type, unsigned char high_byte, unsigned char low_byte);
 extern void f_trb_acquire(time_t timeout);
 #endif
