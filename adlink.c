@@ -33,9 +33,9 @@ int f_adlink_connect(enum e_adlink_boards board) {
 				if (f_plx_select(d_adlink_vendor_code, d_adlink_product_code_data, &(v_adlink_system.data_device)) == ApiSuccess) {
 					if (f_plx_prepare_dma(&(v_adlink_system.data_device), 0, &(v_adlink_system.device_buffer),
 								&(v_adlink_system.notification), &(v_adlink_system.raw_memory_link)) == ApiSuccess) {
-						f_plx_write_register(&(v_adlink_system.data_device), (d_trb_boards*8), 0x3|0x55AA<<16|2000<<4);
-						f_plx_write_register(&(v_adlink_system.data_device), (d_trb_boards*8), 0x2|0x55AA<<16|2000<<4);
-						f_plx_write_register(&(v_adlink_system.data_device), (d_trb_boards*8), 0|0x55AA<<16|2000<<4);
+						f_plx_write_register(&(v_adlink_system.data_device), (d_trb_boards*8), (0x3|0x55AA<<16|2000<<4));
+						f_plx_write_register(&(v_adlink_system.data_device), (d_trb_boards*8), (0x2|0x55AA<<16|2000<<4));
+						f_plx_write_register(&(v_adlink_system.data_device), (d_trb_boards*8), (0x0|0x55AA<<16|2000<<4));
 						f_plx_read_register(&(v_adlink_system.data_device), (d_trb_boards*8), &value);
 						v_adlink_system.data_connected = d_true;
 					} else
@@ -80,8 +80,8 @@ int f_adlink_trigger_setup(enum e_adlink_trigger trigger) {
 			if (trigger != e_adlink_trigger_external)
 				speed = trigger;
 			pulse_properties.interval = (1E7/speed)-pulse_properties.width;
-			value = ((pulse_properties.default_level&0x1)<<31)|
-				((pulse_properties.type&0x3)<<29)|
+			value = ((pulse_properties.default_level&0x0001)<<31)|
+				((pulse_properties.type&0x0003)<<29)|
 				((pulse_properties.repeat_counter&0x1FFF)<<16)|
 				((pulse_properties.width&0x7FFF));
 			if (trigger == e_adlink_trigger_external)
