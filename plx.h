@@ -20,7 +20,6 @@
 #include <miranda/ground.h>
 #include <PlxApi.h>
 #define d_plx_1mb (8*(1024*1024))
-#define d_plx_alignment 4
 #define d_plx_word_size 4
 #define d_plx_min(a,b) (((a)>(b))?(b):(a))
 extern PLX_STATUS f_plx_select(unsigned short vendor, unsigned short ID, PLX_DEVICE_OBJECT *device);
