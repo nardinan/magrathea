@@ -29,7 +29,7 @@
 #define d_console_descriptor_null -1
 #define d_console_parameter_null -1
 #define d_console_clean_line "\033[1K"
-#define d_console_suggestion_columns 5
+#define d_console_suggestion_columns 10
 struct s_console;
 struct s_console_command;
 typedef enum e_console_style {

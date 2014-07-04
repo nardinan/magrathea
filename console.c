@@ -103,6 +103,7 @@ void p_console_write_history(struct s_console *console, struct s_console_input *
 				change = d_true;
 				if (console->history_pointer > 0)
 					console->history_pointer--;
+
 		}
 	if ((console->history_pointer <= console->history_last) && (change)) {
 		f_console_write(console, console->history[console->history_pointer], output);
@@ -131,7 +132,7 @@ void p_console_write_suggestion(struct s_console *console, struct s_console_inpu
 						}
 					}
 					last_match = index;
-					snprintf(backup, d_string_buffer_size, "%c%s", ((match%d_console_suggestion_columns) == 0)?'\n':'\t',
+					snprintf(backup, d_string_buffer_size, "%s%s", ((match%d_console_suggestion_columns) == 0)?"\n":"\t\t",
 							console->commands[index].command);
 					strncat(buffer, backup, (d_console_output_size-f_string_strlen(buffer))-1);
 					match++;
@@ -252,7 +253,7 @@ int f_console_execute(struct s_console *console, struct s_console_input *input, 
 	char **tokens, *pointer, *next, buffer[d_string_buffer_size];
 	int index = 0, arguments = 1, match;
 	size_t length;
-	if ((input->data_pointer > 0) && (input->ready)) {
+	if ((f_string_strlen(input->input) > 0) && (input->ready)) {
 		pointer = input->input;
 		while ((next = strchr(pointer, ' '))) {
 			if ((next-pointer) > 0)
