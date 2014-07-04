@@ -16,6 +16,48 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "magrathea.h"
+struct s_device v_initialized_devices[] = {
+	{0x00, "TRB board #1",
+		(t_device_call[]){NULL, &f_trb_device_description, &f_trb_device_status, &f_trb_device_stream, &f_trb_device_write, NULL, &f_trb_device_mask},
+		(t_device_call_generic[]){&f_trb_device_enabled, &f_trb_device_refresh, &f_trb_device_initialize, &f_trb_device_destroy}
+	},
+	{0x01, "TRB board #2",
+		(t_device_call[]){NULL, &f_trb_device_description, &f_trb_device_status, &f_trb_device_stream, &f_trb_device_write, NULL, &f_trb_device_mask},
+		(t_device_call_generic[]){&f_trb_device_enabled, &f_trb_device_refresh, &f_trb_device_initialize, &f_trb_device_destroy}
+	},
+	{0x02, "TRB board #3",
+		(t_device_call[]){NULL, &f_trb_device_description, &f_trb_device_status, &f_trb_device_stream, &f_trb_device_write, NULL, &f_trb_device_mask},
+		(t_device_call_generic[]){&f_trb_device_enabled, &f_trb_device_refresh, &f_trb_device_initialize, &f_trb_device_destroy}
+	},
+	{0x03, "TRB board #4",
+		(t_device_call[]){NULL, &f_trb_device_description, &f_trb_device_status, &f_trb_device_stream, &f_trb_device_write, NULL, &f_trb_device_mask},
+		(t_device_call_generic[]){&f_trb_device_enabled, &f_trb_device_refresh, &f_trb_device_initialize, &f_trb_device_destroy}
+	},
+	{0x04, "TRB board #5",
+		(t_device_call[]){NULL, &f_trb_device_description, &f_trb_device_status, &f_trb_device_stream, &f_trb_device_write, NULL, &f_trb_device_mask},
+		(t_device_call_generic[]){&f_trb_device_enabled, &f_trb_device_refresh, &f_trb_device_initialize, &f_trb_device_destroy}
+	},
+	{0x05, "TRB board #6",
+		(t_device_call[]){NULL, &f_trb_device_description, &f_trb_device_status, &f_trb_device_stream, &f_trb_device_write, NULL, &f_trb_device_mask},
+		(t_device_call_generic[]){&f_trb_device_enabled, &f_trb_device_refresh, &f_trb_device_initialize, &f_trb_device_destroy}
+	},
+	{0x06, "TRB board #7",
+		(t_device_call[]){NULL, &f_trb_device_description, &f_trb_device_status, &f_trb_device_stream, &f_trb_device_write, NULL, &f_trb_device_mask},
+		(t_device_call_generic[]){&f_trb_device_enabled, &f_trb_device_refresh, &f_trb_device_initialize, &f_trb_device_destroy}
+	},
+	{0x07, "TRB board #8",
+		(t_device_call[]){NULL, &f_trb_device_description, &f_trb_device_status, &f_trb_device_stream, &f_trb_device_write, NULL, &f_trb_device_mask},
+		(t_device_call_generic[]){&f_trb_device_enabled, &f_trb_device_refresh, &f_trb_device_initialize, &f_trb_device_destroy}
+	},
+	{0xaa, "Trigger board",
+		(t_device_call[]){&f_trigger_device_trigger, NULL, NULL, NULL, NULL, NULL, NULL},
+		(t_device_call_generic[]){NULL, NULL, &f_trigger_device_initialize, &f_trigger_device_destroy}
+	},
+	{0xbb, "LVDS board",
+		(t_device_call[]){NULL, NULL, NULL, NULL, NULL, NULL, NULL},
+		(t_device_call_generic[]){NULL, &f_lvds_device_refresh, &f_lvds_device_initialize, &f_lvds_device_destroy}
+	},{0xff}
+};
 struct s_console *console;
 struct s_console_input input = { .ready = d_true };
 int p_magrathea_init_verbose(int descriptor, const char *subsystem) {
@@ -43,18 +85,22 @@ int f_magrathea_init(int descriptor) {
 			console->level = e_console_level_guest;
 		}
 	}
-	d_magrathea_module(status, descriptor, "ADLink") {
-		f_adlink_connect(e_adlink_boards_trigger);
-		f_adlink_connect(e_adlink_boards_data);
+	d_magrathea_module(status, descriptor, "devices") {
+		v_devices = v_initialized_devices;
+		if (descriptor != d_console_descriptor_null) {
+			for (index = 0; v_devices[index].code != 0xff; index++) {
+				snprintf(buffer, d_string_buffer_size, "\t[required unity] name: %s%s%s code: 0x%02x\n", v_console_styles[e_console_style_bold],
+					v_devices[index].description, v_console_styles[e_console_style_reset], v_devices[index].code);
+				write(descriptor, buffer, f_string_strlen(buffer));
+			}
+			fsync(descriptor);
+		}
+		f_device_system_recall(e_device_system_calls_initialize);
 	}
-	d_magrathea_module(status, descriptor, "TRBs")
-		for (index = 0; index < d_trb_boards; index++)
-			f_trb_connect(index, d_trb_common_timeout);
 	return status;
 }
 
 int main (int argc, char *argv[]) {
-	int index;
 	f_memory_init();
 	if (f_magrathea_init(STDOUT_FILENO)) {
 		while (d_true) {
@@ -65,12 +111,9 @@ int main (int argc, char *argv[]) {
 				f_console_execute(console, &input, STDOUT_FILENO);
 			}
 			usleep(d_magrathea_loop_sleep);
-			f_trb_acquire(d_trb_read_timeout);
+			f_device_system_recall(e_device_system_calls_refresh);
 		}
-		for (index = 0; index < d_trb_boards; ++index)
-			f_trb_disconnect(index);
-		f_adlink_destroy(e_adlink_boards_trigger);
-		f_adlink_destroy(e_adlink_boards_data);
+		f_device_system_recall(e_device_system_calls_destroy);
 		f_console_destroy(&console);
 	}
 	f_memory_destroy();
