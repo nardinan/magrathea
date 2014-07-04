@@ -33,10 +33,10 @@ int f_adlink_connect(enum e_adlink_boards board) {
 				if (f_plx_select(d_adlink_vendor_code, d_adlink_product_code_data, &(v_adlink_system.data_device)) == ApiSuccess) {
 					if (f_plx_prepare_dma(&(v_adlink_system.data_device), 0, &(v_adlink_system.device_buffer),
 								&(v_adlink_system.notification), &(v_adlink_system.raw_memory_link)) == ApiSuccess) {
-						f_plx_write_register(&(v_adlink_system.data_device), (d_trb_boards*8), (0x3|0x55AA<<16|2000<<4));
-						f_plx_write_register(&(v_adlink_system.data_device), (d_trb_boards*8), (0x2|0x55AA<<16|2000<<4));
-						f_plx_write_register(&(v_adlink_system.data_device), (d_trb_boards*8), (0x0|0x55AA<<16|2000<<4));
-						f_plx_read_register(&(v_adlink_system.data_device), (d_trb_boards*8), &value);
+						f_plx_write_register(&(v_adlink_system.data_device), (d_trb_device_boards*8), (0x3|0x55AA<<16|2000<<4));
+						f_plx_write_register(&(v_adlink_system.data_device), (d_trb_device_boards*8), (0x2|0x55AA<<16|2000<<4));
+						f_plx_write_register(&(v_adlink_system.data_device), (d_trb_device_boards*8), (0x0|0x55AA<<16|2000<<4));
+						f_plx_read_register(&(v_adlink_system.data_device), (d_trb_device_boards*8), &value);
 						v_adlink_system.data_connected = d_true;
 					} else
 						f_plx_destroy(&(v_adlink_system.data_device), 0, &(v_adlink_system.notification),
@@ -100,7 +100,7 @@ int f_adlink_data_read(unsigned int trb, size_t *readed, FILE *destination, time
 	int result = d_false;
 	if (f_adlink_connect(e_adlink_boards_data)) {
 		if (f_plx_read(&(v_adlink_system.data_device), d_adlink_bucket_size, readed, &(v_adlink_system.device_buffer), &(v_adlink_system.notification),
-					(d_trb_boards*trb), (d_trb_boards*trb)+4, 0, timeout) == ApiSuccess) {
+					(d_trb_device_boards*trb), (d_trb_device_boards*trb)+4, 0, timeout) == ApiSuccess) {
 			if (((*readed) > 0) && (destination)) {
 				fwrite(v_adlink_system.raw_memory_link, (*readed), 1, destination);
 				fflush(destination);
