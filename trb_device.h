@@ -33,6 +33,16 @@ typedef enum e_trb_device_currents {
 	e_trb_device_currents_33,
 	e_trb_device_currents_57,
 	e_trb_device_currents_12,
+	e_trb_device_currents_VSSA1,
+	e_trb_device_currents_VSSA2,
+	e_trb_device_currents_VSSA3,
+	e_trb_device_currents_VSSA4,
+	e_trb_device_currents_VSSA5,
+	e_trb_device_currents_VSSA6,
+	e_trb_device_currents_33VDD1,
+	e_trb_device_currents_33VDD2,
+	e_trb_device_currents_S34,
+	e_trb_device_currents_S33,
 	e_trb_device_currents_null
 } e_trb_device_currents;
 typedef enum e_trb_device_temperatures {
@@ -42,6 +52,11 @@ typedef enum e_trb_device_temperatures {
 	e_trb_device_temperatures_BUSB_2,
 	e_trb_device_temperatures_null
 } e_trb_device_temperatures;
+typedef enum e_trb_device_voltages {
+	e_trb_device_voltages_HV1,
+	e_trb_device_voltages_HV2,
+	e_trb_device_voltages_null
+} e_trb_device_voltages;
 typedef enum e_trb_device_bytes {
 	e_trb_device_bytes_board_code = 0,
 	e_trb_device_bytes_command,
@@ -54,7 +69,20 @@ typedef enum e_trb_device_bytes {
 	e_trb_device_bytes_0x06_temperature_A1,
 	e_trb_device_bytes_0x06_temperature_B1,
 	e_trb_device_bytes_0x06_temperature_A2,
-	e_trb_device_bytes_0x06_temperature_B2
+	e_trb_device_bytes_0x06_temperature_B2,
+	e_trb_device_bytes_0x07,
+	e_trb_device_bytes_0x07_current_VSSA1,
+	e_trb_device_bytes_0x07_current_VSSA2,
+	e_trb_device_bytes_0x07_current_VSSA3,
+	e_trb_device_bytes_0x07_current_VSSA4,
+	e_trb_device_bytes_0x07_current_VSSA5,
+	e_trb_device_bytes_0x07_current_VSSA6,
+	e_trb_device_bytes_0x07_current_33VDD1,
+	e_trb_device_bytes_0x07_current_33VDD2,
+	e_trb_device_bytes_0x07_current_S34,
+	e_trb_device_bytes_0x07_current_S33,
+	e_trb_device_bytes_0x07_voltage_HV1,
+	e_trb_device_bytes_0x07_voltage_HV2
 } e_trb_bytes;
 typedef struct s_trb_device {
 	int descriptor, selected:1;
@@ -67,7 +95,7 @@ typedef struct s_trb_device {
 		size_t written_bytes;
 	} stream;
 	struct s_trb_status {
-		float currents[e_trb_device_currents_null], temperatures[e_trb_device_temperatures_null];
+		float currents[e_trb_device_currents_null], temperatures[e_trb_device_temperatures_null], voltages[e_trb_device_voltages_null];
 	} status;
 } s_trb_device;
 extern unsigned char v_trb_device_raw_head[], v_trb_device_raw_tail[];
