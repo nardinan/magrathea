@@ -107,7 +107,8 @@ int f_rs232_read_packet(int device, unsigned char *message, size_t size, time_t 
 				if (tail)
 					tail_checked = (memcmp((message+(readed-sentry_size)), tail, sentry_size) == 0);
 			}
-		} else if (((result == -1) && (errno != EAGAIN)) || (result == 0)) {
+			begin = current; /* reset timeout */
+		} else if ((result == 0) || (errno != EAGAIN)) {
 			readed = -1;
 			break;
 		}
