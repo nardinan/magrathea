@@ -27,6 +27,19 @@ const char *v_console_styles[] = {
 	"\033[34m",
 	"\033[37m"
 };
+int f_console_parameter(const char *symbol, char **tokens, size_t elements, int is_flag) {
+	int result = d_console_parameter_null, index;
+	for (index = 0; index < elements; index++)
+		if (f_string_strcmp(tokens[index], symbol) == 0) {
+			if (is_flag)
+				result = index;
+			else if ((index+1) < elements)
+				result = (index+1);
+			break;
+		}
+	return result;
+}
+
 int f_console_init(struct s_console **console, struct s_console_command *commands, int descriptor) {
 	int result = d_false;
 	if ((*console = (struct s_console *) d_malloc(sizeof(struct s_console)))) {
@@ -76,8 +89,6 @@ void p_console_append_history(struct s_console *console, const char *buffer) {
 	strncpy(console->history[console->history_last++], buffer, d_string_buffer_size);
 	console->history_pointer = console->history_last;
 }
-
-
 
 void p_console_write_history(struct s_console *console, struct s_console_input *input, int output) {
 	int change = d_false;
@@ -214,6 +225,29 @@ int f_console_read(struct s_console *console, struct s_console_input *input, int
 	return input->ready;
 }
 
+int p_console_execute_verify(struct s_console_command *command, char **tokens, size_t elements, int output) {
+	int result = d_true, confirmed, index, argument;
+	char buffer[d_string_buffer_size];
+	for (index = 0; (command->parameters[index].initialized) && (result); index++)
+		if (!command->parameters[index].optional) {
+			for (argument = 0, confirmed = d_false; (argument < elements) && (confirmed == d_false); argument++)
+				if (f_string_strcmp(tokens[argument], command->parameters[index].parameter) == 0)
+					if ((command->parameters[index].is_flag) || (((argument+1) < elements) && (f_string_strlen(tokens[argument+1]) > 0)))
+						confirmed = d_true;
+			if (!confirmed) {
+				result = d_false;
+				if (output != d_console_descriptor_null) {
+					snprintf(buffer, d_string_buffer_size, "can't find required parameter '%s%s%s'; aborted\n",
+							v_console_styles[e_console_style_bold], command->parameters[index].parameter,
+							v_console_styles[e_console_style_reset]);
+					write(output, buffer, f_string_strlen(buffer));
+					fsync(output);
+				}
+			}
+		}
+	return result;
+}
+
 int f_console_execute(struct s_console *console, struct s_console_input *input, int output) {
 	char **tokens, *pointer, *next, buffer[d_string_buffer_size];
 	int index = 0, arguments = 1, match;
@@ -249,8 +283,10 @@ int f_console_execute(struct s_console *console, struct s_console_input *input, 
 			if (console->commands) {
 				for (index = 0, match = 0; console->commands[index].initialized; index++)
 					if (f_string_strcmp(tokens[0], console->commands[index].command) == 0) {
-						if (console->commands[index].recall)
-							console->commands[index].recall(console, &(console->commands[index]), tokens, arguments, output);
+						if (p_console_execute_verify(&(console->commands[index]), tokens, arguments, output))
+							if (console->commands[index].call)
+								console->commands[index].call(console, &(console->commands[index]), tokens, arguments,
+										output);
 						match++;
 					}
 				if ((match == 0) && (output != d_console_descriptor_null)) {

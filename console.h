@@ -22,10 +22,12 @@
 #include <miranda/ground.h>
 #define d_console_parameter_size 8
 #define d_console_command_size 16
+#define d_console_command_parameters 10
 #define d_console_output_size 1024
 #define d_console_history_size 256
 #define d_console_special_size 3
 #define d_console_descriptor_null -1
+#define d_console_parameter_null -1
 #define d_console_clean_line "\033[1K"
 #define d_console_suggestion_columns 5
 struct s_console;
@@ -50,18 +52,18 @@ extern const char *v_console_styles[];
 typedef int (*t_console_recall)(struct s_console *, struct s_console_command *, char **, size_t, int);
 typedef struct s_console_parameter {
 	char parameter[d_console_parameter_size], description[d_string_buffer_size];
-	int flag, optional, initialized;
-} s_console_paramter;
+	int is_flag:1, optional:1, initialized:1;
+} s_console_parameter;
 typedef struct s_console_command {
-	enum e_console_level level;
-	struct s_console_parameter *parameters;
 	char command[d_console_command_size], description[d_string_buffer_size];
-	t_console_recall recall;
-	int initialized;
+	struct s_console_parameter *parameters;
+	t_console_recall call;
+	enum e_console_level level;
+	int initialized:1;
 } s_console_command;
 typedef struct s_console_input {
 	char input[d_string_buffer_size], special[d_console_parameter_size];
-	int data_pointer, special_pointer, ready;
+	int data_pointer, special_pointer, ready:1;
 } s_console_input;
 typedef struct s_console {
 	enum e_console_level level;
@@ -70,6 +72,7 @@ typedef struct s_console {
 	char history[d_console_history_size][d_string_buffer_size], prefix[d_string_buffer_size];
 	int history_last, history_pointer, descriptor;
 } s_console;
+extern int f_console_parameter(const char *symbol, char **tokens, size_t elements, int is_flag);
 extern int f_console_init(struct s_console **console, struct s_console_command *commands, int descriptor);
 extern int f_console_destroy(struct s_console **console);
 extern void f_console_write(struct s_console *console, const char *buffer, int output);
@@ -77,5 +80,6 @@ extern void p_console_append_history(struct s_console *console, const char *buff
 extern void p_console_write_history(struct s_console *console, struct s_console_input *input, int output);
 extern void p_console_write_suggestion(struct s_console *console, struct s_console_input *input, int output);
 extern int f_console_read(struct s_console *console, struct s_console_input *input, int output, time_t sec, time_t usec);
+extern int p_console_execute_verify(struct s_console_command *command, char **tokens, size_t elements, int output);
 extern int f_console_execute(struct s_console *console, struct s_console_input *input, int output);
 #endif
