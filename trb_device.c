@@ -82,12 +82,27 @@ int f_trb_device_description(unsigned char code, char **tokens, size_t elements,
 }
 
 int f_trb_device_status(unsigned char code, char **tokens, size_t elements, int output) {
+	static unsigned char status_requests[] = {0x05, 0x06, 0x07};
+	unsigned char raw_command[d_trb_device_raw_command_size];
 	char buffer[d_console_output_size] = {0}, currents[d_string_buffer_size], temperatures[d_string_buffer_size];
-	int argument, selected = d_true, result = d_true;
+	int index, argument, selected = d_true, result = d_true;
 	if ((argument = f_console_parameter("-d", tokens, elements, d_false)) != d_console_descriptor_null)
 		if (code != atoi(tokens[argument]))
 			selected = d_false;
 	if (selected) {
+		if (v_trb_device_boards[code].descriptor != d_rs232_null) {
+			/* refresh the status of our TRB (sorry but I have to hardcode this shi**ing incoherent stuff) */
+			for (index = 0; index < sizeof(status_requests); ++index) {
+				p_trb_device_write_packet(raw_command, v_trb_device_boards[code].code, status_requests[index], 0x00, 0x00);
+				if (f_rs232_write(v_trb_device_boards[code].descriptor, raw_command,
+							d_trb_device_raw_command_size) == d_trb_device_raw_command_size)
+					f_trb_device_refresh(code);
+				else {
+					f_trb_device_destroy(code);
+					break;
+				}
+			}
+		}
 		if ((result = f_trb_device_description(code, tokens, elements, output))) {
 			if (output != d_console_descriptor_null) {
 				snprintf(currents, d_string_buffer_size, "[+3.4V %4.02fmA | -3.3V %4.02fmA | +5.7V %4.02fmA | +12V %4.02fmA]\n",
@@ -207,7 +222,7 @@ int f_trb_device_initialize(unsigned char code) {
 	if (v_trb_device_boards[code].descriptor != d_rs232_null) {
 		f_rs232_write(v_trb_device_boards[code].descriptor, bus_loopback, d_trb_device_raw_command_size);
 		if ((readed = f_rs232_read_packet(v_trb_device_boards[code].descriptor, loopback_answer, d_trb_device_raw_command_size, d_trb_device_timeout,
-					v_trb_device_raw_head, v_trb_device_raw_tail, d_trb_device_sentinel_size)) > 0)
+						v_trb_device_raw_head, v_trb_device_raw_tail, d_trb_device_sentinel_size)) > 0)
 			result = d_true;
 		else
 			f_trb_device_destroy(code);
