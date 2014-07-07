@@ -75,6 +75,7 @@ typedef struct s_console {
 extern int f_console_parameter(const char *symbol, char **tokens, size_t elements, int is_flag);
 extern int f_console_init(struct s_console **console, struct s_console_command *commands, int descriptor);
 extern int f_console_destroy(struct s_console **console);
+extern void f_console_refresh(struct s_console *console, struct s_console_input *input, int output);
 extern void f_console_write(struct s_console *console, const char *buffer, int output);
 extern void p_console_append_history(struct s_console *console, const char *buffer);
 extern void p_console_write_history(struct s_console *console, struct s_console_input *input, int output);

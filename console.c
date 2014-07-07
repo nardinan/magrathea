@@ -70,11 +70,19 @@ int f_console_destroy(struct s_console **console) {
 	return result;
 }
 
+void f_console_refresh(struct s_console *console, struct s_console_input *input, int output) {
+	char *buffer = NULL;
+	if (input->data_pointer > 0)
+		buffer = input->input;
+	f_console_write(console, buffer, output);
+}
+
 void f_console_write(struct s_console *console, const char *buffer, int output) {
 	if (output != d_console_descriptor_null) {
 		write(output, d_console_clean_line, f_string_strlen(d_console_clean_line));
 		write(output, console->prefix, f_string_strlen(console->prefix));
-		write(output, buffer, f_string_strlen(buffer));
+		if (buffer)
+			write(output, buffer, f_string_strlen(buffer));
 		fsync(output);
 	}
 }
@@ -106,7 +114,6 @@ void p_console_write_history(struct s_console *console, struct s_console_input *
 
 		}
 	if ((console->history_pointer <= console->history_last) && (change)) {
-		f_console_write(console, console->history[console->history_pointer], output);
 		strcpy(input->input, console->history[console->history_pointer]);
 		input->data_pointer = f_string_strlen(console->history[console->history_pointer]);
 	}
@@ -162,7 +169,6 @@ void p_console_write_suggestion(struct s_console *console, struct s_console_inpu
 			}
 			write(output, buffer, f_string_strlen(buffer));
 			write(output, "\n", sizeof(char));
-			f_console_write(console, input->input, output);
 		} else
 			write(output, "\a", sizeof(char));
 	}
@@ -172,13 +178,10 @@ int f_console_read(struct s_console *console, struct s_console_input *input, int
 	struct timeval timeout = {sec, usec};
 	char incoming_character;
 	fd_set descriptor_set;
-	if (input->ready) {
+	if (input->ready)
 		memset(input, 0, sizeof(struct s_console_input));
-		if (output != d_console_descriptor_null) {
-			write(output, (void *)console->prefix, f_string_strlen(console->prefix));
-			fsync(output);
-		}
-	}
+	/* refresh command line */
+	f_console_refresh(console, input, output);
 	FD_ZERO(&descriptor_set);
 	FD_SET(console->descriptor, &descriptor_set);
 	if (select(console->descriptor+1, &descriptor_set, NULL, NULL, &timeout) > 0) {
@@ -196,12 +199,14 @@ int f_console_read(struct s_console *console, struct s_console_input *input, int
 						break;
 					case 127:
 						if (input->data_pointer > 0) {
-							input->input[--(input->data_pointer)] = '\0';
-							f_console_write(console, input->input, output);
+							--(input->data_pointer);
+							memset((input->input+input->data_pointer), 0, (d_string_buffer_size-input->data_pointer));
+							//f_console_write(console, input->input, output);
 						}
 						break;
 					case 27:
-						input->special[input->special_pointer++] = incoming_character;
+						if (input->special_pointer < (d_string_buffer_size-1)) /* leave some space for string tail character */
+							input->special[input->special_pointer++] = incoming_character;
 						break;
 					case 10:
 						if (input->data_pointer > 0) {
@@ -219,8 +224,6 @@ int f_console_read(struct s_console *console, struct s_console_input *input, int
 						}
 				}
 			}
-			if (output != d_console_descriptor_null)
-				fsync(output);
 		}
 	}
 	return input->ready;
