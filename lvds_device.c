@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "lvds_device.h"
-int f_lvds_device_refresh(unsigned char code) {
+int f_lvds_device_refresh(unsigned char code, struct s_console *console) {
 	int index, result = d_true;
 	size_t readed;
 	for (index = 0; index < d_trb_device_boards; index++)
