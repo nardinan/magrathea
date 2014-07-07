@@ -26,25 +26,28 @@ typedef enum e_device_calls {
 	e_device_calls_write,
 	e_device_calls_read,
 	e_device_calls_mask,
+	e_device_calls_focus,
 	e_device_calls_null
 } e_device_calls;
 typedef enum e_device_system_calls {
 	e_device_system_calls_is_enabled = 0,
-	e_device_system_calls_refresh,
 	e_device_system_calls_initialize,
 	e_device_system_calls_destroy,
 	e_device_system_calls_null
 } e_device_system_calls;
 typedef int (*t_device_call_generic)(unsigned char);
 typedef int (*t_device_call)(unsigned char, char **, size_t, int output);
+typedef int (*t_device_call_refresh)(unsigned char, struct s_console *);
 typedef struct s_device {
 	unsigned char code;
 	char *description;
 	t_device_call calls[e_device_calls_null];
 	t_device_call_generic system_calls[e_device_system_calls_null];
+	t_device_call_refresh refresh_call;
 } s_device;
 extern struct s_device *v_devices;
 extern const char *v_device_call_description[];
-extern int f_device_recall(e_device_calls call, int skip_mask, char **tokens, size_t elements, int output);
-extern int f_device_system_recall(e_device_system_calls call);
+extern int f_device_recall(enum e_device_calls call, int skip_mask, char **tokens, size_t elements, int output);
+extern int f_device_system_recall(enum e_device_system_calls call);
+extern int f_device_system_refresh(struct s_console *console);
 #endif

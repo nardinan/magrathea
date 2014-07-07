@@ -57,3 +57,15 @@ int f_device_system_recall(e_device_system_calls call) {
 					result = d_false;
 	return result;
 }
+
+int f_device_system_refresh(struct s_console *console) {
+	int index, result = d_true;
+	if (v_devices)
+		for (index = 0; v_devices[index].code != 0xff; index++)
+			if (v_devices[index].refresh_call)
+				if (!v_devices[index].refresh_call(v_devices[index].code, console))
+					result = d_false;
+	return result;
+}
+
+
