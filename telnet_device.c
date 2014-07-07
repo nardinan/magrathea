@@ -17,14 +17,14 @@
  */
 #include "telnet_device.h"
 int f_telnet_device_initialize(unsigned char code) {
-	if (!v_telnet_device.initialized) {
+	if (!v_telnet_device.socket.initialized) {
 		memset(&(v_telnet_device.address), 0, sizeof(struct sockaddr_in));
 		if ((v_telnet_device.socket.socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) != d_telnet_device_stream_null) {
 			v_telnet_device.address.sin_family = AF_INET;
 			v_telnet_device.address.sin_port = htons(d_telnet_device_port);
 			v_telnet_device.address.sin_addr.s_addr = htonl(INADDR_ANY);
-			if (bind(v_telnet_device.socket, (struct sockaddr *)&(v_telnet_device.address), sizeof(struct sockaddr_in)) == 0)
-				if (listen(v_telnet_device.socket, d_telnet_device_queue) == 0)
+			if (bind(v_telnet_device.socket.socket, (struct sockaddr *)&(v_telnet_device.address), sizeof(struct sockaddr_in)) == 0)
+				if (listen(v_telnet_device.socket.socket, d_telnet_device_queue) == 0)
 					v_telnet_device.socket.initialized = d_true;
 		}
 	}
@@ -34,7 +34,7 @@ int f_telnet_device_initialize(unsigned char code) {
 int f_telnet_device_destroy(unsigned char code) {
 	int result = d_true;
 	/* remove every opened clients */
-	if (v_telnet_device.socket.nitialized) {
+	if (v_telnet_device.socket.initialized) {
 		shutdown(v_telnet_device.socket.socket, SHUT_RDWR);
 		close(v_telnet_device.socket.socket);
 	}
