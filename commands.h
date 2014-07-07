@@ -27,4 +27,5 @@ extern int f_commands_stream(struct s_console *console, struct s_console_command
 extern int f_commands_write(struct s_console *console, struct s_console_command *command, char **tokens, size_t elements, int output);
 extern int f_commands_read(struct s_console *console, struct s_console_command *command, char **tokens, size_t elements, int output);
 extern int f_commands_mask(struct s_console *console, struct s_console_command *command, char **tokens, size_t elements, int output);
+extern int f_commands_focus(struct s_console *console, struct s_console_command *command, char **tokens, size_t elements, int output);
 #endif

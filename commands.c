@@ -68,6 +68,13 @@ struct s_console_command v_commands[] = {
 		},
 		&f_commands_mask, e_console_level_guest, d_true
 	},
+	{"focus", "(usage: focus -d 0) shows some informations about the selected device in the command line",
+		(struct s_console_parameter[]) {
+			{"-d", "(integer) selects and shows details about a specific device", d_false, d_false, d_true},
+			{.initialized = d_false}
+		},
+		&f_commands_focus, e_console_level_guest, d_true
+	},
 	{.initialized = d_false}
 };
 int f_commands_trigger(struct s_console *console, struct s_console_command *command, char **tokens, size_t elements, int output) {
@@ -98,3 +105,6 @@ int f_commands_mask(struct s_console *console, struct s_console_command *command
 	return f_device_recall(e_device_calls_mask, d_true, tokens, elements, output);
 }
 
+int f_commands_focus(struct s_console *console, struct s_console_command *command, char **tokens, size_t elements, int output) {
+	return f_device_recall(e_device_calls_focus, d_true, tokens, elements, output);
+}
