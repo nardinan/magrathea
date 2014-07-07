@@ -18,44 +18,62 @@
 #include "magrathea.h"
 struct s_device v_initialized_devices[] = {
 	{0x00, "TRB board #1",
-		(t_device_call[]){NULL, &f_trb_device_description, &f_trb_device_status, &f_trb_device_stream, &f_trb_device_write, NULL, &f_trb_device_mask},
-		(t_device_call_generic[]){&f_trb_device_enabled, &f_trb_device_refresh, &f_trb_device_initialize, &f_trb_device_destroy}
+		(t_device_call[]){NULL, &f_trb_device_description, &f_trb_device_status, &f_trb_device_stream, &f_trb_device_write, NULL, &f_trb_device_mask,
+				&f_trb_device_focus},
+		(t_device_call_generic[]){&f_trb_device_enabled, &f_trb_device_initialize, &f_trb_device_destroy},
+		&f_trb_device_refresh
 	},
 	{0x01, "TRB board #2",
-		(t_device_call[]){NULL, &f_trb_device_description, &f_trb_device_status, &f_trb_device_stream, &f_trb_device_write, NULL, &f_trb_device_mask},
-		(t_device_call_generic[]){&f_trb_device_enabled, &f_trb_device_refresh, &f_trb_device_initialize, &f_trb_device_destroy}
+		(t_device_call[]){NULL, &f_trb_device_description, &f_trb_device_status, &f_trb_device_stream, &f_trb_device_write, NULL, &f_trb_device_mask,
+				&f_trb_device_focus},
+		(t_device_call_generic[]){&f_trb_device_enabled, &f_trb_device_initialize, &f_trb_device_destroy},
+		&f_trb_device_refresh
 	},
 	{0x02, "TRB board #3",
-		(t_device_call[]){NULL, &f_trb_device_description, &f_trb_device_status, &f_trb_device_stream, &f_trb_device_write, NULL, &f_trb_device_mask},
-		(t_device_call_generic[]){&f_trb_device_enabled, &f_trb_device_refresh, &f_trb_device_initialize, &f_trb_device_destroy}
+		(t_device_call[]){NULL, &f_trb_device_description, &f_trb_device_status, &f_trb_device_stream, &f_trb_device_write, NULL, &f_trb_device_mask,
+				&f_trb_device_focus},
+		(t_device_call_generic[]){&f_trb_device_enabled, &f_trb_device_initialize, &f_trb_device_destroy},
+		&f_trb_device_refresh
 	},
 	{0x03, "TRB board #4",
-		(t_device_call[]){NULL, &f_trb_device_description, &f_trb_device_status, &f_trb_device_stream, &f_trb_device_write, NULL, &f_trb_device_mask},
-		(t_device_call_generic[]){&f_trb_device_enabled, &f_trb_device_refresh, &f_trb_device_initialize, &f_trb_device_destroy}
+		(t_device_call[]){NULL, &f_trb_device_description, &f_trb_device_status, &f_trb_device_stream, &f_trb_device_write, NULL, &f_trb_device_mask,
+				&f_trb_device_focus},
+		(t_device_call_generic[]){&f_trb_device_enabled, &f_trb_device_initialize, &f_trb_device_destroy},
+		&f_trb_device_refresh
 	},
 	{0x04, "TRB board #5",
-		(t_device_call[]){NULL, &f_trb_device_description, &f_trb_device_status, &f_trb_device_stream, &f_trb_device_write, NULL, &f_trb_device_mask},
-		(t_device_call_generic[]){&f_trb_device_enabled, &f_trb_device_refresh, &f_trb_device_initialize, &f_trb_device_destroy}
+		(t_device_call[]){NULL, &f_trb_device_description, &f_trb_device_status, &f_trb_device_stream, &f_trb_device_write, NULL, &f_trb_device_mask,
+				&f_trb_device_focus},
+		(t_device_call_generic[]){&f_trb_device_enabled, &f_trb_device_initialize, &f_trb_device_destroy},
+		&f_trb_device_refresh
 	},
 	{0x05, "TRB board #6",
-		(t_device_call[]){NULL, &f_trb_device_description, &f_trb_device_status, &f_trb_device_stream, &f_trb_device_write, NULL, &f_trb_device_mask},
-		(t_device_call_generic[]){&f_trb_device_enabled, &f_trb_device_refresh, &f_trb_device_initialize, &f_trb_device_destroy}
+		(t_device_call[]){NULL, &f_trb_device_description, &f_trb_device_status, &f_trb_device_stream, &f_trb_device_write, NULL, &f_trb_device_mask,
+				&f_trb_device_focus},
+		(t_device_call_generic[]){&f_trb_device_enabled, &f_trb_device_initialize, &f_trb_device_destroy},
+		&f_trb_device_refresh
 	},
 	{0x06, "TRB board #7",
-		(t_device_call[]){NULL, &f_trb_device_description, &f_trb_device_status, &f_trb_device_stream, &f_trb_device_write, NULL, &f_trb_device_mask},
-		(t_device_call_generic[]){&f_trb_device_enabled, &f_trb_device_refresh, &f_trb_device_initialize, &f_trb_device_destroy}
+		(t_device_call[]){NULL, &f_trb_device_description, &f_trb_device_status, &f_trb_device_stream, &f_trb_device_write, NULL, &f_trb_device_mask,
+				&f_trb_device_focus},
+		(t_device_call_generic[]){&f_trb_device_enabled, &f_trb_device_initialize, &f_trb_device_destroy},
+		&f_trb_device_refresh
 	},
 	{0x07, "TRB board #8",
-		(t_device_call[]){NULL, &f_trb_device_description, &f_trb_device_status, &f_trb_device_stream, &f_trb_device_write, NULL, &f_trb_device_mask},
-		(t_device_call_generic[]){&f_trb_device_enabled, &f_trb_device_refresh, &f_trb_device_initialize, &f_trb_device_destroy}
+		(t_device_call[]){NULL, &f_trb_device_description, &f_trb_device_status, &f_trb_device_stream, &f_trb_device_write, NULL, &f_trb_device_mask,
+				&f_trb_device_focus},
+		(t_device_call_generic[]){&f_trb_device_enabled, &f_trb_device_initialize, &f_trb_device_destroy},
+		&f_trb_device_refresh
 	},
 	{0xaa, "Trigger board",
-		(t_device_call[]){&f_trigger_device_trigger, NULL, NULL, NULL, NULL, NULL, NULL},
-		(t_device_call_generic[]){NULL, NULL, &f_trigger_device_initialize, &f_trigger_device_destroy}
+		(t_device_call[]){&f_trigger_device_trigger, NULL, NULL, NULL, NULL, NULL, NULL, NULL},
+		(t_device_call_generic[]){NULL, &f_trigger_device_initialize, &f_trigger_device_destroy},
+		NULL
 	},
 	{0xbb, "LVDS board",
-		(t_device_call[]){NULL, NULL, NULL, NULL, NULL, NULL, NULL},
-		(t_device_call_generic[]){NULL, &f_lvds_device_refresh, &f_lvds_device_initialize, &f_lvds_device_destroy}
+		(t_device_call[]){NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL},
+		(t_device_call_generic[]){NULL, &f_lvds_device_initialize, &f_lvds_device_destroy},
+		&f_lvds_device_refresh
 	},{0xff}
 };
 struct s_console *console;
@@ -111,7 +129,7 @@ int main (int argc, char *argv[]) {
 				f_console_execute(console, &input, STDOUT_FILENO);
 			}
 			usleep(d_magrathea_loop_sleep);
-			f_device_system_recall(e_device_system_calls_refresh);
+			f_device_system_refresh(console);
 		}
 		f_device_system_recall(e_device_system_calls_destroy);
 		f_console_destroy(&console);
