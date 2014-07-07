@@ -74,7 +74,12 @@ struct s_device v_initialized_devices[] = {
 		(t_device_call[]){NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL},
 		(t_device_call_generic[]){NULL, &f_lvds_device_initialize, &f_lvds_device_destroy},
 		&f_lvds_device_refresh
-	},{0xff}
+	},
+	{0xcc, "Telnet server",
+		(t_device_call[]){NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL},
+		(t_device_call_generic[]){NULL, &f_telnet_device_initialize, &f_telnet_device_destroy},
+		&f_telnet_device_refresh
+	}, {0xff}
 };
 struct s_console *console;
 struct s_console_input input = { .ready = d_true };
@@ -107,13 +112,13 @@ int f_magrathea_init(int descriptor) {
 		v_devices = v_initialized_devices;
 		if (descriptor != d_console_descriptor_null) {
 			for (index = 0; v_devices[index].code != 0xff; index++) {
-				snprintf(buffer, d_string_buffer_size, "\t[required unity] name: %s%s%s code: 0x%02x\n", v_console_styles[e_console_style_bold],
+				snprintf(buffer, d_string_buffer_size, "\t[required unity] name: %s%s%s\tcode: 0x%02x\n", v_console_styles[e_console_style_bold],
 					v_devices[index].description, v_console_styles[e_console_style_reset], v_devices[index].code);
 				write(descriptor, buffer, f_string_strlen(buffer));
 			}
 			fsync(descriptor);
 		}
-		f_device_system_recall(e_device_system_calls_initialize);
+		f_device_system_recall(e_device_system_calls_initialize, STDOUT_FILENO);
 	}
 	return status;
 }
@@ -131,7 +136,7 @@ int main (int argc, char *argv[]) {
 			usleep(d_magrathea_loop_sleep);
 			f_device_system_refresh(console);
 		}
-		f_device_system_recall(e_device_system_calls_destroy);
+		f_device_system_recall(e_device_system_calls_destroy, STDOUT_FILENO);
 		f_console_destroy(&console);
 	}
 	f_memory_destroy();
