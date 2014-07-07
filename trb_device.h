@@ -57,6 +57,14 @@ typedef enum e_trb_device_voltages {
 	e_trb_device_voltages_HV2,
 	e_trb_device_voltages_null
 } e_trb_device_voltages;
+typedef enum e_trb_device_status {
+	e_trb_device_status_trigger_low = 0,
+	e_trb_device_status_trigger_high,
+	e_trb_device_status_HD,
+	e_trb_device_status_version_M,
+	e_trb_device_status_version_L,
+	e_trb_device_status_null
+} e_trb_device_status;
 typedef enum e_trb_device_bytes {
 	e_trb_device_bytes_board_code = 0,
 	e_trb_device_bytes_command,
@@ -82,12 +90,20 @@ typedef enum e_trb_device_bytes {
 	e_trb_device_bytes_0x07_current_S34,
 	e_trb_device_bytes_0x07_current_S33,
 	e_trb_device_bytes_0x07_voltage_HV1,
-	e_trb_device_bytes_0x07_voltage_HV2
+	e_trb_device_bytes_0x07_voltage_HV2,
+	e_trb_device_bytes_0x07_status_trigger_low,
+	e_trb_device_bytes_0x07_status_trigger_high,
+	e_trb_device_bytes_0x07_status_HD,
+	e_trb_device_bytes_0x07_status_version_M,
+	e_trb_device_bytes_0x07_status_version_L
 } e_trb_bytes;
 typedef struct s_trb_device {
-	int descriptor, selected:1;
+	/* do not touch */
+	int descriptor, selected:1, focused:1;
 	unsigned char code;
 	const char *location;
+	/* ok, now you can add your values */
+	unsigned int trigger;
 	struct termios old_configuration;
 	struct s_trb_stream {
 		char destination[d_string_buffer_size];
@@ -96,23 +112,27 @@ typedef struct s_trb_device {
 	} stream;
 	struct s_trb_status {
 		float currents[e_trb_device_currents_null], temperatures[e_trb_device_temperatures_null], voltages[e_trb_device_voltages_null];
+		unsigned char status[e_trb_device_status_null];
 	} status;
 } s_trb_device;
 extern unsigned char v_trb_device_raw_head[], v_trb_device_raw_tail[];
 extern unsigned int v_trb_device_bytes[];
 extern const char *v_trb_device_bytes_extensions[];
 extern struct s_trb_device v_trb_device_boards[d_trb_device_boards];
+extern void p_trb_device_description_format(unsigned char code, char *destination, size_t size);
 extern int f_trb_device_description(unsigned char code, char **tokens, size_t elements, int output);
 extern int f_trb_device_status(unsigned char code, char **tokens, size_t elements, int output);
 extern int f_trb_device_stream(unsigned char code, char **tokens, size_t elements, int output);
 extern void p_trb_device_write_packet(unsigned char *supplied, unsigned char code, unsigned char type, unsigned char high_byte, unsigned char low_byte);
 extern int f_trb_device_write(unsigned char code, char **tokens, size_t elements, int output);
 extern int f_trb_device_mask(unsigned char code, char **tokens, size_t elements, int output);
+extern int f_trb_device_focus(unsigned char code, char **tokens, size_t elements, int output);
 extern int f_trb_device_enabled(unsigned char code);
 extern int f_trb_device_initialize(unsigned char code);
 extern void p_trb_device_destroy_descriptor(unsigned char code);
 extern void p_trb_device_destroy_stream(unsigned char code);
 extern int f_trb_device_destroy(unsigned char code);
 extern void p_trb_device_refresh_analyze(unsigned char code, unsigned char *buffer, size_t size);
-extern int f_trb_device_refresh(unsigned char code);
+extern int p_trb_device_refresh_status(unsigned char code);
+extern int f_trb_device_refresh(unsigned char code, struct s_console *console);
 #endif

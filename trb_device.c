@@ -42,19 +42,24 @@ unsigned int v_trb_device_bytes[] = {
 	9,	/* 0x07 - current @ 3.4V	*/
 	10,	/* 0x07 - current @ -3.3V	*/
 	11,	/* 0x07 - BIAS voltage #1	*/
-	12	/* 0x07 - BIAS voltage #2	*/
+	12,	/* 0x07 - BIAS voltage #2	*/
+	14,	/* 0x07 - trigger low byte	*/
+	15,	/* 0x07 - trigger high byte	*/
+	22,	/* 0x07 - hold delay value	*/
+	29,	/* 0x07 - version code A	*/
+	31	/* 0x07 - version code B	*/
 };
 struct s_trb_device v_trb_device_boards[d_trb_device_boards] = {
-	{d_rs232_null, d_false, 0x00, "/dev/ttyL0"},
-	{d_rs232_null, d_false, 0x01, "/dev/ttyL3"},
-	{d_rs232_null, d_false, 0x08, "/dev/ttyL1"},
-	{d_rs232_null, d_false, 0x09, "/dev/ttyL2"},
-	{d_rs232_null, d_false, 0x04, "/dev/ttyL4"},
-	{d_rs232_null, d_false, 0x05, "/dev/ttyL7"},
-	{d_rs232_null, d_false, 0x0C, "/dev/ttyL5"},
-	{d_rs232_null, d_false, 0x0D, "/dev/ttyL6"}
+	{d_rs232_null, d_false, d_false, 0x00, "/dev/ttyL0"},
+	{d_rs232_null, d_false, d_false, 0x01, "/dev/ttyL3"},
+	{d_rs232_null, d_false, d_false, 0x08, "/dev/ttyL1"},
+	{d_rs232_null, d_false, d_false, 0x09, "/dev/ttyL2"},
+	{d_rs232_null, d_false, d_false, 0x04, "/dev/ttyL4"},
+	{d_rs232_null, d_false, d_false, 0x05, "/dev/ttyL7"},
+	{d_rs232_null, d_false, d_false, 0x0C, "/dev/ttyL5"},
+	{d_rs232_null, d_false, d_false, 0x0D, "/dev/ttyL6"}
 };
-int f_trb_device_description(unsigned char code, char **tokens, size_t elements, int output) {
+void p_trb_device_description_format(unsigned char code, char *destination, size_t size) {
 	static const char *bytes_postfixes[] = {
 		"B",
 		"kB",
@@ -64,40 +69,44 @@ int f_trb_device_description(unsigned char code, char **tokens, size_t elements,
 		"YB",
 		NULL
 	};
-	char buffer[d_console_output_size] = {0}, status[d_string_buffer_size], stream[d_string_buffer_size];
+	char status[d_string_buffer_size], stream[d_string_buffer_size];
 	float value;
-	int result = d_true, postfix;
-	if (output != d_console_descriptor_null) {
-		snprintf(buffer, d_console_output_size, "#%d [%s]%s TRB 0x%02x ", code, v_trb_device_boards[code].location,
-				(v_trb_device_boards[code].selected)?"[*]":"", v_trb_device_boards[code].code);
-		if (f_trb_device_initialize(code)) {
-			snprintf(status, d_string_buffer_size, "[%sready%s]", v_console_styles[e_console_style_green],
-					v_console_styles[e_console_style_reset]);
-			if (v_trb_device_boards[code].stream.stream) {
-				value = v_trb_device_boards[code].stream.written_bytes;
-				for (postfix = 0; (bytes_postfixes[postfix+1]) && (value >= 1024.0); ++postfix)
-					value /= 1024.0;
-				snprintf(stream, d_string_buffer_size, "{output: %sopen%s}[%.02f %s| %s]\n", v_console_styles[e_console_style_green],
-						v_console_styles[e_console_style_reset], value, bytes_postfixes[postfix],
-						v_trb_device_boards[code].stream.destination);
-			} else
-				snprintf(stream, d_string_buffer_size, "{output: %sclose%s}\n", v_console_styles[e_console_style_red],
-						v_console_styles[e_console_style_reset]);
-			strncat(status, stream, (d_string_buffer_size-f_string_strlen(status)));
+	int postfix;
+	snprintf(destination, size, "#%d [%s]%s TRB 0x%02x ", code, v_trb_device_boards[code].location, (v_trb_device_boards[code].selected)?"[*]":"",
+	v_trb_device_boards[code].code);
+	if (f_trb_device_initialize(code)) {
+		snprintf(status, d_string_buffer_size, "[%sready%s]", v_console_styles[e_console_style_green], v_console_styles[e_console_style_reset]);
+		if (v_trb_device_boards[code].stream.stream) {
+			value = v_trb_device_boards[code].stream.written_bytes;
+			for (postfix = 0; (bytes_postfixes[postfix+1]) && (value >= 1024.0); ++postfix)
+				value /= 1024.0;
+			snprintf(stream, d_string_buffer_size, "{%sW%s}[%4.02f %s| %s]", v_console_styles[e_console_style_green],
+					v_console_styles[e_console_style_reset], value, bytes_postfixes[postfix], v_trb_device_boards[code].stream.destination);
 		} else
-			snprintf(status, d_string_buffer_size, "[%soffline%s]\n", v_console_styles[e_console_style_red],
+			snprintf(stream, d_string_buffer_size, "{%sR%s}", v_console_styles[e_console_style_red],
 					v_console_styles[e_console_style_reset]);
-		strncat(buffer, status, (d_console_output_size-f_string_strlen(buffer)));
-	}
-	if (output != d_console_descriptor_null)
+		strncat(status, stream, (d_string_buffer_size-f_string_strlen(status)));
+	} else
+		snprintf(status, d_string_buffer_size, "[%soffline%s]", v_console_styles[e_console_style_red], v_console_styles[e_console_style_reset]);
+	strncat(destination, status, (size-f_string_strlen(destination)));
+}
+
+int f_trb_device_description(unsigned char code, char **tokens, size_t elements, int output) {
+	char buffer[d_console_output_size];
+	int result = d_true;
+	if (output != d_console_descriptor_null) {
+		p_trb_device_description_format(code, buffer, d_console_output_size);
 		write(output, buffer, f_string_strlen(buffer));
+		write(output, "\n", f_string_strlen("\n"));
+		fsync(output);
+	}
 	return result;
 }
 
 int f_trb_device_status(unsigned char code, char **tokens, size_t elements, int output) {
 	static unsigned char status_requests[] = {0x05, 0x06, 0x07};
 	unsigned char raw_command[d_trb_device_raw_command_size];
-	char buffer[d_console_output_size] = {0}, currents[d_string_buffer_size], temperatures[d_string_buffer_size], voltages[d_string_buffer_size];
+	char currents[d_string_buffer_size], temperatures[d_string_buffer_size], voltages[d_string_buffer_size], status[d_string_buffer_size];
 	int index, argument, selected = d_true, result = d_true;
 	if ((argument = f_console_parameter("-d", tokens, elements, d_false)) != d_console_descriptor_null)
 		if (code != atoi(tokens[argument]))
@@ -109,31 +118,38 @@ int f_trb_device_status(unsigned char code, char **tokens, size_t elements, int 
 				p_trb_device_write_packet(raw_command, v_trb_device_boards[code].code, status_requests[index], 0x00, 0x00);
 				if (f_rs232_write(v_trb_device_boards[code].descriptor, raw_command,
 							d_trb_device_raw_command_size) == d_trb_device_raw_command_size)
-					f_trb_device_refresh(code);
-				else {
-					f_trb_device_destroy(code);
+					p_trb_device_refresh_status(code);
+				else
 					break;
-				}
 			}
 		if ((result = f_trb_device_description(code, tokens, elements, output))) {
 			if (output != d_console_descriptor_null) {
-				snprintf(currents, d_string_buffer_size, "Currents: [+3.4V %4.02fmA | -3.3V %4.02fmA | +5.7V %4.02fmA | +12V %4.02fmA]\n",
+				snprintf(currents, d_string_buffer_size, "%scurrents%s\n\t[+3.4V % 4.02fmA]\n\t[-3.3V % 4.02fmA]\n"
+				"\t[+5.7V % 4.02fmA]\n\t[+12V  % 4.02fmA]\n",
+						v_console_styles[e_console_style_yellow], v_console_styles[e_console_style_reset],
 						v_trb_device_boards[code].status.currents[e_trb_device_currents_34],
 						v_trb_device_boards[code].status.currents[e_trb_device_currents_33],
 						v_trb_device_boards[code].status.currents[e_trb_device_currents_57],
 						v_trb_device_boards[code].status.currents[e_trb_device_currents_12]);
-				snprintf(temperatures, d_string_buffer_size, "Temperatures: [A %4.02fC - %4.02fC | %4.02fC - %4.02fC B]\n",
+				write(output, currents, f_string_strlen(currents));
+				snprintf(temperatures, d_string_buffer_size, "%stemperatures%s\n\t[A %4.02fC %4.02fC]\n\t[B %4.02fC %4.02fC]\n",
+						v_console_styles[e_console_style_yellow], v_console_styles[e_console_style_reset],
 						v_trb_device_boards[code].status.temperatures[e_trb_device_temperatures_BUSA_1],
 						v_trb_device_boards[code].status.temperatures[e_trb_device_temperatures_BUSB_1],
 						v_trb_device_boards[code].status.temperatures[e_trb_device_temperatures_BUSA_2],
 						v_trb_device_boards[code].status.temperatures[e_trb_device_temperatures_BUSB_2]);
-				snprintf(voltages, d_string_buffer_size, "Voltages: [HV#1 %4.02fV | HV#2 %4.02fV]\n",
-						v_trb_device_boards[code].status.voltages[e_trb_device_voltages_HV1],
-						v_trb_device_boards[code].status.voltages[e_trb_device_voltages_HV2]);
-				strncat(buffer, currents, (d_console_output_size-f_string_strlen(buffer)));
-				strncat(buffer, temperatures, (d_console_output_size-f_string_strlen(buffer)));
-				strncat(buffer, voltages, (d_console_output_size-f_string_strlen(buffer)));
-				write(output, buffer, f_string_strlen(buffer));
+				write(output, temperatures, f_string_strlen(temperatures));
+				snprintf(voltages, d_string_buffer_size, "%svoltages%s\n\t[HV#1 %s%4.02f%sV]\n\t[HV#2 %s%4.02f%sV]\n",
+						v_console_styles[e_console_style_yellow], v_console_styles[e_console_style_reset],
+						v_console_styles[e_console_style_bold], v_trb_device_boards[code].status.voltages[e_trb_device_voltages_HV1],
+						v_console_styles[e_console_style_reset], v_console_styles[e_console_style_bold],
+						v_trb_device_boards[code].status.voltages[e_trb_device_voltages_HV2], v_console_styles[e_console_style_reset]);
+				write(output, voltages, f_string_strlen(voltages));
+				snprintf(status, d_string_buffer_size, "%sstatus%s\n\t[Trigger: % 5d]\n\t[Hold Delay: %4.01fuS]\n",
+						v_console_styles[e_console_style_yellow], v_console_styles[e_console_style_reset],
+						v_trb_device_boards[code].trigger,
+						((float)((unsigned int)v_trb_device_boards[code].status.status[e_trb_device_status_HD]*50)/1000.0));
+				write(output, status, f_string_strlen(status));
 				fsync(output);
 			}
 		} else
@@ -220,6 +236,22 @@ int f_trb_device_mask(unsigned char code, char **tokens, size_t elements, int ou
 		write(output, buffer, f_string_strlen(buffer));
 		fsync(output);
 	}
+	return result;
+}
+
+int f_trb_device_focus(unsigned char code, char **tokens, size_t elements, int output) {
+	char buffer[d_string_buffer_size];
+	int argument, selected = d_true, result = d_true;
+	if ((argument = f_console_parameter("-d", tokens, elements, d_false)) != d_console_descriptor_null)
+		if (code != atoi(tokens[argument]))
+			selected = d_false;
+	v_trb_device_boards[code].focused = selected;
+	if (output != d_console_descriptor_null)
+		if (v_trb_device_boards[code].focused) {
+			snprintf(buffer, d_string_buffer_size, "magrathea's focus is now on TRB #%d\n", code);
+			write(output, buffer, f_string_strlen(buffer));
+			fsync(output);
+		}
 	return result;
 }
 
@@ -344,13 +376,25 @@ void p_trb_device_refresh_analyze(unsigned char code, unsigned char *buffer, siz
 						value = (int)(buffer[B(e_trb_device_bytes_0x07_voltage_HV2)]);
 						voltage = (value*0.7246)-21.6207;
 						v_trb_device_boards[code].status.voltages[e_trb_device_voltages_HV2] = (value<50)?0.0f:voltage;
+						v_trb_device_boards[code].status.status[e_trb_device_status_trigger_low] =
+							buffer[B(e_trb_device_bytes_0x07_status_trigger_low)];
+						v_trb_device_boards[code].status.status[e_trb_device_status_trigger_high] =
+							buffer[B(e_trb_device_bytes_0x07_status_trigger_high)];
+						v_trb_device_boards[code].trigger =
+							(((unsigned int)buffer[B(e_trb_device_status_trigger_low)])&0xFF)||
+							((((unsigned int)buffer[B(e_trb_device_status_trigger_high)])<<8)&0xFF);
+						v_trb_device_boards[code].status.status[e_trb_device_status_HD] = buffer[B(e_trb_device_bytes_0x07_status_HD)];
+						v_trb_device_boards[code].status.status[e_trb_device_status_version_M] =
+							buffer[B(e_trb_device_bytes_0x07_status_version_M)];
+						v_trb_device_boards[code].status.status[e_trb_device_status_version_L] =
+							buffer[B(e_trb_device_bytes_0x07_status_version_L)];
 					}
 					break;
 			}
 		}
 }
 
-int f_trb_device_refresh(unsigned char code) {
+int p_trb_device_refresh_status(unsigned char code) {
 	unsigned char raw_answer[d_trb_device_raw_answer_size];
 	int readed = d_true, result = d_true;
 	while ((readed > 0) && (v_trb_device_boards[code].descriptor != d_rs232_null))
@@ -361,6 +405,17 @@ int f_trb_device_refresh(unsigned char code) {
 			f_trb_device_destroy(code);
 			result = d_false;
 			return result;
+		}
+	return result;
+}
+
+int f_trb_device_refresh(unsigned char code, struct s_console *console) {
+	int result = p_trb_device_refresh_status(code);
+	char buffer[d_string_buffer_size];
+	if (console)
+		if (v_trb_device_boards[code].focused) {
+			p_trb_device_description_format(code, buffer, d_string_buffer_size);
+			snprintf(console->prefix, d_string_buffer_size, "\r[%s]>", buffer);
 		}
 	return result;
 }
