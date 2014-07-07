@@ -26,6 +26,10 @@ const char *v_device_call_description[] = {
 	"read",
 	"mask",
 	"null"
+}, *v_device_system_call_description[] = {
+	"enabled",
+	"initialize",
+	"destroy"
 };
 int f_device_recall(e_device_calls call, int skip_mask, char **tokens, size_t elements, int output) {
 	int index, result = 0;
@@ -38,9 +42,10 @@ int f_device_recall(e_device_calls call, int skip_mask, char **tokens, size_t el
 					if (v_devices[index].calls[call](v_devices[index].code, tokens, elements, output))
 						result++;
 					else if (output != d_console_descriptor_null) {
-						snprintf(buffer, d_string_buffer_size, "failed running command %s%s%s\n",
+						snprintf(buffer, d_string_buffer_size, "%sfailed%s running command %s%s%s on device %s\n",
+								v_console_styles[e_console_style_red], v_console_styles[e_console_style_reset],
 								v_console_styles[e_console_style_bold], v_device_call_description[call],
-								v_console_styles[e_console_style_reset]);
+								v_console_styles[e_console_style_reset], v_devices[index].description);
 						write(output, buffer, f_string_strlen(buffer));
 						fsync(output);
 					}
@@ -48,13 +53,23 @@ int f_device_recall(e_device_calls call, int skip_mask, char **tokens, size_t el
 	return result;
 }
 
-int f_device_system_recall(e_device_system_calls call) {
+int f_device_system_recall(e_device_system_calls call, int output) {
 	int index, result = d_true;
+	char buffer[d_string_buffer_size];
 	if (v_devices)
 		for (index = 0; v_devices[index].code != 0xff; index++)
 			if (v_devices[index].system_calls[call])
-				if (!v_devices[index].system_calls[call](v_devices[index].code))
+				if (!v_devices[index].system_calls[call](v_devices[index].code)) {
 					result = d_false;
+					if (output != d_console_descriptor_null) {
+						snprintf(buffer, d_string_buffer_size, "%sfailed%s running command %s%s%s on device %s\n",
+								v_console_styles[e_console_style_red], v_console_styles[e_console_style_reset],
+								v_console_styles[e_console_style_bold], v_device_system_call_description[call],
+								v_console_styles[e_console_style_reset], v_devices[index].description);
+						write(output, buffer, f_string_strlen(buffer));
+						fsync(output);
+					}
+				}
 	return result;
 }
 

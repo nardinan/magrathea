@@ -46,8 +46,8 @@ typedef struct s_device {
 	t_device_call_refresh refresh_call;
 } s_device;
 extern struct s_device *v_devices;
-extern const char *v_device_call_description[];
+extern const char *v_device_call_description[], *v_device_system_call_description[];
 extern int f_device_recall(enum e_device_calls call, int skip_mask, char **tokens, size_t elements, int output);
-extern int f_device_system_recall(enum e_device_system_calls call);
+extern int f_device_system_recall(enum e_device_system_calls call, int output);
 extern int f_device_system_refresh(struct s_console *console);
 #endif
