@@ -38,7 +38,7 @@ int f_device_recall(e_device_calls call, int skip_mask, char **tokens, size_t el
 		for (index = 0; v_devices[index].code != 0xff; index++)
 			if (v_devices[index].calls[call])
 				if ((!v_devices[index].system_calls[e_device_system_calls_is_enabled]) || (skip_mask) ||
-					(v_devices[index].system_calls[e_device_system_calls_is_enabled](v_devices[index].code))) {
+						(v_devices[index].system_calls[e_device_system_calls_is_enabled](v_devices[index].code))) {
 					if (v_devices[index].calls[call](v_devices[index].code, tokens, elements, output))
 						result++;
 					else if (output != d_console_descriptor_null) {
