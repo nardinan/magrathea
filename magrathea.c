@@ -129,7 +129,7 @@ int main (int argc, char *argv[]) {
 		while (d_true) {
 			f_console_read(console, &input, STDOUT_FILENO, 0, 10);
 			if (input.ready) {
-				if ((f_string_strcmp(input.input, "quit") == 0) || (f_string_strcmp(input.input, "exit") == 0))
+				if (f_string_strcmp(input.input, d_magrathea_exit_command) == 0)
 					break;
 				f_console_execute(console, &input, STDOUT_FILENO);
 			}
