@@ -113,6 +113,7 @@ void p_console_write_history(struct s_console *console, struct s_console_input *
 
 		}
 	if ((console->history_pointer <= console->history_last) && (change)) {
+		memset(input->input, 0, d_string_buffer_size);
 		strcpy(input->input, console->history[console->history_pointer]);
 		input->data_pointer = f_string_strlen(console->history[console->history_pointer]);
 	}
