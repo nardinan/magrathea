@@ -23,6 +23,7 @@
 #include <arpa/inet.h>
 #include "adlink.h"
 #include "console.h"
+#include "magrathea.h"
 #define d_telnet_device_stream_null -1
 #define d_telnet_device_port 8090
 #define d_telnet_device_queue 5
@@ -31,13 +32,23 @@
 typedef struct s_telnet_device_socket {
 	int socket, initialized:1;
 } s_telnet_device_socket;
+typedef struct s_telnet_device_client {
+	struct s_telnet_device_socket socket;
+	char buffer[d_string_buffer_size];
+	unsigned int data_pointer;
+} s_telnet_device_client;
 typedef struct s_telnet_device {
-	struct s_telnet_device_socket socket, clients[d_telnet_device_clients];
+	struct s_telnet_device_socket socket;
+	struct s_telnet_device_client clients[d_telnet_device_clients];
 	struct sockaddr_in address;
 	/* clients */
 } s_telnet_device;
 struct s_telnet_device v_telnet_device;
 extern int f_telnet_device_initialize(unsigned char code);
+extern void p_telnet_device_destroy_client(int client);
 extern int f_telnet_device_destroy(unsigned char code);
+extern void p_telnet_device_refresh_incoming(void);
+extern void p_telnet_device_refresh_command(int client);
+extern void p_telnet_device_refresh_readout(int client, struct s_console *console);
 extern int f_telnet_device_refresh(unsigned char code, struct s_console *console);
 #endif
