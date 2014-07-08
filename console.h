@@ -82,5 +82,6 @@ extern void p_console_write_history(struct s_console *console, struct s_console_
 extern void p_console_write_suggestion(struct s_console *console, struct s_console_input *input, int output);
 extern int f_console_read(struct s_console *console, struct s_console_input *input, int output, time_t sec, time_t usec);
 extern int p_console_execute_verify(struct s_console_command *command, char **tokens, size_t elements, int output);
+extern int p_console_execute(struct s_console *console, char *input, int output);
 extern int f_console_execute(struct s_console *console, struct s_console_input *input, int output);
 #endif
