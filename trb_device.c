@@ -73,7 +73,7 @@ void p_trb_device_description_format(unsigned char code, char *destination, size
 	float value;
 	int postfix;
 	snprintf(destination, size, "#%d [%s]%s TRB 0x%02x ", code, v_trb_device_boards[code].location, (v_trb_device_boards[code].selected)?"[*]":"",
-	v_trb_device_boards[code].code);
+			v_trb_device_boards[code].code);
 	if (f_trb_device_initialize(code)) {
 		snprintf(status, d_string_buffer_size, "[%sready%s]", v_console_styles[e_console_style_green], v_console_styles[e_console_style_reset]);
 		if (v_trb_device_boards[code].stream.stream) {
@@ -125,7 +125,7 @@ int f_trb_device_status(unsigned char code, char **tokens, size_t elements, int 
 		if ((result = f_trb_device_description(code, tokens, elements, output))) {
 			if (output != d_console_descriptor_null) {
 				snprintf(currents, d_string_buffer_size, "%scurrents%s\n\t[+3.4V % 4.02fmA]\n\t[-3.3V % 4.02fmA]\n"
-				"\t[+5.7V % 4.02fmA]\n\t[+12V  % 4.02fmA]\n",
+						"\t[+5.7V % 4.02fmA]\n\t[+12V  % 4.02fmA]\n",
 						v_console_styles[e_console_style_yellow], v_console_styles[e_console_style_reset],
 						v_trb_device_boards[code].status.currents[e_trb_device_currents_34],
 						v_trb_device_boards[code].status.currents[e_trb_device_currents_33],
