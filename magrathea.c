@@ -16,6 +16,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "magrathea.h"
+const char *quit_greetings[] = {
+	"ciao ciao!\n", 	/* italian */
+	"bye bye!\n",		/* english */
+	"au revoir!\n",		/* french  */
+	"zaijian!\n"		/* chinese */
+};
 struct s_device v_initialized_devices[] = {
 	{0x00, "TRB board #1",
 		(t_device_call[]){NULL, &f_trb_device_description, &f_trb_device_status, &f_trb_device_stream, &f_trb_device_write, NULL, &f_trb_device_mask,
@@ -124,6 +130,17 @@ int f_magrathea_init(int descriptor) {
 	return status;
 }
 
+void f_magrathea_greetings(int descriptor) {
+	int index, value;
+	if (descriptor != d_console_descriptor_null) {
+		for (index = 0; quit_greetings[index]; index++);
+		srand(time(NULL));
+		value = (rand()%index);
+		write(descriptor, quit_greetings[value], f_string_strlen(quit_greetings[value]));
+		fsync(descriptor);
+	}
+}
+
 int main (int argc, char *argv[]) {
 	f_memory_init();
 	if (f_magrathea_init(STDOUT_FILENO)) {
@@ -138,6 +155,7 @@ int main (int argc, char *argv[]) {
 			f_device_system_refresh(console);
 		}
 		f_device_system_recall(e_device_system_calls_destroy, STDOUT_FILENO);
+		f_magrathea_greetings(STDOUT_FILENO);
 		f_console_destroy(&console);
 	}
 	f_memory_destroy();

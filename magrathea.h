@@ -27,6 +27,7 @@
 #define d_magrathea_loop_sleep 50000
 #define d_magrathea_version "0.1"
 #define d_magrathea_exit_command "quit"
+extern const char *quit_greetings[];
 extern int p_magrathea_init_verbose(int descriptor, const char *subsystem);
 extern int f_magrathea_init(int descriptor);
 #endif
