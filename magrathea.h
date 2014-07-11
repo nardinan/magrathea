@@ -23,6 +23,7 @@
 #include "trigger_device.h"
 #include "lvds_device.h"
 #include "telnet_device.h"
+#include "package.h"
 #define d_magrathea_module(st,ds,mod) if(((st)==d_true)&&(p_magrathea_init_verbose((ds),(mod))))
 #define d_magrathea_loop_sleep 50000
 #define d_magrathea_version "0.1"
