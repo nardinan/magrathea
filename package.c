@@ -23,7 +23,7 @@ unsigned char *p_package_analyze_raw(struct s_package *package, unsigned char *b
 		for (ladder = 0; ladder < d_package_ladders; ++ladder) {
 			package->data.values.raw.ladder[ladder] = ((unsigned short int)pointer[1])|((unsigned short int)pointer[0])<<8;
 			pointer += 2;
-			for (index = 0; index < d_package_channels; index++, pointer += 2)
+			for (index = 0; index < d_package_channels; ++index, pointer += 2)
 				package->data.values.raw.values[ladder][index] = ((unsigned short int)pointer[1])|((unsigned short int)pointer[0])<<8;
 		}
 		result = pointer;
@@ -113,28 +113,3 @@ unsigned char *f_package_analyze(struct s_package *package, unsigned char *buffe
 	return pointer;
 }
 
-/*int f_package_analyze_test(const char *file) {
-	FILE *stream = fopen(file, "rb");
-	unsigned char buffer_analyzer[d_package_buffer_size], *backup;
-	size_t bytes = 0, readed;
-	struct s_package package;
-	int index;
-	if (stream) {
-		while ((readed = fread(buffer_analyzer+bytes, 1, d_package_buffer_size-bytes, stream)) || (bytes > 0)) {
-			bytes += readed;
-			if ((backup = f_package_analyze(&package, buffer_analyzer, bytes))) {
-				bytes -= (backup-buffer_analyzer);
-				memmove(buffer_analyzer, backup, bytes);
-				if (package.complete) {
-					for (index = 0; index < 2; index++) {
-						printf("================================== 0x%02x[%d] ==============================\n", package.data.trb,
-						package.data.values.raw.ladder[index]);
-					}
-				}
-			}
-		}
-		fclose(stream);
-	}
-	return d_false;
-}
-*/
