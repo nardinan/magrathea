@@ -25,9 +25,14 @@
 #define d_trb_device_command_size 4
 #define d_trb_device_sentinel_size 2
 #define d_trb_device_hexadecimal_size 2
+#define d_trb_device_temperatures_size 48
 #define d_trb_device_timeout 5000 /* microseconds */
-#define d_trb_device_timeout_refresh 10
+#define d_trb_device_timeout_refresh 10 /* milliseconds */
+#define d_trb_device_timeout_status 10 /* seconds */
+#define d_trb_device_log "./magrathea.log"
+#define d_trb_device_csv_character '\t'
 #define B(a) v_trb_device_bytes[(a)]
+#define V(a) v_trb_device_boards[(a)].status
 typedef enum e_trb_device_currents {
 	e_trb_device_currents_34 = 0,
 	e_trb_device_currents_33,
@@ -78,6 +83,7 @@ typedef enum e_trb_device_bytes {
 	e_trb_device_bytes_0x06_temperature_B1,
 	e_trb_device_bytes_0x06_temperature_A2,
 	e_trb_device_bytes_0x06_temperature_B2,
+	e_trb_device_bytes_0x06_temperature_TFH,
 	e_trb_device_bytes_0x07,
 	e_trb_device_bytes_0x07_current_VSSA1,
 	e_trb_device_bytes_0x07_current_VSSA2,
@@ -105,13 +111,15 @@ typedef struct s_trb_device {
 	/* ok, now you can add your values */
 	unsigned int trigger;
 	struct termios old_configuration;
+	time_t last_refresh;
 	struct s_trb_stream {
 		char destination[d_string_buffer_size];
 		FILE *stream;
 		size_t written_bytes;
 	} stream;
 	struct s_trb_status {
-		float currents[e_trb_device_currents_null], temperatures[e_trb_device_temperatures_null], voltages[e_trb_device_voltages_null];
+		float currents[e_trb_device_currents_null], temperatures[e_trb_device_temperatures_null], tfh_temperatures[d_trb_device_temperatures_size],
+		      voltages[e_trb_device_voltages_null];
 		unsigned char status[e_trb_device_status_null];
 	} status;
 } s_trb_device;
@@ -121,6 +129,8 @@ extern const char *v_trb_device_bytes_extensions[];
 extern struct s_trb_device v_trb_device_boards[d_trb_device_boards];
 extern void p_trb_device_description_format(unsigned char code, char *destination, size_t size);
 extern int f_trb_device_description(unsigned char code, char **tokens, size_t elements, int output);
+extern void p_trb_device_status_dump(unsigned char code, const char *path);
+extern int p_trb_device_status_refresh(unsigned char code);
 extern int f_trb_device_status(unsigned char code, char **tokens, size_t elements, int output);
 extern int f_trb_device_stream(unsigned char code, char **tokens, size_t elements, int output);
 extern void p_trb_device_write_packet(unsigned char *supplied, unsigned char code, unsigned char type, unsigned char high_byte, unsigned char low_byte);

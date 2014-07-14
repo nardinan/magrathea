@@ -30,6 +30,7 @@ unsigned int v_trb_device_bytes[] = {
 	55,	/* 0x06 - temperature BUS B #1	*/
 	56,	/* 0x06 - temperature BUS A #2	*/
 	57,	/* 0x06 - temperature BUS B #3	*/
+	6,	/* 0x06 - first TFH temperature */
 	40,	/* 0x07				*/
 	32,	/* 0x07 - current on VSSA1	*/
 	33,	/* 0x07 - current on VSSA2	*/
@@ -103,25 +104,56 @@ int f_trb_device_description(unsigned char code, char **tokens, size_t elements,
 	return result;
 }
 
-int f_trb_device_status(unsigned char code, char **tokens, size_t elements, int output) {
+void p_trb_device_status_dump(unsigned char code, const char *path) {
+	FILE *stream;
+	int index;
+	if ((stream = fopen(path, "a"))) {
+		fprintf(stream, "%zu%c0x%02x", v_trb_device_boards[code].last_refresh, d_trb_device_csv_character, code);
+		for (index = 0; index < e_trb_device_currents_null; ++index)
+			fprintf(stream, "%c%.02f", d_trb_device_csv_character, V(code).currents[index]);
+		for (index = 0; index < e_trb_device_temperatures_null; ++index)
+			fprintf(stream, "%c%.02f", d_trb_device_csv_character, V(code).temperatures[index]);
+		for (index = 0; index < d_trb_device_temperatures_size; ++index)
+			fprintf(stream, "%c%.02f", d_trb_device_csv_character, V(code).tfh_temperatures[index]);
+		for (index = 0; index < e_trb_device_voltages_null; ++index)
+			fprintf(stream, "%c%.02f", d_trb_device_csv_character, V(code).voltages[index]);
+		for (index = 0; index < e_trb_device_status_null; ++index)
+			fprintf(stream, "%c0x%02x", d_trb_device_csv_character, V(code).status[index]);
+		fputc('\n', stream);
+		fclose(stream);
+	}
+}
+
+int p_trb_device_status_refresh(unsigned char code) {
 	static unsigned char status_requests[] = {0x05, 0x06, 0x07};
 	unsigned char raw_command[d_trb_device_raw_command_size];
+	int index, result = d_true;
+	if (v_trb_device_boards[code].descriptor != d_rs232_null) {
+		v_trb_device_boards[code].last_refresh = time(NULL);
+		/* refresh the status of our TRB (sorry but I have to hardcode this shi**ing incoherent stuff) */
+		for (index = 0; index < sizeof(status_requests); ++index) {
+			p_trb_device_write_packet(raw_command, v_trb_device_boards[code].code, status_requests[index], 0x00, 0x00);
+			if (f_rs232_write(v_trb_device_boards[code].descriptor, raw_command, d_trb_device_raw_command_size) == d_trb_device_raw_command_size)
+				p_trb_device_refresh_status(code);
+			else {
+				result = d_false;
+				break;
+			}
+		}
+		if (result)
+			p_trb_device_status_dump(code, d_trb_device_log);
+	}
+	return result;
+}
+
+int f_trb_device_status(unsigned char code, char **tokens, size_t elements, int output) {
 	char currents[d_string_buffer_size], temperatures[d_string_buffer_size], voltages[d_string_buffer_size], status[d_string_buffer_size];
-	int index, argument, selected = d_true, result = d_true;
+	int argument, selected = d_true, result = d_true;
 	if ((argument = f_console_parameter("-d", tokens, elements, d_false)) != d_console_descriptor_null)
 		if (code != atoi(tokens[argument]))
 			selected = d_false;
 	if (selected) {
-		if (v_trb_device_boards[code].descriptor != d_rs232_null)
-			/* refresh the status of our TRB (sorry but I have to hardcode this shi**ing incoherent stuff) */
-			for (index = 0; index < sizeof(status_requests); ++index) {
-				p_trb_device_write_packet(raw_command, v_trb_device_boards[code].code, status_requests[index], 0x00, 0x00);
-				if (f_rs232_write(v_trb_device_boards[code].descriptor, raw_command,
-							d_trb_device_raw_command_size) == d_trb_device_raw_command_size)
-					p_trb_device_refresh_status(code);
-				else
-					break;
-			}
+		p_trb_device_status_refresh(code);
 		if ((result = f_trb_device_description(code, tokens, elements, output))) {
 			if (output != d_console_descriptor_null) {
 				snprintf(currents, d_string_buffer_size, "%scurrents%s\n\t[+3.4V % 4.02fmA]\n\t[-3.3V % 4.02fmA]\n"
@@ -301,6 +333,7 @@ int f_trb_device_destroy(unsigned char code) {
 }
 
 void p_trb_device_refresh_analyze(unsigned char code, unsigned char *buffer, size_t size) {
+	int index;
 	float value, current, temperature, voltage;
 	if (size > B(e_trb_device_bytes_board_code))
 		if (v_trb_device_boards[code].code == buffer[B(e_trb_device_bytes_board_code)]) {
@@ -336,6 +369,9 @@ void p_trb_device_refresh_analyze(unsigned char code, unsigned char *buffer, siz
 						value = (buffer[B(e_trb_device_bytes_0x06_temperature_B2)])*0.008;
 						temperature = (-136.64*value*value*value)+(304.47*value*value)-(285.48*value)+139.21;
 						v_trb_device_boards[code].status.temperatures[e_trb_device_temperatures_BUSB_2] = temperature;
+						for (index = 0; index < d_trb_device_temperatures_size; ++index)
+							v_trb_device_boards[code].status.tfh_temperatures[index] =
+								buffer[index+B(e_trb_device_bytes_0x06_temperature_TFH)];
 					}
 					break;
 				case 0x07:
@@ -381,8 +417,8 @@ void p_trb_device_refresh_analyze(unsigned char code, unsigned char *buffer, siz
 						v_trb_device_boards[code].status.status[e_trb_device_status_trigger_high] =
 							buffer[B(e_trb_device_bytes_0x07_status_trigger_high)];
 						v_trb_device_boards[code].trigger =
-							(((unsigned int)buffer[B(e_trb_device_status_trigger_low)])&0xFF)||
-							((((unsigned int)buffer[B(e_trb_device_status_trigger_high)])<<8)&0xFF);
+							(((unsigned int)buffer[B(e_trb_device_status_trigger_high)])&0xFF)||
+							((((unsigned int)buffer[B(e_trb_device_status_trigger_low)])<<8)&0xFF);
 						v_trb_device_boards[code].status.status[e_trb_device_status_HD] = buffer[B(e_trb_device_bytes_0x07_status_HD)];
 						v_trb_device_boards[code].status.status[e_trb_device_status_version_M] =
 							buffer[B(e_trb_device_bytes_0x07_status_version_M)];
@@ -412,10 +448,16 @@ int p_trb_device_refresh_status(unsigned char code) {
 int f_trb_device_refresh(unsigned char code, struct s_console *console) {
 	int result = p_trb_device_refresh_status(code);
 	char buffer[d_string_buffer_size];
-	if (console)
-		if (v_trb_device_boards[code].focused) {
-			p_trb_device_description_format(code, buffer, d_string_buffer_size);
-			snprintf(console->prefix, d_string_buffer_size, "\r[%s]>", buffer);
-		}
+	time_t current_time;
+	if (v_trb_device_boards[code].descriptor != d_rs232_null) {
+		current_time = time(NULL);
+		if ((v_trb_device_boards[code].last_refresh+d_trb_device_timeout_status) < current_time)
+			p_trb_device_status_refresh(code);
+		if (console)
+			if (v_trb_device_boards[code].focused) {
+				p_trb_device_description_format(code, buffer, d_string_buffer_size);
+				snprintf(console->prefix, d_string_buffer_size, "\r[%s]>", buffer);
+			}
+	}
 	return result;
 }
