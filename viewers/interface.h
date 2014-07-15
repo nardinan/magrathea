@@ -59,15 +59,21 @@ typedef enum e_interface_spins {
 	e_interface_spin_ladder = 0,
 	e_interface_spin_NULL
 } e_interface_spins;
+typedef enum e_interface_buttons {
+	e_interface_button_dump = 0,
+	e_interface_button_NULL
+} e_interface_buttons;
 typedef struct s_interface {
 	GtkBuilder *interface;
 	GtkWindow *window;
 	GtkAlignment *charts[e_interface_chart_NULL];
 	GtkLabel *labels[e_interface_label_NULL];
 	GtkSpinButton *spins[e_interface_spin_NULL];
+	GtkButton *buttons[e_interface_button_NULL];
 	struct s_chart logic_charts[e_interface_chart_NULL];
 	int destroy;
 } s_interface;
-extern const char *v_interface_charts[], *v_interface_labels[], *v_interface_chart_labels[], *v_interface_chart_styles[];
+extern const char *v_interface_charts[], *v_interface_labels[], *v_interface_spins[], *v_interface_buttons[], *v_interface_chart_labels[],
+       *v_interface_chart_styles[];
 extern struct s_interface *f_interface_initialize(struct s_interface *supplied, const char *builder_path);
 #endif

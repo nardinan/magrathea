@@ -51,6 +51,8 @@ const char *v_interface_charts[] = {
 	"v_interface_label_events"
 }, *v_interface_spins[] = {
 	"v_interface_spin_ladder"
+}, *v_interface_buttons[] = {
+	"v_interface_button_dump"	
 }, *v_interface_chart_labels[] = {
 	"ADC_count",
 	"Pedestal",
@@ -114,6 +116,7 @@ const char *v_interface_charts[] = {
 	"styles/adc.keys",
 	"styles/adc.keys"
 };
+
 struct s_interface *f_interface_initialize(struct s_interface *supplied, const char *builder_path) {
 	struct s_interface *result = supplied;
 	int index;
@@ -124,17 +127,19 @@ struct s_interface *f_interface_initialize(struct s_interface *supplied, const c
 	if ((result->interface = gtk_builder_new())) {
 		if ((gtk_builder_add_from_file(result->interface, builder_path, NULL))) {
 			d_assert(result->window = GTK_WINDOW(gtk_builder_get_object(result->interface, "v_window")));
-			for (index = 0; index < e_interface_chart_NULL; index++) {
+			for (index = 0; index < e_interface_chart_NULL; ++index) {
 				d_assert(f_chart_new(&(result->logic_charts[index])));
 				f_chart_style(&(result->logic_charts[index]), "styles/base_graph.keys");
 				f_chart_style(&(result->logic_charts[index]), v_interface_chart_styles[index]);
 				d_assert(result->charts[index] = GTK_ALIGNMENT(gtk_builder_get_object(result->interface, v_interface_charts[index])));
 				gtk_container_add(GTK_CONTAINER(result->charts[index]), g_object_ref(result->logic_charts[index].plane));
 			}
-			for (index = 0; index < e_interface_label_NULL; index++)
+			for (index = 0; index < e_interface_label_NULL; ++index)
 				d_assert(result->labels[index] = GTK_LABEL(gtk_builder_get_object(result->interface, v_interface_labels[index])));
-			for (index = 0; index < e_interface_label_NULL; index++)
+			for (index = 0; index < e_interface_spin_NULL; ++index)
 				d_assert(result->spins[index] = GTK_SPIN_BUTTON(gtk_builder_get_object(result->interface, v_interface_spins[index])));
+			for (index = 0; index < e_interface_button_NULL; ++index)
+				d_assert(result->buttons[index] = GTK_BUTTON(gtk_builder_get_object(result->interface, v_interface_buttons[index])));
 		}
 	}
 	return result;
