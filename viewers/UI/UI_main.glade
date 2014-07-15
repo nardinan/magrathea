@@ -19,7 +19,7 @@
   <object class="GtkWindow" id="v_window">
     <property name="title" translatable="yes">Magrathea event viewer</property>
     <child>
-      <object class="GtkVBox" id="vbox1">
+      <object class="GtkVBox" id="v_main_grid">
         <property name="visible">True</property>
         <property name="orientation">vertical</property>
         <child>
@@ -162,7 +162,7 @@
                 <property name="n_columns">2</property>
                 <property name="homogeneous">True</property>
                 <child>
-                  <object class="GtkFrame" id="v_adc_pedetal_frame">
+                  <object class="GtkFrame" id="v_adc_pedestal_frame">
                     <property name="visible">True</property>
                     <property name="label_xalign">0.5</property>
                     <property name="shadow_type">none</property>
@@ -225,6 +225,749 @@
               </object>
               <packing>
                 <property name="position">2</property>
+                <property name="tab_fill">False</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkTable" id="v_master_view">
+                <property name="visible">True</property>
+                <property name="n_rows">6</property>
+                <property name="n_columns">4</property>
+                <property name="homogeneous">True</property>
+                <child>
+                  <object class="GtkFrame" id="v_adc_small_frame_0">
+                    <property name="visible">True</property>
+                    <property name="label_xalign">0.5</property>
+                    <property name="shadow_type">none</property>
+                    <child>
+                      <object class="GtkAlignment" id="v_interface_adc_0">
+                        <property name="visible">True</property>
+                        <child>
+                          <placeholder/>
+                        </child>
+                      </object>
+                    </child>
+                    <child type="label">
+                      <object class="GtkLabel" id="v_interface_adc_label_0">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">ladder 0</property>
+                        <property name="use_markup">True</property>
+                        <attributes>
+                          <attribute name="scale" value="0.500000"/>
+                        </attributes>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="top_attach">5</property>
+                    <property name="bottom_attach">6</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkFrame" id="v_adc_small_frame_1">
+                    <property name="visible">True</property>
+                    <property name="label_xalign">0.5</property>
+                    <property name="shadow_type">none</property>
+                    <child>
+                      <object class="GtkAlignment" id="v_interface_adc_1">
+                        <property name="visible">True</property>
+                        <child>
+                          <placeholder/>
+                        </child>
+                      </object>
+                    </child>
+                    <child type="label">
+                      <object class="GtkLabel" id="v_interface_adc_label_1">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">ladder 1</property>
+                        <property name="use_markup">True</property>
+                        <attributes>
+                          <attribute name="scale" value="0.500000"/>
+                        </attributes>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">1</property>
+                    <property name="right_attach">2</property>
+                    <property name="top_attach">5</property>
+                    <property name="bottom_attach">6</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkFrame" id="v_adc_small_frame_2">
+                    <property name="visible">True</property>
+                    <property name="label_xalign">0.5</property>
+                    <property name="shadow_type">none</property>
+                    <child>
+                      <object class="GtkAlignment" id="v_interface_adc_2">
+                        <property name="visible">True</property>
+                        <child>
+                          <placeholder/>
+                        </child>
+                      </object>
+                    </child>
+                    <child type="label">
+                      <object class="GtkLabel" id="v_interface_adc_label_2">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">ladder 2</property>
+                        <property name="use_markup">True</property>
+                        <attributes>
+                          <attribute name="scale" value="0.500000"/>
+                        </attributes>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">2</property>
+                    <property name="right_attach">3</property>
+                    <property name="top_attach">5</property>
+                    <property name="bottom_attach">6</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkFrame" id="v_adc_small_frame_3">
+                    <property name="visible">True</property>
+                    <property name="label_xalign">0.5</property>
+                    <property name="shadow_type">none</property>
+                    <child>
+                      <object class="GtkAlignment" id="v_interface_adc_3">
+                        <property name="visible">True</property>
+                        <child>
+                          <placeholder/>
+                        </child>
+                      </object>
+                    </child>
+                    <child type="label">
+                      <object class="GtkLabel" id="v_interface_adc_label_3">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">ladder 3</property>
+                        <property name="use_markup">True</property>
+                        <attributes>
+                          <attribute name="scale" value="0.500000"/>
+                        </attributes>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">3</property>
+                    <property name="right_attach">4</property>
+                    <property name="top_attach">5</property>
+                    <property name="bottom_attach">6</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkFrame" id="v_adc_small_frame_4">
+                    <property name="visible">True</property>
+                    <property name="label_xalign">0.5</property>
+                    <property name="shadow_type">none</property>
+                    <child>
+                      <object class="GtkAlignment" id="v_interface_adc_4">
+                        <property name="visible">True</property>
+                        <child>
+                          <placeholder/>
+                        </child>
+                      </object>
+                    </child>
+                    <child type="label">
+                      <object class="GtkLabel" id="v_interface_adc_label_4">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">ladder 4</property>
+                        <property name="use_markup">True</property>
+                        <attributes>
+                          <attribute name="scale" value="0.500000"/>
+                        </attributes>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="top_attach">4</property>
+                    <property name="bottom_attach">5</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkFrame" id="v_adc_small_frame_5">
+                    <property name="visible">True</property>
+                    <property name="label_xalign">0.5</property>
+                    <property name="shadow_type">none</property>
+                    <child>
+                      <object class="GtkAlignment" id="v_interface_adc_5">
+                        <property name="visible">True</property>
+                        <child>
+                          <placeholder/>
+                        </child>
+                      </object>
+                    </child>
+                    <child type="label">
+                      <object class="GtkLabel" id="v_interface_adc_label_5">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">ladder 5</property>
+                        <property name="use_markup">True</property>
+                        <attributes>
+                          <attribute name="scale" value="0.500000"/>
+                        </attributes>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">1</property>
+                    <property name="right_attach">2</property>
+                    <property name="top_attach">4</property>
+                    <property name="bottom_attach">5</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkFrame" id="v_adc_small_frame_6">
+                    <property name="visible">True</property>
+                    <property name="label_xalign">0.5</property>
+                    <property name="shadow_type">none</property>
+                    <child>
+                      <object class="GtkAlignment" id="v_interface_adc_6">
+                        <property name="visible">True</property>
+                        <child>
+                          <placeholder/>
+                        </child>
+                      </object>
+                    </child>
+                    <child type="label">
+                      <object class="GtkLabel" id="v_interface_adc_label_6">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">ladder 6</property>
+                        <property name="use_markup">True</property>
+                        <attributes>
+                          <attribute name="scale" value="0.500000"/>
+                        </attributes>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">2</property>
+                    <property name="right_attach">3</property>
+                    <property name="top_attach">4</property>
+                    <property name="bottom_attach">5</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkFrame" id="v_adc_small_frame_7">
+                    <property name="visible">True</property>
+                    <property name="label_xalign">0.5</property>
+                    <property name="shadow_type">none</property>
+                    <child>
+                      <object class="GtkAlignment" id="v_interface_adc_7">
+                        <property name="visible">True</property>
+                        <child>
+                          <placeholder/>
+                        </child>
+                      </object>
+                    </child>
+                    <child type="label">
+                      <object class="GtkLabel" id="v_interface_adc_label_7">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">ladder 7</property>
+                        <property name="use_markup">True</property>
+                        <attributes>
+                          <attribute name="scale" value="0.500000"/>
+                        </attributes>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">3</property>
+                    <property name="right_attach">4</property>
+                    <property name="top_attach">4</property>
+                    <property name="bottom_attach">5</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkFrame" id="v_adc_small_frame_8">
+                    <property name="visible">True</property>
+                    <property name="label_xalign">0.5</property>
+                    <property name="shadow_type">none</property>
+                    <child>
+                      <object class="GtkAlignment" id="v_interface_adc_8">
+                        <property name="visible">True</property>
+                        <child>
+                          <placeholder/>
+                        </child>
+                      </object>
+                    </child>
+                    <child type="label">
+                      <object class="GtkLabel" id="v_interface_adc_label_8">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">ladder 8</property>
+                        <property name="use_markup">True</property>
+                        <attributes>
+                          <attribute name="scale" value="0.500000"/>
+                        </attributes>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="top_attach">3</property>
+                    <property name="bottom_attach">4</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkFrame" id="v_adc_small_frame_9">
+                    <property name="visible">True</property>
+                    <property name="label_xalign">0.5</property>
+                    <property name="shadow_type">none</property>
+                    <child>
+                      <object class="GtkAlignment" id="v_interface_adc_9">
+                        <property name="visible">True</property>
+                        <child>
+                          <placeholder/>
+                        </child>
+                      </object>
+                    </child>
+                    <child type="label">
+                      <object class="GtkLabel" id="v_interface_adc_label_9">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">ladder 9</property>
+                        <property name="use_markup">True</property>
+                        <attributes>
+                          <attribute name="scale" value="0.500000"/>
+                        </attributes>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">1</property>
+                    <property name="right_attach">2</property>
+                    <property name="top_attach">3</property>
+                    <property name="bottom_attach">4</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkFrame" id="v_adc_small_frame_10">
+                    <property name="visible">True</property>
+                    <property name="label_xalign">0.5</property>
+                    <property name="shadow_type">none</property>
+                    <child>
+                      <object class="GtkAlignment" id="v_interface_adc_10">
+                        <property name="visible">True</property>
+                        <child>
+                          <placeholder/>
+                        </child>
+                      </object>
+                    </child>
+                    <child type="label">
+                      <object class="GtkLabel" id="v_interface_adc_label_10">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">ladder 10</property>
+                        <property name="use_markup">True</property>
+                        <attributes>
+                          <attribute name="scale" value="0.500000"/>
+                        </attributes>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">2</property>
+                    <property name="right_attach">3</property>
+                    <property name="top_attach">3</property>
+                    <property name="bottom_attach">4</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkFrame" id="v_adc_small_frame_11">
+                    <property name="visible">True</property>
+                    <property name="label_xalign">0.5</property>
+                    <property name="shadow_type">none</property>
+                    <child>
+                      <object class="GtkAlignment" id="v_interface_adc_11">
+                        <property name="visible">True</property>
+                        <child>
+                          <placeholder/>
+                        </child>
+                      </object>
+                    </child>
+                    <child type="label">
+                      <object class="GtkLabel" id="v_interface_adc_label_11">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">ladder 11</property>
+                        <property name="use_markup">True</property>
+                        <attributes>
+                          <attribute name="scale" value="0.500000"/>
+                        </attributes>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">3</property>
+                    <property name="right_attach">4</property>
+                    <property name="top_attach">3</property>
+                    <property name="bottom_attach">4</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkFrame" id="v_adc_small_frame_12">
+                    <property name="visible">True</property>
+                    <property name="label_xalign">0.5</property>
+                    <property name="shadow_type">none</property>
+                    <child>
+                      <object class="GtkAlignment" id="v_interface_adc_12">
+                        <property name="visible">True</property>
+                        <child>
+                          <placeholder/>
+                        </child>
+                      </object>
+                    </child>
+                    <child type="label">
+                      <object class="GtkLabel" id="v_interface_adc_label_12">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">ladder 12</property>
+                        <property name="use_markup">True</property>
+                        <attributes>
+                          <attribute name="scale" value="0.500000"/>
+                        </attributes>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="top_attach">2</property>
+                    <property name="bottom_attach">3</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkFrame" id="v_adc_small_frame_13">
+                    <property name="visible">True</property>
+                    <property name="label_xalign">0.5</property>
+                    <property name="shadow_type">none</property>
+                    <child>
+                      <object class="GtkAlignment" id="v_interface_adc_13">
+                        <property name="visible">True</property>
+                        <child>
+                          <placeholder/>
+                        </child>
+                      </object>
+                    </child>
+                    <child type="label">
+                      <object class="GtkLabel" id="v_interface_adc_label_13">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">ladder 13</property>
+                        <property name="use_markup">True</property>
+                        <attributes>
+                          <attribute name="scale" value="0.500000"/>
+                        </attributes>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">1</property>
+                    <property name="right_attach">2</property>
+                    <property name="top_attach">2</property>
+                    <property name="bottom_attach">3</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkFrame" id="v_adc_small_frame_14">
+                    <property name="visible">True</property>
+                    <property name="label_xalign">0.5</property>
+                    <property name="shadow_type">none</property>
+                    <child>
+                      <object class="GtkAlignment" id="v_interface_adc_14">
+                        <property name="visible">True</property>
+                        <child>
+                          <placeholder/>
+                        </child>
+                      </object>
+                    </child>
+                    <child type="label">
+                      <object class="GtkLabel" id="v_interface_adc_label_14">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">ladder 14</property>
+                        <property name="use_markup">True</property>
+                        <attributes>
+                          <attribute name="scale" value="0.500000"/>
+                        </attributes>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">2</property>
+                    <property name="right_attach">3</property>
+                    <property name="top_attach">2</property>
+                    <property name="bottom_attach">3</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkFrame" id="v_adc_small_frame_15">
+                    <property name="visible">True</property>
+                    <property name="label_xalign">0.5</property>
+                    <property name="shadow_type">none</property>
+                    <child>
+                      <object class="GtkAlignment" id="v_interface_adc_15">
+                        <property name="visible">True</property>
+                        <child>
+                          <placeholder/>
+                        </child>
+                      </object>
+                    </child>
+                    <child type="label">
+                      <object class="GtkLabel" id="v_interface_adc_label_15">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">ladder 15</property>
+                        <property name="use_markup">True</property>
+                        <attributes>
+                          <attribute name="scale" value="0.500000"/>
+                        </attributes>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">3</property>
+                    <property name="right_attach">4</property>
+                    <property name="top_attach">2</property>
+                    <property name="bottom_attach">3</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkFrame" id="v_adc_small_frame_16">
+                    <property name="visible">True</property>
+                    <property name="label_xalign">0.5</property>
+                    <property name="shadow_type">none</property>
+                    <child>
+                      <object class="GtkAlignment" id="v_interface_adc_16">
+                        <property name="visible">True</property>
+                        <child>
+                          <placeholder/>
+                        </child>
+                      </object>
+                    </child>
+                    <child type="label">
+                      <object class="GtkLabel" id="v_interface_adc_label_16">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">ladder 16</property>
+                        <property name="use_markup">True</property>
+                        <attributes>
+                          <attribute name="scale" value="0.500000"/>
+                        </attributes>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="top_attach">1</property>
+                    <property name="bottom_attach">2</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkFrame" id="v_adc_small_frame_17">
+                    <property name="visible">True</property>
+                    <property name="label_xalign">0.5</property>
+                    <property name="shadow_type">none</property>
+                    <child>
+                      <object class="GtkAlignment" id="v_interface_adc_17">
+                        <property name="visible">True</property>
+                        <child>
+                          <placeholder/>
+                        </child>
+                      </object>
+                    </child>
+                    <child type="label">
+                      <object class="GtkLabel" id="v_interface_adc_label_17">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">ladder 17</property>
+                        <property name="use_markup">True</property>
+                        <attributes>
+                          <attribute name="scale" value="0.500000"/>
+                        </attributes>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">1</property>
+                    <property name="right_attach">2</property>
+                    <property name="top_attach">1</property>
+                    <property name="bottom_attach">2</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkFrame" id="v_adc_small_frame_18">
+                    <property name="visible">True</property>
+                    <property name="label_xalign">0.5</property>
+                    <property name="shadow_type">none</property>
+                    <child>
+                      <object class="GtkAlignment" id="v_interface_adc_18">
+                        <property name="visible">True</property>
+                        <child>
+                          <placeholder/>
+                        </child>
+                      </object>
+                    </child>
+                    <child type="label">
+                      <object class="GtkLabel" id="v_interface_adc_label_18">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">ladder 18</property>
+                        <property name="use_markup">True</property>
+                        <attributes>
+                          <attribute name="scale" value="0.500000"/>
+                        </attributes>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">2</property>
+                    <property name="right_attach">3</property>
+                    <property name="top_attach">1</property>
+                    <property name="bottom_attach">2</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkFrame" id="v_adc_small_frame_19">
+                    <property name="visible">True</property>
+                    <property name="label_xalign">0.5</property>
+                    <property name="shadow_type">none</property>
+                    <child>
+                      <object class="GtkAlignment" id="v_interface_adc_19">
+                        <property name="visible">True</property>
+                        <child>
+                          <placeholder/>
+                        </child>
+                      </object>
+                    </child>
+                    <child type="label">
+                      <object class="GtkLabel" id="v_interface_adc_label_19">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">ladder 19</property>
+                        <property name="use_markup">True</property>
+                        <attributes>
+                          <attribute name="scale" value="0.500000"/>
+                        </attributes>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">3</property>
+                    <property name="right_attach">4</property>
+                    <property name="top_attach">1</property>
+                    <property name="bottom_attach">2</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkFrame" id="v_adc_small_frame_20">
+                    <property name="visible">True</property>
+                    <property name="label_xalign">0.5</property>
+                    <property name="shadow_type">none</property>
+                    <child>
+                      <object class="GtkAlignment" id="v_interface_adc_20">
+                        <property name="visible">True</property>
+                        <child>
+                          <placeholder/>
+                        </child>
+                      </object>
+                    </child>
+                    <child type="label">
+                      <object class="GtkLabel" id="v_interface_adc_label_20">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">ladder 20</property>
+                        <property name="use_markup">True</property>
+                        <attributes>
+                          <attribute name="scale" value="0.500000"/>
+                        </attributes>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkFrame" id="v_adc_small_frame_21">
+                    <property name="visible">True</property>
+                    <property name="label_xalign">0.5</property>
+                    <property name="shadow_type">none</property>
+                    <child>
+                      <object class="GtkAlignment" id="v_interface_adc_21">
+                        <property name="visible">True</property>
+                        <child>
+                          <placeholder/>
+                        </child>
+                      </object>
+                    </child>
+                    <child type="label">
+                      <object class="GtkLabel" id="v_interface_adc_label_21">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">ladder 21</property>
+                        <property name="use_markup">True</property>
+                        <attributes>
+                          <attribute name="scale" value="0.500000"/>
+                        </attributes>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">1</property>
+                    <property name="right_attach">2</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkFrame" id="v_adc_small_frame_22">
+                    <property name="visible">True</property>
+                    <property name="label_xalign">0.5</property>
+                    <property name="shadow_type">none</property>
+                    <child>
+                      <object class="GtkAlignment" id="v_interface_adc_22">
+                        <property name="visible">True</property>
+                        <child>
+                          <placeholder/>
+                        </child>
+                      </object>
+                    </child>
+                    <child type="label">
+                      <object class="GtkLabel" id="v_interface_adc_label_22">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">ladder 22</property>
+                        <property name="use_markup">True</property>
+                        <attributes>
+                          <attribute name="scale" value="0.500000"/>
+                        </attributes>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">2</property>
+                    <property name="right_attach">3</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkFrame" id="v_adc_small_frame_23">
+                    <property name="visible">True</property>
+                    <property name="label_xalign">0.5</property>
+                    <property name="shadow_type">none</property>
+                    <child>
+                      <object class="GtkAlignment" id="v_interface_adc_23">
+                        <property name="visible">True</property>
+                        <child>
+                          <placeholder/>
+                        </child>
+                      </object>
+                    </child>
+                    <child type="label">
+                      <object class="GtkLabel" id="v_interface_adc_label_23">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">ladder 23</property>
+                        <property name="use_markup">True</property>
+                        <attributes>
+                          <attribute name="scale" value="0.500000"/>
+                        </attributes>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">3</property>
+                    <property name="right_attach">4</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="position">3</property>
+              </packing>
+            </child>
+            <child type="tab">
+              <object class="GtkLabel" id="v_view_label">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">All</property>
+              </object>
+              <packing>
+                <property name="position">3</property>
                 <property name="tab_fill">False</property>
               </packing>
             </child>

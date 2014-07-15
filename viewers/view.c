@@ -79,7 +79,7 @@ int f_view_loop(struct s_interface *interface) {
 		if ((backup = f_package_analyze(&package, environment.buffer, environment.bytes))) {
 			environment.bytes -= (backup-environment.buffer);
 			memmove(environment.buffer, backup, environment.bytes);
-			if (package.complete)
+			if (package.complete) {
 				for (ladder = 0; ladder < d_package_ladders; ++ladder)
 					if ((package.data.values.raw.ladder[ladder] >= 0) && (package.data.values.raw.ladder[ladder] < d_view_ladders)) {
 						environment.data[package.data.values.raw.ladder[ladder]].events++;
@@ -122,7 +122,13 @@ int f_view_loop(struct s_interface *interface) {
 								f_chart_append_signal(&(interface->logic_charts[e_interface_chart_adc]), 0, index,
 										package.data.values.raw.values[ladder][index]);
 						}
+						f_chart_flush(&(interface->logic_charts[e_interface_chart_adc_0+package.data.values.raw.ladder[ladder]]));
+						for (index = 0; index < d_package_channels; ++index)
+							f_chart_append_signal(&(interface->logic_charts[e_interface_chart_adc_0+
+										package.data.values.raw.ladder[ladder]]), 0, index,
+									package.data.values.raw.values[ladder][index]);
 					}
+			}
 		}
 	}
 	for (index = 0; index < e_interface_chart_NULL; ++index)
