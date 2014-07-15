@@ -1,0 +1,10 @@
+segments_x=6.0
+segments_y=20.0
+range_top_x=384.0
+range_bottom_x=0.0
+range_bottom_y=-10.0
+range_top_y=10.0
+color_R_0_z=0.0
+color_G_0_z=0.6
+color_B_0_z=0.0
+show_borders_z=1

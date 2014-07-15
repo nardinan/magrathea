@@ -30,6 +30,48 @@ struct s_chart *f_chart_new(struct s_chart *supplied) {
 	return result;
 }
 
+void p_chart_style_axis(struct s_list *dictionary, const char postfix, struct s_chart_axis *axis) {
+	p_keys_int(dictionary, "segments", postfix, (int *)&(axis->segments));
+	p_keys_int(dictionary, "show_negative", postfix, &(axis->show_negative));
+	p_keys_int(dictionary, "show_positive", postfix, &(axis->show_positive));
+	p_keys_int(dictionary, "show_grid", postfix, &(axis->show_grid));
+	p_keys_float(dictionary, "range_bottom", postfix, &(axis->range[0]));
+	p_keys_float(dictionary, "range_top", postfix, &(axis->range[1]));
+	p_keys_float(dictionary, "minimum_distance", postfix, &(axis->minimum_distance));
+	p_keys_float(dictionary, "offset", postfix, &(axis->offset));
+	p_keys_float(dictionary, "size", postfix, &(axis->size));
+	p_keys_float(dictionary, "color_R", postfix, &(axis->color.R));
+	p_keys_float(dictionary, "color_G", postfix, &(axis->color.G));
+	p_keys_float(dictionary, "color_B", postfix, &(axis->color.B));
+}
+
+void f_chart_style(struct s_chart *chart, const char *path) {
+	char buffer[d_string_buffer_size];
+	struct s_list *dictionary;
+	int index;
+	if ((dictionary = f_keys_initialize(NULL, path, '='))) {
+		p_chart_style_axis(dictionary, 'x', &(chart->axis_x));
+		p_chart_style_axis(dictionary, 'y', &(chart->axis_y));
+		p_keys_int(dictionary, "border", 'x', &(chart->border_x));
+		p_keys_int(dictionary, "border", 'y', &(chart->border_y));
+		p_keys_int(dictionary, "show_borders", 'z', &(chart->show_borders));
+		for (index = 0; index < d_chart_max_nested; index++) {
+			snprintf(buffer, d_string_buffer_size, "dot_size_%d", index);
+			p_keys_float(dictionary, buffer, 'z', &(chart->data.dot_size[index]));
+			snprintf(buffer, d_string_buffer_size, "line_size_%d", index);
+			p_keys_float(dictionary, buffer, 'z', &(chart->data.line_size[index]));
+			snprintf(buffer, d_string_buffer_size, "color_R_%d", index);
+			p_keys_float(dictionary, buffer, 'z', &(chart->data.color[index].R));
+			snprintf(buffer, d_string_buffer_size, "color_G_%d", index);
+			p_keys_float(dictionary, buffer, 'z', &(chart->data.color[index].G));
+			snprintf(buffer, d_string_buffer_size, "color_B_%d", index);
+			p_keys_float(dictionary, buffer, 'z', &(chart->data.color[index].B));
+			snprintf(buffer, d_string_buffer_size, "bins_%d", index);
+			p_keys_int(dictionary, buffer, 'z', &(chart->bins[index]));
+		}
+	}
+}
+
 void p_chart_create_bins(struct s_chart *chart, unsigned int code) {
 	float step = fabs(chart->axis_x.range[1]-chart->axis_x.range[0])/(float)chart->bins[code], current_value;
 	for (current_value = chart->axis_x.range[0]; current_value <= chart->axis_x.range[1]; current_value += step) {

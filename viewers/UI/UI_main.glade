@@ -1,21 +1,38 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <requires lib="gtk+" version="2.16"/>
   <!-- interface-naming-policy project-wide -->
+  <object class="GtkListStore" id="v_chart_combobox_model">
+    <columns>
+      <!-- column-name chart -->
+      <column type="gchararray"/>
+    </columns>
+    <data>
+      <row>
+        <col id="0" translatable="yes">CIAO</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">cavolo</col>
+      </row>
+    </data>
+  </object>
   <object class="GtkWindow" id="v_window">
+    <property name="can_focus">False</property>
     <property name="title" translatable="yes">Magrathea event viewer</property>
     <child>
       <object class="GtkNotebook" id="v_tabs">
         <property name="visible">True</property>
         <property name="can_focus">True</property>
         <child>
-          <object class="GtkFrame" id="v_main_frame">
+          <object class="GtkFrame" id="v_adc_frame">
             <property name="visible">True</property>
+            <property name="can_focus">False</property>
             <property name="label_xalign">0.5</property>
             <property name="shadow_type">none</property>
             <child>
               <object class="GtkAlignment" id="v_interface_chart_adc">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <child>
                   <placeholder/>
                 </child>
@@ -24,15 +41,17 @@
             <child type="label">
               <object class="GtkLabel" id="v_interface_chart_adc_label">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes">&lt;b&gt;ADC count&lt;/b&gt;</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">&lt;b&gt;ADC&lt;/b&gt;</property>
                 <property name="use_markup">True</property>
               </object>
             </child>
           </object>
         </child>
         <child type="tab">
-          <object class="GtkLabel" id="label1">
+          <object class="GtkLabel" id="v_main_label">
             <property name="visible">True</property>
+            <property name="can_focus">False</property>
             <property name="label" translatable="yes">Main</property>
           </object>
           <packing>
@@ -40,16 +59,222 @@
           </packing>
         </child>
         <child>
-          <placeholder/>
+          <object class="GtkTable" id="v_calibration_grid">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="n_rows">2</property>
+            <property name="n_columns">2</property>
+            <property name="homogeneous">True</property>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <object class="GtkFrame" id="v_pedestal_frame">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label_xalign">0.5</property>
+                <property name="shadow_type">none</property>
+                <child>
+                  <object class="GtkAlignment" id="v_interface_chart_pedestal">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <child>
+                      <placeholder/>
+                    </child>
+                  </object>
+                </child>
+                <child type="label">
+                  <object class="GtkLabel" id="v_interface_chart_pedestal_label">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="label" translatable="yes">&lt;b&gt;Pedestal&lt;/b&gt;</property>
+                    <property name="use_markup">True</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkFrame" id="v_sigma_raw_frame">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label_xalign">0.5</property>
+                <property name="shadow_type">none</property>
+                <child>
+                  <object class="GtkAlignment" id="v_interface_chart_sigma_raw">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <child>
+                      <placeholder/>
+                    </child>
+                  </object>
+                </child>
+                <child type="label">
+                  <object class="GtkLabel" id="v_interface_chart_sigma_raw_label">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="label" translatable="yes">&lt;b&gt;Sigma raw&lt;/b&gt;</property>
+                    <property name="use_markup">True</property>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="right_attach">2</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkFrame" id="v_sigma_frame">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label_xalign">0.5</property>
+                <property name="shadow_type">none</property>
+                <child>
+                  <object class="GtkAlignment" id="v_interface_chart_sigma">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <child>
+                      <placeholder/>
+                    </child>
+                  </object>
+                </child>
+                <child type="label">
+                  <object class="GtkLabel" id="v_interface_chart_sigma_label">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="label" translatable="yes">&lt;b&gt;Sigma&lt;/b&gt;</property>
+                    <property name="use_markup">True</property>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="top_attach">1</property>
+                <property name="bottom_attach">2</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="position">1</property>
+          </packing>
         </child>
         <child type="tab">
-          <placeholder/>
+          <object class="GtkLabel" id="v_calibration_label">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="label" translatable="yes">Calibration</property>
+          </object>
+          <packing>
+            <property name="position">1</property>
+            <property name="tab_fill">False</property>
+          </packing>
         </child>
         <child>
-          <placeholder/>
+          <object class="GtkTable" id="v_data_grid">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="n_rows">2</property>
+            <property name="n_columns">2</property>
+            <property name="homogeneous">True</property>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <object class="GtkFrame" id="v_adc_pedetal_frame">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label_xalign">0.5</property>
+                <property name="shadow_type">none</property>
+                <child>
+                  <object class="GtkAlignment" id="v_interface_chart_adc_pedestal">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <child>
+                      <placeholder/>
+                    </child>
+                  </object>
+                </child>
+                <child type="label">
+                  <object class="GtkLabel" id="v_interface_chart_adc_pedestal_label">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="label" translatable="yes">&lt;b&gt;ADC - pedestal&lt;/b&gt;</property>
+                    <property name="use_markup">True</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkFrame" id="v_adc_pedestal_cn_frame">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label_xalign">0.5</property>
+                <property name="shadow_type">none</property>
+                <child>
+                  <object class="GtkAlignment" id="v_interface_chart_adc_pedestal_cn">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <child>
+                      <placeholder/>
+                    </child>
+                  </object>
+                </child>
+                <child type="label">
+                  <object class="GtkLabel" id="v_interface_chart_adc_pedestal_cn_label">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="label" translatable="yes">&lt;b&gt;ADC - pedestal - CN&lt;/b&gt;</property>
+                    <property name="use_markup">True</property>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="right_attach">2</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkFrame" id="v_signal_frame">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label_xalign">0.5</property>
+                <property name="shadow_type">none</property>
+                <child>
+                  <object class="GtkAlignment" id="v_interface_chart_signal">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <child>
+                      <placeholder/>
+                    </child>
+                  </object>
+                </child>
+                <child type="label">
+                  <object class="GtkLabel" id="v_interface_chart_signal_label">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="label" translatable="yes">&lt;b&gt;Signal&lt;/b&gt;</property>
+                    <property name="use_markup">True</property>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="top_attach">1</property>
+                <property name="bottom_attach">2</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="position">2</property>
+          </packing>
         </child>
         <child type="tab">
-          <placeholder/>
+          <object class="GtkLabel" id="v_data_label">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="label" translatable="yes">Data</property>
+          </object>
+          <packing>
+            <property name="position">2</property>
+            <property name="tab_fill">False</property>
+          </packing>
         </child>
       </object>
     </child>

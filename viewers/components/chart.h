@@ -17,9 +17,9 @@
  */
 #ifndef magrathea_chart_h
 #define magrathea_chart_h
-#include <miranda/ground.h>
 #include <gtk/gtk.h>
 #include <math.h>
+#include "keys.h"
 #define d_chart_bucket 1024
 #define d_chart_max_nested 4
 #define d_chart_font_size 7.0
@@ -42,7 +42,7 @@ typedef struct s_chart_color {
 } s_chart_color;
 typedef struct s_chart_axis {
 	unsigned int segments;
-	int show_negative, show_positive, show_grid, logarithmic;
+	int show_negative, show_positive, show_grid;
 	float range[2], minimum_distance, segments_length, offset, size;
 	struct s_chart_color color;
 } s_chart_axis;
@@ -63,6 +63,8 @@ typedef struct s_chart {
 	float total[d_chart_max_nested], total_square[d_chart_max_nested], elements[d_chart_max_nested];
 } s_chart;
 extern struct s_chart *f_chart_new(struct s_chart *supplied);
+extern void p_chart_style_axis(struct s_list *dictionary, const char postfix, struct s_chart_axis *axis);
+extern void f_chart_style(struct s_chart *chart, const char *path);
 extern void p_chart_build_bins(struct s_chart *chart, unsigned int code);
 extern void f_chart_append_signal(struct s_chart *chart, unsigned int code, float x, float y);
 extern void f_chart_append_histogram(struct s_chart *chart, unsigned int code, float value);
