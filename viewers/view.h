@@ -19,10 +19,12 @@
 #define magrathea_view_h
 #include "interface.h"
 #include "analyze.h"
+#define d_view_ladders 24
 #define d_view_calibration_steps 512
 #define d_view_calibration_sigma_k 10.0f
 #define d_view_window_width 640
 #define d_view_window_height 480
+#define d_view_window_title "Magrathea event viewer"
 typedef struct s_view_environment {
 	FILE *stream;
 	unsigned char buffer[d_package_buffer_size];
@@ -31,12 +33,16 @@ typedef struct s_view_environment {
 		unsigned short int package, computed:1, drawed:1;
 		float bucket[d_view_calibration_steps][d_package_channels], pedestal[d_package_channels], sigma_raw[d_package_channels],
 		      sigma[d_package_channels];
-	} calibration;
+	} calibration[d_view_ladders];
+	struct {
+		size_t events;
+		float bucket[d_view_calibration_steps], adc_pedestal[d_package_channels], adc_pedestal_cn[d_package_channels];
+	} data[d_view_ladders];
 } s_view_environment;
 extern struct s_view_environment environment;
 extern int v_view_ladder;
 extern int f_view_initialize(struct s_interface *supplied, const char *builder_path);
 extern void f_view_destroy(GtkWidget *widget, struct s_interface *supplied);
-extern void p_view_loop_analyze(struct s_interface *interface, unsigned short int *values);
+extern void p_view_loop_analyze(struct s_interface *interface, unsigned short int ladder, unsigned short int *values);
 extern int f_view_loop(struct s_interface *interface);
 #endif

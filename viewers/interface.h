@@ -25,19 +25,22 @@ typedef enum e_interface_charts {
 	e_interface_chart_sigma,
 	e_interface_chart_adc_pedestal,
 	e_interface_chart_adc_pedestal_cn,
-	e_interface_chart_signal,
 	e_interface_chart_NULL
 } e_interface_charts;
 typedef enum e_interface_labels {
 	e_interface_label_events = 0,
-	e_interface_label_bad_events,
 	e_interface_label_NULL
 } e_interface_labels;
+typedef enum e_interface_spins {
+	e_interface_spin_ladder = 0,
+	e_interface_spin_NULL
+} e_interface_spins;
 typedef struct s_interface {
 	GtkBuilder *interface;
 	GtkWindow *window;
 	GtkAlignment *charts[e_interface_chart_NULL];
 	GtkLabel *labels[e_interface_label_NULL];
+	GtkSpinButton *spins[e_interface_spin_NULL];
 	struct s_chart logic_charts[e_interface_chart_NULL];
 	int destroy;
 } s_interface;
