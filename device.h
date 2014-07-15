@@ -27,6 +27,7 @@ typedef enum e_device_calls {
 	e_device_calls_read,
 	e_device_calls_mask,
 	e_device_calls_focus,
+	e_device_calls_view,
 	e_device_calls_null
 } e_device_calls;
 typedef enum e_device_system_calls {

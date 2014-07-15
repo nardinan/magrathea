@@ -75,6 +75,13 @@ struct s_console_command v_commands[] = {
 		},
 		&f_commands_focus, e_console_level_guest, d_true
 	},
+	{"view", "(usage: view -l 1) shows ADC counts and other usefull informations about a ladder of a specific TRB",
+		(struct s_console_parameter[]){
+			{"-l", "(integer) selects a ladder of selected devices", d_false, d_false, d_true},
+			{.initialized = d_false}
+		},
+		&f_commands_view, e_console_level_guest, d_true
+	},
 	{.initialized = d_false}
 };
 int f_commands_trigger(struct s_console *console, struct s_console_command *command, char **tokens, size_t elements, int output) {
@@ -107,4 +114,8 @@ int f_commands_mask(struct s_console *console, struct s_console_command *command
 
 int f_commands_focus(struct s_console *console, struct s_console_command *command, char **tokens, size_t elements, int output) {
 	return f_device_recall(e_device_calls_focus, d_true, tokens, elements, output);
+}
+
+int f_commands_view(struct s_console *console, struct s_console_command *command, char **tokens, size_t elements, int output) {
+	return f_device_recall(e_device_calls_view, d_true, tokens, elements, output);
 }
