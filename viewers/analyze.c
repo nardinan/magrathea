@@ -19,7 +19,7 @@
 float f_analyze_mean_f(float *values, size_t size) {
 	float result = 0;
 	int index;
-	for (index = 0; index < size; index++)
+	for (index = 0; index < size; ++index)
 		result += values[index];
 	result /= (float)size;
 	return result;
@@ -28,7 +28,7 @@ float f_analyze_mean_f(float *values, size_t size) {
 float f_analyze_mean_i(int *values, size_t size) {
 	float result = 0;
 	int index;
-	for (index = 0; index < size; index++)
+	for (index = 0; index < size; ++index)
 		result += values[index];
 	result /= (float)size;
 	return result;
@@ -42,7 +42,7 @@ float *f_analyze_pedestal(float values[][d_package_channels], size_t size, float
 			d_die(d_error_malloc);
 	for (channel = 0; channel < d_package_channels; ++channel) {
 		result[channel] = 0;
-		for (event = 0; event < size; event++)
+		for (event = 0; event < size; ++event)
 			result[channel] += values[event][channel];
 		result[channel] = (result[channel]/(float)size);
 	}
@@ -55,8 +55,8 @@ float *f_analyze_sigma_raw(float values[][d_package_channels], size_t size, floa
 	if (!result)
 		if (!(result = (float *) d_malloc(sizeof(float)*d_package_channels)))
 			d_die(d_error_malloc);
-	for (channel = 0; channel < d_package_channels; channel++) {
-		for (event = 0, total = 0, total_square = 0; event < size; event++) {
+	for (channel = 0; channel < d_package_channels; ++channel) {
+		for (event = 0, total = 0, total_square = 0; event < size; ++event) {
 			total += values[event][channel];
 			total_square += values[event][channel]*values[event][channel];
 		}
@@ -67,13 +67,13 @@ float *f_analyze_sigma_raw(float values[][d_package_channels], size_t size, floa
 	return result;
 }
 
-float *f_analyze_cn_no_pedestal(float *no_pedestal, float sigma_multiplicator, float *sigma, int *flags, float *supplied) {
+float *f_analyze_cn_no_pedestal(float *no_pedestal, float sigma_multiplicator, float *sigma, float *supplied) {
 	float elements[d_package_channels_on_va];
 	int va, channel, local_channel, entries, index;
 	for (va = 0, channel = 0; va < d_package_vas; va++, channel += d_package_channels_on_va) {
 		supplied[va] = 0;
-		for (local_channel = channel, entries = 0; local_channel < (channel+d_package_channels_on_va); local_channel++) {
-			for (index = (entries-1); ((index >= 0) && (elements[index] > no_pedestal[local_channel])); index--)
+		for (local_channel = channel, entries = 0; local_channel < (channel+d_package_channels_on_va); ++local_channel) {
+			for (index = (entries-1); ((index >= 0) && (elements[index] > no_pedestal[local_channel])); --index)
 				elements[index+1] = elements[index];
 			elements[index+1] = no_pedestal[local_channel];
 			entries++;
@@ -83,24 +83,23 @@ float *f_analyze_cn_no_pedestal(float *no_pedestal, float sigma_multiplicator, f
 	return supplied;
 }
 
-float *f_analyze_cn(float *values, float sigma_multiplicator, float *pedestal, float *sigma, int *flags, float *supplied) {
+float *f_analyze_cn(float *values, float sigma_multiplicator, float *pedestal, float *sigma, float *supplied) {
 	float no_pedestal[d_package_channels];
 	int index;
 	for (index = 0; index < d_package_channels; index++)
 		no_pedestal[index] = values[index]-pedestal[index];
-	return f_analyze_cn_no_pedestal(no_pedestal, sigma_multiplicator, sigma, flags, supplied);
+	return f_analyze_cn_no_pedestal(no_pedestal, sigma_multiplicator, sigma, supplied);
 }
 
-float *f_analyze_sigma(float values[][d_package_channels], size_t size, float sigma_multiplicator, float *sigma_raw, float *pedestal, int *flags,
-		float *supplied) {
+float *f_analyze_sigma(float values[][d_package_channels], size_t size, float sigma_multiplicator, float *sigma_raw, float *pedestal, float *supplied) {
 	float *result = supplied, common_noise[d_package_vas], common_noise_pure[d_package_channels] = {0},
 	common_noise_pure_square[d_package_channels] = {0}, value, fraction;
 	int channel, event, local_entries[d_package_channels] = {0};
 	if (!result)
 		if (!(result = (float *) d_malloc(sizeof(float)*d_package_channels)))
 			d_die(d_error_malloc);
-	for (event = 0; event < size; event++) {
-		f_analyze_cn(values[event], sigma_multiplicator, pedestal, sigma_raw, flags, common_noise);
+	for (event = 0; event < size; ++event) {
+		f_analyze_cn(values[event], sigma_multiplicator, pedestal, sigma_raw, common_noise);
 		for (channel = 0; channel < d_package_channels; channel++) {
 			value = ((float)(values[event][channel]))-pedestal[channel]-common_noise[(int)(channel/d_package_channels_on_va)];
 			if (fabs(value) < (sigma_multiplicator*sigma_raw[channel])) {
@@ -110,7 +109,7 @@ float *f_analyze_sigma(float values[][d_package_channels], size_t size, float si
 			}
 		}
 	}
-	for (channel = 0; channel < d_package_channels; channel++)
+	for (channel = 0; channel < d_package_channels; ++channel)
 		if (local_entries[channel]) {
 			fraction = (1.0/(float)local_entries[channel]);
 			common_noise_pure[channel] *= fraction;
@@ -120,4 +119,26 @@ float *f_analyze_sigma(float values[][d_package_channels], size_t size, float si
 	return result;
 }
 
+float *f_analyze_adc_pedestal(float values[d_package_channels], float *pedestal, float *supplied) {
+	float *result = supplied;
+	int index;
+	if (!result)
+		if (!(result = (float *) d_malloc(sizeof(float)*d_package_channels)))
+			d_die(d_error_malloc);
+	for (index = 0; index < d_package_channels; ++index)
+		supplied[index] = values[index]-pedestal[index];
+	return result;
+}
+
+float *f_analyze_adc_pedestal_cn(float values[d_package_channels], float sigma_multiplicator, float *pedestal, float *sigma, float *supplied) {
+	float *result = supplied, common_noise[d_package_vas];
+	int index;
+	if (!result)
+		if (!(result = (float *) d_malloc(sizeof(float)*d_package_channels)))
+			d_die(d_error_malloc);
+	f_analyze_cn(values, sigma_multiplicator, pedestal, sigma, common_noise);
+	for (index = 0; index < d_package_channels; ++index)
+		supplied[index] = values[index]-pedestal[index]-common_noise[(index/d_package_channels_on_va)];
+	return result;
+}
 
