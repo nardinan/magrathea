@@ -21,6 +21,8 @@
 #define d_package_ladders 2
 #define d_package_channels 384
 #define d_package_channels_half 192
+#define d_package_channels_on_va 64
+#define d_package_vas 6
 #define d_package_frame_header_size 8	 	/* total dimension of the header 	*/
 #define d_package_frame_header_const_size 2 	/* number of constants in the header 	*/
 #define d_package_frame_tail_size 2 		/* total dimension of the tail 		*/

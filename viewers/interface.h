@@ -17,9 +17,15 @@
  */
 #ifndef magrathea_interface_h
 #define magrathea_interface_h
-#include "chart.h"
+#include "components/chart.h"
 typedef enum e_interface_charts {
 	e_interface_chart_adc = 0,
+	e_interface_chart_pedestal,
+	e_interface_chart_sigma_raw,
+	e_interface_chart_sigma,
+	e_interface_chart_adc_pedestal,
+	e_interface_chart_adc_pedestal_cn,
+	e_interface_chart_signal,
 	e_interface_chart_NULL
 } e_interface_charts;
 typedef enum e_interface_labels {
@@ -35,6 +41,6 @@ typedef struct s_interface {
 	struct s_chart logic_charts[e_interface_chart_NULL];
 	int destroy;
 } s_interface;
-extern const char *v_interface_charts[], *v_interface_labels[], *v_interface_chart_labels[];
+extern const char *v_interface_charts[], *v_interface_labels[], *v_interface_chart_labels[], *v_interface_chart_styles[];
 extern struct s_interface *f_interface_initialize(struct s_interface *supplied, const char *builder_path);
 #endif

@@ -17,12 +17,32 @@
  */
 #include "interface.h"
 const char *v_interface_charts[] = {
-	"v_interface_chart_adc"
+	"v_interface_chart_adc",
+	"v_interface_chart_pedestal",
+	"v_interface_chart_sigma_raw",
+	"v_interface_chart_sigma",
+	"v_interface_chart_adc_pedestal",
+	"v_interface_chart_adc_pedestal_cn",
+	"v_interface_chart_signal",
 }, *v_interface_labels[] = {
 	"v_interface_label_events",
 	"v_interface_label_bad_events"
 }, *v_interface_chart_labels[] = {
-	"ADC_count"
+	"ADC_count",
+	"Pedestal",
+	"Sigma_raw",
+	"Sigma",
+	"ADC_pedestal",
+	"ADC_pedestal_CN",
+	"Signal"
+}, *v_interface_chart_styles[] = {
+	"styles/adc.keys",
+	"styles/pedestal.keys",
+	"styles/sigma_raw.keys",
+	"styles/sigma.keys",
+	"styles/adc_pedestal.keys",
+	"styles/adc_pedestal_cn.keys",
+	"styles/signal.keys",
 };
 struct s_interface *f_interface_initialize(struct s_interface *supplied, const char *builder_path) {
 	struct s_interface *result = supplied;
@@ -36,6 +56,8 @@ struct s_interface *f_interface_initialize(struct s_interface *supplied, const c
 			d_assert(result->window = GTK_WINDOW(gtk_builder_get_object(result->interface, "v_window")));
 			for (index = 0; index < e_interface_chart_NULL; index++) {
 				d_assert(f_chart_new(&(result->logic_charts[index])));
+				f_chart_style(&(result->logic_charts[index]), "styles/base_graph.keys");
+				f_chart_style(&(result->logic_charts[index]), v_interface_chart_styles[index]);
 				d_assert(result->charts[index] = GTK_ALIGNMENT(gtk_builder_get_object(result->interface, v_interface_charts[index])));
 				gtk_container_add(GTK_CONTAINER(result->charts[index]), g_object_ref(result->logic_charts[index].plane));
 			}
