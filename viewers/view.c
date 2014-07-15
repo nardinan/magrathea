@@ -137,10 +137,7 @@ int f_view_loop(struct s_interface *interface) {
 
 int main (int argc, char *argv[]) {
 	struct s_interface main_interface;
-	struct s_list *styles;
 	f_memory_init();
-	if ((styles = f_keys_initialize(NULL, "styles/base_graph.keys", '=')))
-		f_keys_destroy(&styles);
 	if (argc == 3) {
 		v_view_ladder = atoi(argv[2]);
 		if ((environment.stream = fopen(argv[1], "rb"))) {
