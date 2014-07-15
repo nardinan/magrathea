@@ -964,7 +964,7 @@
             <child type="tab">
               <object class="GtkLabel" id="v_view_label">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes">All</property>
+                <property name="label" translatable="yes">Quick TRB View</property>
               </object>
               <packing>
                 <property name="position">3</property>
