@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <requires lib="gtk+" version="2.16"/>
   <!-- interface-naming-policy project-wide -->
@@ -16,12 +16,18 @@
       </row>
     </data>
   </object>
+  <object class="GtkAdjustment" id="v_interface_spin_ladder_adjustement">
+    <property name="upper">23</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+  </object>
   <object class="GtkWindow" id="v_window">
+    <property name="can_focus">False</property>
     <property name="title" translatable="yes">Magrathea event viewer</property>
     <child>
       <object class="GtkVBox" id="v_main_grid">
         <property name="visible">True</property>
-        <property name="orientation">vertical</property>
+        <property name="can_focus">False</property>
         <child>
           <object class="GtkNotebook" id="v_tabs">
             <property name="visible">True</property>
@@ -29,11 +35,13 @@
             <child>
               <object class="GtkFrame" id="v_adc_frame">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <property name="label_xalign">0.5</property>
-                <property name="shadow_type">none</property>
+                <property name="shadow_type">in</property>
                 <child>
                   <object class="GtkAlignment" id="v_interface_chart_adc">
                     <property name="visible">True</property>
+                    <property name="can_focus">False</property>
                     <child>
                       <placeholder/>
                     </child>
@@ -42,6 +50,7 @@
                 <child type="label">
                   <object class="GtkLabel" id="v_interface_chart_adc_label">
                     <property name="visible">True</property>
+                    <property name="can_focus">False</property>
                     <property name="label" translatable="yes">&lt;b&gt;ADC&lt;/b&gt;</property>
                     <property name="use_markup">True</property>
                   </object>
@@ -51,6 +60,7 @@
             <child type="tab">
               <object class="GtkLabel" id="v_main_label">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <property name="label" translatable="yes">Main</property>
               </object>
               <packing>
@@ -60,17 +70,23 @@
             <child>
               <object class="GtkTable" id="v_calibration_grid">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <property name="n_rows">2</property>
                 <property name="n_columns">2</property>
                 <property name="homogeneous">True</property>
                 <child>
+                  <placeholder/>
+                </child>
+                <child>
                   <object class="GtkFrame" id="v_pedestal_frame">
                     <property name="visible">True</property>
+                    <property name="can_focus">False</property>
                     <property name="label_xalign">0.5</property>
-                    <property name="shadow_type">none</property>
+                    <property name="shadow_type">in</property>
                     <child>
                       <object class="GtkAlignment" id="v_interface_chart_pedestal">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <child>
                           <placeholder/>
                         </child>
@@ -79,6 +95,7 @@
                     <child type="label">
                       <object class="GtkLabel" id="v_interface_chart_pedestal_label">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="label" translatable="yes">&lt;b&gt;Pedestal&lt;/b&gt;</property>
                         <property name="use_markup">True</property>
                       </object>
@@ -88,11 +105,13 @@
                 <child>
                   <object class="GtkFrame" id="v_sigma_raw_frame">
                     <property name="visible">True</property>
+                    <property name="can_focus">False</property>
                     <property name="label_xalign">0.5</property>
-                    <property name="shadow_type">none</property>
+                    <property name="shadow_type">in</property>
                     <child>
                       <object class="GtkAlignment" id="v_interface_chart_sigma_raw">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <child>
                           <placeholder/>
                         </child>
@@ -101,6 +120,7 @@
                     <child type="label">
                       <object class="GtkLabel" id="v_interface_chart_sigma_raw_label">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="label" translatable="yes">&lt;b&gt;Sigma raw&lt;/b&gt;</property>
                         <property name="use_markup">True</property>
                       </object>
@@ -114,11 +134,13 @@
                 <child>
                   <object class="GtkFrame" id="v_sigma_frame">
                     <property name="visible">True</property>
+                    <property name="can_focus">False</property>
                     <property name="label_xalign">0.5</property>
-                    <property name="shadow_type">none</property>
+                    <property name="shadow_type">in</property>
                     <child>
                       <object class="GtkAlignment" id="v_interface_chart_sigma">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <child>
                           <placeholder/>
                         </child>
@@ -127,6 +149,7 @@
                     <child type="label">
                       <object class="GtkLabel" id="v_interface_chart_sigma_label">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="label" translatable="yes">&lt;b&gt;Sigma&lt;/b&gt;</property>
                         <property name="use_markup">True</property>
                       </object>
@@ -137,9 +160,6 @@
                     <property name="bottom_attach">2</property>
                   </packing>
                 </child>
-                <child>
-                  <placeholder/>
-                </child>
               </object>
               <packing>
                 <property name="position">1</property>
@@ -148,6 +168,7 @@
             <child type="tab">
               <object class="GtkLabel" id="v_calibration_label">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <property name="label" translatable="yes">Calibration</property>
               </object>
               <packing>
@@ -158,17 +179,20 @@
             <child>
               <object class="GtkTable" id="v_data_grid">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <property name="n_rows">2</property>
                 <property name="n_columns">2</property>
                 <property name="homogeneous">True</property>
                 <child>
                   <object class="GtkFrame" id="v_adc_pedestal_frame">
                     <property name="visible">True</property>
+                    <property name="can_focus">False</property>
                     <property name="label_xalign">0.5</property>
-                    <property name="shadow_type">none</property>
+                    <property name="shadow_type">in</property>
                     <child>
                       <object class="GtkAlignment" id="v_interface_chart_adc_pedestal">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <child>
                           <placeholder/>
                         </child>
@@ -177,6 +201,7 @@
                     <child type="label">
                       <object class="GtkLabel" id="v_interface_chart_adc_pedestal_label">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="label" translatable="yes">&lt;b&gt;ADC - pedestal&lt;/b&gt;</property>
                         <property name="use_markup">True</property>
                       </object>
@@ -189,11 +214,13 @@
                 <child>
                   <object class="GtkFrame" id="v_adc_pedestal_cn_frame">
                     <property name="visible">True</property>
+                    <property name="can_focus">False</property>
                     <property name="label_xalign">0.5</property>
-                    <property name="shadow_type">none</property>
+                    <property name="shadow_type">in</property>
                     <child>
                       <object class="GtkAlignment" id="v_interface_chart_adc_pedestal_cn">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <child>
                           <placeholder/>
                         </child>
@@ -202,6 +229,7 @@
                     <child type="label">
                       <object class="GtkLabel" id="v_interface_chart_adc_pedestal_cn_label">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="label" translatable="yes">&lt;b&gt;Signal&lt;/b&gt;</property>
                         <property name="use_markup">True</property>
                       </object>
@@ -221,6 +249,7 @@
             <child type="tab">
               <object class="GtkLabel" id="v_data_label">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <property name="label" translatable="yes">Data</property>
               </object>
               <packing>
@@ -231,17 +260,20 @@
             <child>
               <object class="GtkTable" id="v_master_view">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <property name="n_rows">6</property>
                 <property name="n_columns">4</property>
                 <property name="homogeneous">True</property>
                 <child>
                   <object class="GtkFrame" id="v_adc_small_frame_0">
                     <property name="visible">True</property>
+                    <property name="can_focus">False</property>
                     <property name="label_xalign">0.5</property>
-                    <property name="shadow_type">none</property>
+                    <property name="shadow_type">in</property>
                     <child>
                       <object class="GtkAlignment" id="v_interface_adc_0">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <child>
                           <placeholder/>
                         </child>
@@ -250,10 +282,11 @@
                     <child type="label">
                       <object class="GtkLabel" id="v_interface_adc_label_0">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="label" translatable="yes">ladder 0</property>
                         <property name="use_markup">True</property>
                         <attributes>
-                          <attribute name="scale" value="0.500000"/>
+                          <attribute name="scale" value="0.5"/>
                         </attributes>
                       </object>
                     </child>
@@ -266,11 +299,13 @@
                 <child>
                   <object class="GtkFrame" id="v_adc_small_frame_1">
                     <property name="visible">True</property>
+                    <property name="can_focus">False</property>
                     <property name="label_xalign">0.5</property>
-                    <property name="shadow_type">none</property>
+                    <property name="shadow_type">in</property>
                     <child>
                       <object class="GtkAlignment" id="v_interface_adc_1">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <child>
                           <placeholder/>
                         </child>
@@ -279,10 +314,11 @@
                     <child type="label">
                       <object class="GtkLabel" id="v_interface_adc_label_1">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="label" translatable="yes">ladder 1</property>
                         <property name="use_markup">True</property>
                         <attributes>
-                          <attribute name="scale" value="0.500000"/>
+                          <attribute name="scale" value="0.5"/>
                         </attributes>
                       </object>
                     </child>
@@ -297,11 +333,13 @@
                 <child>
                   <object class="GtkFrame" id="v_adc_small_frame_2">
                     <property name="visible">True</property>
+                    <property name="can_focus">False</property>
                     <property name="label_xalign">0.5</property>
-                    <property name="shadow_type">none</property>
+                    <property name="shadow_type">in</property>
                     <child>
                       <object class="GtkAlignment" id="v_interface_adc_2">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <child>
                           <placeholder/>
                         </child>
@@ -310,10 +348,11 @@
                     <child type="label">
                       <object class="GtkLabel" id="v_interface_adc_label_2">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="label" translatable="yes">ladder 2</property>
                         <property name="use_markup">True</property>
                         <attributes>
-                          <attribute name="scale" value="0.500000"/>
+                          <attribute name="scale" value="0.5"/>
                         </attributes>
                       </object>
                     </child>
@@ -328,11 +367,13 @@
                 <child>
                   <object class="GtkFrame" id="v_adc_small_frame_3">
                     <property name="visible">True</property>
+                    <property name="can_focus">False</property>
                     <property name="label_xalign">0.5</property>
-                    <property name="shadow_type">none</property>
+                    <property name="shadow_type">in</property>
                     <child>
                       <object class="GtkAlignment" id="v_interface_adc_3">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <child>
                           <placeholder/>
                         </child>
@@ -341,10 +382,11 @@
                     <child type="label">
                       <object class="GtkLabel" id="v_interface_adc_label_3">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="label" translatable="yes">ladder 3</property>
                         <property name="use_markup">True</property>
                         <attributes>
-                          <attribute name="scale" value="0.500000"/>
+                          <attribute name="scale" value="0.5"/>
                         </attributes>
                       </object>
                     </child>
@@ -359,11 +401,13 @@
                 <child>
                   <object class="GtkFrame" id="v_adc_small_frame_4">
                     <property name="visible">True</property>
+                    <property name="can_focus">False</property>
                     <property name="label_xalign">0.5</property>
-                    <property name="shadow_type">none</property>
+                    <property name="shadow_type">in</property>
                     <child>
                       <object class="GtkAlignment" id="v_interface_adc_4">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <child>
                           <placeholder/>
                         </child>
@@ -372,10 +416,11 @@
                     <child type="label">
                       <object class="GtkLabel" id="v_interface_adc_label_4">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="label" translatable="yes">ladder 4</property>
                         <property name="use_markup">True</property>
                         <attributes>
-                          <attribute name="scale" value="0.500000"/>
+                          <attribute name="scale" value="0.5"/>
                         </attributes>
                       </object>
                     </child>
@@ -388,11 +433,13 @@
                 <child>
                   <object class="GtkFrame" id="v_adc_small_frame_5">
                     <property name="visible">True</property>
+                    <property name="can_focus">False</property>
                     <property name="label_xalign">0.5</property>
-                    <property name="shadow_type">none</property>
+                    <property name="shadow_type">in</property>
                     <child>
                       <object class="GtkAlignment" id="v_interface_adc_5">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <child>
                           <placeholder/>
                         </child>
@@ -401,10 +448,11 @@
                     <child type="label">
                       <object class="GtkLabel" id="v_interface_adc_label_5">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="label" translatable="yes">ladder 5</property>
                         <property name="use_markup">True</property>
                         <attributes>
-                          <attribute name="scale" value="0.500000"/>
+                          <attribute name="scale" value="0.5"/>
                         </attributes>
                       </object>
                     </child>
@@ -419,11 +467,13 @@
                 <child>
                   <object class="GtkFrame" id="v_adc_small_frame_6">
                     <property name="visible">True</property>
+                    <property name="can_focus">False</property>
                     <property name="label_xalign">0.5</property>
-                    <property name="shadow_type">none</property>
+                    <property name="shadow_type">in</property>
                     <child>
                       <object class="GtkAlignment" id="v_interface_adc_6">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <child>
                           <placeholder/>
                         </child>
@@ -432,10 +482,11 @@
                     <child type="label">
                       <object class="GtkLabel" id="v_interface_adc_label_6">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="label" translatable="yes">ladder 6</property>
                         <property name="use_markup">True</property>
                         <attributes>
-                          <attribute name="scale" value="0.500000"/>
+                          <attribute name="scale" value="0.5"/>
                         </attributes>
                       </object>
                     </child>
@@ -450,11 +501,13 @@
                 <child>
                   <object class="GtkFrame" id="v_adc_small_frame_7">
                     <property name="visible">True</property>
+                    <property name="can_focus">False</property>
                     <property name="label_xalign">0.5</property>
-                    <property name="shadow_type">none</property>
+                    <property name="shadow_type">in</property>
                     <child>
                       <object class="GtkAlignment" id="v_interface_adc_7">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <child>
                           <placeholder/>
                         </child>
@@ -463,10 +516,11 @@
                     <child type="label">
                       <object class="GtkLabel" id="v_interface_adc_label_7">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="label" translatable="yes">ladder 7</property>
                         <property name="use_markup">True</property>
                         <attributes>
-                          <attribute name="scale" value="0.500000"/>
+                          <attribute name="scale" value="0.5"/>
                         </attributes>
                       </object>
                     </child>
@@ -481,11 +535,13 @@
                 <child>
                   <object class="GtkFrame" id="v_adc_small_frame_8">
                     <property name="visible">True</property>
+                    <property name="can_focus">False</property>
                     <property name="label_xalign">0.5</property>
-                    <property name="shadow_type">none</property>
+                    <property name="shadow_type">in</property>
                     <child>
                       <object class="GtkAlignment" id="v_interface_adc_8">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <child>
                           <placeholder/>
                         </child>
@@ -494,10 +550,11 @@
                     <child type="label">
                       <object class="GtkLabel" id="v_interface_adc_label_8">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="label" translatable="yes">ladder 8</property>
                         <property name="use_markup">True</property>
                         <attributes>
-                          <attribute name="scale" value="0.500000"/>
+                          <attribute name="scale" value="0.5"/>
                         </attributes>
                       </object>
                     </child>
@@ -510,11 +567,13 @@
                 <child>
                   <object class="GtkFrame" id="v_adc_small_frame_9">
                     <property name="visible">True</property>
+                    <property name="can_focus">False</property>
                     <property name="label_xalign">0.5</property>
-                    <property name="shadow_type">none</property>
+                    <property name="shadow_type">in</property>
                     <child>
                       <object class="GtkAlignment" id="v_interface_adc_9">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <child>
                           <placeholder/>
                         </child>
@@ -523,10 +582,11 @@
                     <child type="label">
                       <object class="GtkLabel" id="v_interface_adc_label_9">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="label" translatable="yes">ladder 9</property>
                         <property name="use_markup">True</property>
                         <attributes>
-                          <attribute name="scale" value="0.500000"/>
+                          <attribute name="scale" value="0.5"/>
                         </attributes>
                       </object>
                     </child>
@@ -541,11 +601,13 @@
                 <child>
                   <object class="GtkFrame" id="v_adc_small_frame_10">
                     <property name="visible">True</property>
+                    <property name="can_focus">False</property>
                     <property name="label_xalign">0.5</property>
-                    <property name="shadow_type">none</property>
+                    <property name="shadow_type">in</property>
                     <child>
                       <object class="GtkAlignment" id="v_interface_adc_10">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <child>
                           <placeholder/>
                         </child>
@@ -554,10 +616,11 @@
                     <child type="label">
                       <object class="GtkLabel" id="v_interface_adc_label_10">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="label" translatable="yes">ladder 10</property>
                         <property name="use_markup">True</property>
                         <attributes>
-                          <attribute name="scale" value="0.500000"/>
+                          <attribute name="scale" value="0.5"/>
                         </attributes>
                       </object>
                     </child>
@@ -572,11 +635,13 @@
                 <child>
                   <object class="GtkFrame" id="v_adc_small_frame_11">
                     <property name="visible">True</property>
+                    <property name="can_focus">False</property>
                     <property name="label_xalign">0.5</property>
-                    <property name="shadow_type">none</property>
+                    <property name="shadow_type">in</property>
                     <child>
                       <object class="GtkAlignment" id="v_interface_adc_11">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <child>
                           <placeholder/>
                         </child>
@@ -585,10 +650,11 @@
                     <child type="label">
                       <object class="GtkLabel" id="v_interface_adc_label_11">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="label" translatable="yes">ladder 11</property>
                         <property name="use_markup">True</property>
                         <attributes>
-                          <attribute name="scale" value="0.500000"/>
+                          <attribute name="scale" value="0.5"/>
                         </attributes>
                       </object>
                     </child>
@@ -603,11 +669,13 @@
                 <child>
                   <object class="GtkFrame" id="v_adc_small_frame_12">
                     <property name="visible">True</property>
+                    <property name="can_focus">False</property>
                     <property name="label_xalign">0.5</property>
-                    <property name="shadow_type">none</property>
+                    <property name="shadow_type">in</property>
                     <child>
                       <object class="GtkAlignment" id="v_interface_adc_12">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <child>
                           <placeholder/>
                         </child>
@@ -616,10 +684,11 @@
                     <child type="label">
                       <object class="GtkLabel" id="v_interface_adc_label_12">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="label" translatable="yes">ladder 12</property>
                         <property name="use_markup">True</property>
                         <attributes>
-                          <attribute name="scale" value="0.500000"/>
+                          <attribute name="scale" value="0.5"/>
                         </attributes>
                       </object>
                     </child>
@@ -632,11 +701,13 @@
                 <child>
                   <object class="GtkFrame" id="v_adc_small_frame_13">
                     <property name="visible">True</property>
+                    <property name="can_focus">False</property>
                     <property name="label_xalign">0.5</property>
-                    <property name="shadow_type">none</property>
+                    <property name="shadow_type">in</property>
                     <child>
                       <object class="GtkAlignment" id="v_interface_adc_13">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <child>
                           <placeholder/>
                         </child>
@@ -645,10 +716,11 @@
                     <child type="label">
                       <object class="GtkLabel" id="v_interface_adc_label_13">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="label" translatable="yes">ladder 13</property>
                         <property name="use_markup">True</property>
                         <attributes>
-                          <attribute name="scale" value="0.500000"/>
+                          <attribute name="scale" value="0.5"/>
                         </attributes>
                       </object>
                     </child>
@@ -663,11 +735,13 @@
                 <child>
                   <object class="GtkFrame" id="v_adc_small_frame_14">
                     <property name="visible">True</property>
+                    <property name="can_focus">False</property>
                     <property name="label_xalign">0.5</property>
-                    <property name="shadow_type">none</property>
+                    <property name="shadow_type">in</property>
                     <child>
                       <object class="GtkAlignment" id="v_interface_adc_14">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <child>
                           <placeholder/>
                         </child>
@@ -676,10 +750,11 @@
                     <child type="label">
                       <object class="GtkLabel" id="v_interface_adc_label_14">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="label" translatable="yes">ladder 14</property>
                         <property name="use_markup">True</property>
                         <attributes>
-                          <attribute name="scale" value="0.500000"/>
+                          <attribute name="scale" value="0.5"/>
                         </attributes>
                       </object>
                     </child>
@@ -694,11 +769,13 @@
                 <child>
                   <object class="GtkFrame" id="v_adc_small_frame_15">
                     <property name="visible">True</property>
+                    <property name="can_focus">False</property>
                     <property name="label_xalign">0.5</property>
-                    <property name="shadow_type">none</property>
+                    <property name="shadow_type">in</property>
                     <child>
                       <object class="GtkAlignment" id="v_interface_adc_15">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <child>
                           <placeholder/>
                         </child>
@@ -707,10 +784,11 @@
                     <child type="label">
                       <object class="GtkLabel" id="v_interface_adc_label_15">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="label" translatable="yes">ladder 15</property>
                         <property name="use_markup">True</property>
                         <attributes>
-                          <attribute name="scale" value="0.500000"/>
+                          <attribute name="scale" value="0.5"/>
                         </attributes>
                       </object>
                     </child>
@@ -725,11 +803,13 @@
                 <child>
                   <object class="GtkFrame" id="v_adc_small_frame_16">
                     <property name="visible">True</property>
+                    <property name="can_focus">False</property>
                     <property name="label_xalign">0.5</property>
-                    <property name="shadow_type">none</property>
+                    <property name="shadow_type">in</property>
                     <child>
                       <object class="GtkAlignment" id="v_interface_adc_16">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <child>
                           <placeholder/>
                         </child>
@@ -738,10 +818,11 @@
                     <child type="label">
                       <object class="GtkLabel" id="v_interface_adc_label_16">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="label" translatable="yes">ladder 16</property>
                         <property name="use_markup">True</property>
                         <attributes>
-                          <attribute name="scale" value="0.500000"/>
+                          <attribute name="scale" value="0.5"/>
                         </attributes>
                       </object>
                     </child>
@@ -754,11 +835,13 @@
                 <child>
                   <object class="GtkFrame" id="v_adc_small_frame_17">
                     <property name="visible">True</property>
+                    <property name="can_focus">False</property>
                     <property name="label_xalign">0.5</property>
-                    <property name="shadow_type">none</property>
+                    <property name="shadow_type">in</property>
                     <child>
                       <object class="GtkAlignment" id="v_interface_adc_17">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <child>
                           <placeholder/>
                         </child>
@@ -767,10 +850,11 @@
                     <child type="label">
                       <object class="GtkLabel" id="v_interface_adc_label_17">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="label" translatable="yes">ladder 17</property>
                         <property name="use_markup">True</property>
                         <attributes>
-                          <attribute name="scale" value="0.500000"/>
+                          <attribute name="scale" value="0.5"/>
                         </attributes>
                       </object>
                     </child>
@@ -785,11 +869,13 @@
                 <child>
                   <object class="GtkFrame" id="v_adc_small_frame_18">
                     <property name="visible">True</property>
+                    <property name="can_focus">False</property>
                     <property name="label_xalign">0.5</property>
-                    <property name="shadow_type">none</property>
+                    <property name="shadow_type">in</property>
                     <child>
                       <object class="GtkAlignment" id="v_interface_adc_18">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <child>
                           <placeholder/>
                         </child>
@@ -798,10 +884,11 @@
                     <child type="label">
                       <object class="GtkLabel" id="v_interface_adc_label_18">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="label" translatable="yes">ladder 18</property>
                         <property name="use_markup">True</property>
                         <attributes>
-                          <attribute name="scale" value="0.500000"/>
+                          <attribute name="scale" value="0.5"/>
                         </attributes>
                       </object>
                     </child>
@@ -816,11 +903,13 @@
                 <child>
                   <object class="GtkFrame" id="v_adc_small_frame_19">
                     <property name="visible">True</property>
+                    <property name="can_focus">False</property>
                     <property name="label_xalign">0.5</property>
-                    <property name="shadow_type">none</property>
+                    <property name="shadow_type">in</property>
                     <child>
                       <object class="GtkAlignment" id="v_interface_adc_19">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <child>
                           <placeholder/>
                         </child>
@@ -829,10 +918,11 @@
                     <child type="label">
                       <object class="GtkLabel" id="v_interface_adc_label_19">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="label" translatable="yes">ladder 19</property>
                         <property name="use_markup">True</property>
                         <attributes>
-                          <attribute name="scale" value="0.500000"/>
+                          <attribute name="scale" value="0.5"/>
                         </attributes>
                       </object>
                     </child>
@@ -847,11 +937,13 @@
                 <child>
                   <object class="GtkFrame" id="v_adc_small_frame_20">
                     <property name="visible">True</property>
+                    <property name="can_focus">False</property>
                     <property name="label_xalign">0.5</property>
-                    <property name="shadow_type">none</property>
+                    <property name="shadow_type">in</property>
                     <child>
                       <object class="GtkAlignment" id="v_interface_adc_20">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <child>
                           <placeholder/>
                         </child>
@@ -860,10 +952,11 @@
                     <child type="label">
                       <object class="GtkLabel" id="v_interface_adc_label_20">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="label" translatable="yes">ladder 20</property>
                         <property name="use_markup">True</property>
                         <attributes>
-                          <attribute name="scale" value="0.500000"/>
+                          <attribute name="scale" value="0.5"/>
                         </attributes>
                       </object>
                     </child>
@@ -872,11 +965,13 @@
                 <child>
                   <object class="GtkFrame" id="v_adc_small_frame_21">
                     <property name="visible">True</property>
+                    <property name="can_focus">False</property>
                     <property name="label_xalign">0.5</property>
-                    <property name="shadow_type">none</property>
+                    <property name="shadow_type">in</property>
                     <child>
                       <object class="GtkAlignment" id="v_interface_adc_21">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <child>
                           <placeholder/>
                         </child>
@@ -885,10 +980,11 @@
                     <child type="label">
                       <object class="GtkLabel" id="v_interface_adc_label_21">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="label" translatable="yes">ladder 21</property>
                         <property name="use_markup">True</property>
                         <attributes>
-                          <attribute name="scale" value="0.500000"/>
+                          <attribute name="scale" value="0.5"/>
                         </attributes>
                       </object>
                     </child>
@@ -901,11 +997,13 @@
                 <child>
                   <object class="GtkFrame" id="v_adc_small_frame_22">
                     <property name="visible">True</property>
+                    <property name="can_focus">False</property>
                     <property name="label_xalign">0.5</property>
-                    <property name="shadow_type">none</property>
+                    <property name="shadow_type">in</property>
                     <child>
                       <object class="GtkAlignment" id="v_interface_adc_22">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <child>
                           <placeholder/>
                         </child>
@@ -914,10 +1012,11 @@
                     <child type="label">
                       <object class="GtkLabel" id="v_interface_adc_label_22">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="label" translatable="yes">ladder 22</property>
                         <property name="use_markup">True</property>
                         <attributes>
-                          <attribute name="scale" value="0.500000"/>
+                          <attribute name="scale" value="0.5"/>
                         </attributes>
                       </object>
                     </child>
@@ -930,11 +1029,13 @@
                 <child>
                   <object class="GtkFrame" id="v_adc_small_frame_23">
                     <property name="visible">True</property>
+                    <property name="can_focus">False</property>
                     <property name="label_xalign">0.5</property>
-                    <property name="shadow_type">none</property>
+                    <property name="shadow_type">in</property>
                     <child>
                       <object class="GtkAlignment" id="v_interface_adc_23">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <child>
                           <placeholder/>
                         </child>
@@ -943,10 +1044,11 @@
                     <child type="label">
                       <object class="GtkLabel" id="v_interface_adc_label_23">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="label" translatable="yes">ladder 23</property>
                         <property name="use_markup">True</property>
                         <attributes>
-                          <attribute name="scale" value="0.500000"/>
+                          <attribute name="scale" value="0.5"/>
                         </attributes>
                       </object>
                     </child>
@@ -964,6 +1066,7 @@
             <child type="tab">
               <object class="GtkLabel" id="v_view_label">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <property name="label" translatable="yes">Quick TRB View</property>
               </object>
               <packing>
@@ -973,33 +1076,43 @@
             </child>
           </object>
           <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
             <property name="position">0</property>
           </packing>
         </child>
         <child>
           <object class="GtkStatusbar" id="v_status_bar">
             <property name="visible">True</property>
+            <property name="can_focus">False</property>
             <property name="spacing">2</property>
             <child>
               <object class="GtkLabel" id="v_interface_label_events">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <property name="xalign">0</property>
                 <property name="xpad">5</property>
                 <property name="label" translatable="yes">Events: 0</property>
               </object>
               <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
                 <property name="position">0</property>
               </packing>
             </child>
             <child>
               <object class="GtkHBox" id="v_selector_grid">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <child>
                   <object class="GtkLabel" id="v_selector_label">
                     <property name="visible">True</property>
+                    <property name="can_focus">False</property>
                     <property name="label" translatable="yes">Ladder</property>
                   </object>
                   <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
                     <property name="position">0</property>
                   </packing>
                 </child>
@@ -1007,30 +1120,34 @@
                   <object class="GtkSpinButton" id="v_interface_spin_ladder">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="invisible_char">&#x25CF;</property>
+                    <property name="invisible_char">●</property>
+                    <property name="primary_icon_activatable">False</property>
+                    <property name="secondary_icon_activatable">False</property>
+                    <property name="primary_icon_sensitive">True</property>
+                    <property name="secondary_icon_sensitive">True</property>
                     <property name="adjustment">v_interface_spin_ladder_adjustement</property>
                   </object>
                   <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
                     <property name="position">1</property>
                   </packing>
                 </child>
               </object>
               <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
                 <property name="position">2</property>
               </packing>
             </child>
           </object>
           <packing>
             <property name="expand">False</property>
+            <property name="fill">True</property>
             <property name="position">1</property>
           </packing>
         </child>
       </object>
     </child>
-  </object>
-  <object class="GtkAdjustment" id="v_interface_spin_ladder_adjustement">
-    <property name="upper">23</property>
-    <property name="step_increment">1</property>
-    <property name="page_increment">10</property>
   </object>
 </interface>
