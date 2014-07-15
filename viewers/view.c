@@ -65,7 +65,7 @@ int f_view_loop(struct s_interface *interface) {
 	unsigned char *backup;
 	struct s_package package;
 	int result = d_true, index, ladder, selected;
-	size_t readed;
+	ssize_t readed;
 	if (environment.stream) {
 		selected = gtk_spin_button_get_value_as_int(interface->spins[e_interface_spin_ladder]);
 		if ((selected != v_view_ladder) && (selected >= 0) && (selected < d_view_ladders)) {
@@ -79,7 +79,7 @@ int f_view_loop(struct s_interface *interface) {
 		if ((backup = f_package_analyze(&package, environment.buffer, environment.bytes))) {
 			environment.bytes -= (backup-environment.buffer);
 			memmove(environment.buffer, backup, environment.bytes);
-			if (package.complete) {
+			if (package.complete)
 				for (ladder = 0; ladder < d_package_ladders; ++ladder)
 					if ((package.data.values.raw.ladder[ladder] >= 0) && (package.data.values.raw.ladder[ladder] < d_view_ladders)) {
 						environment.data[package.data.values.raw.ladder[ladder]].events++;
@@ -128,7 +128,6 @@ int f_view_loop(struct s_interface *interface) {
 										package.data.values.raw.ladder[ladder]]), 0, index,
 									package.data.values.raw.values[ladder][index]);
 					}
-			}
 		}
 	}
 	for (index = 0; index < e_interface_chart_NULL; ++index)
