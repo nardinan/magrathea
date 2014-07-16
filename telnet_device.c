@@ -90,33 +90,33 @@ void p_telnet_device_refresh_command(int client) {
 void p_telnet_device_refresh_readout(int client, struct s_console *console) {
 	fd_set sockets;
 	struct timeval timeout = {0, d_telnet_device_timeout};
-	size_t size, index;
-	char buffer[d_string_buffer_size];
+	char character;
 	if (v_telnet_device.clients[client].socket.initialized) {
 		FD_ZERO(&sockets);
 		FD_SET(v_telnet_device.clients[client].socket.socket, &sockets);
 		if (select(v_telnet_device.clients[client].socket.socket+1, &sockets, NULL, NULL, &timeout) > 0)
-			if ((size = read(v_telnet_device.clients[client].socket.socket, buffer, d_string_buffer_size)) > 0)
-				for (index = 0; index < size; ++index) {
-					if (buffer[index] == '\n') {
-						if (v_telnet_device.clients[client].data_pointer > 0) {
-							if (f_string_strcmp(v_telnet_device.clients[client].buffer, d_magrathea_exit_command) != 0) {
-								p_console_execute(console, v_telnet_device.clients[client].buffer,
-										v_telnet_device.clients[client].socket.socket);
-								p_telnet_device_refresh_command(client);
-								memset(v_telnet_device.clients[client].buffer, 0, d_string_buffer_size);
-								v_telnet_device.clients[client].data_pointer = 0;
-							} else {
-								p_telnet_device_destroy_client(client);
-								break;
-							}
+			while (read(v_telnet_device.clients[client].socket.socket, &character, 1) > 0) {
+				if (character == '\n') {
+					printf("\n[remote command: \"%s\"]\n", v_telnet_device.clients[client].buffer);
+					if (f_string_strlen(v_telnet_device.clients[client].buffer) > 0) {
+						if (f_string_strcmp(v_telnet_device.clients[client].buffer, d_magrathea_exit_command) != 0) {
+							p_console_execute(console, v_telnet_device.clients[client].buffer,
+									v_telnet_device.clients[client].socket.socket);
+							p_telnet_device_refresh_command(client);
+						} else {
+							p_telnet_device_destroy_client(client);
+							break;
 						}
-					} else if (buffer[index] == '\b') {
-						if (v_telnet_device.clients[client].data_pointer > 0)
-							v_telnet_device.clients[client].buffer[--(v_telnet_device.clients[client].data_pointer)] = '\0';
-					} else if ((buffer[index] != '\r') && (v_telnet_device.clients[client].data_pointer < (d_string_buffer_size-1)))
-						v_telnet_device.clients[client].buffer[v_telnet_device.clients[client].data_pointer++] = buffer[index];
-				}
+					}
+					memset(v_telnet_device.clients[client].buffer, 0, d_string_buffer_size);
+					v_telnet_device.clients[client].data_pointer = 0;
+					break;
+				} else if (character == '\b') {
+					if (v_telnet_device.clients[client].data_pointer > 0)
+						v_telnet_device.clients[client].buffer[--(v_telnet_device.clients[client].data_pointer)] = '\0';
+				} else if ((character != '\r') && (v_telnet_device.clients[client].data_pointer < (d_string_buffer_size-1)))
+					v_telnet_device.clients[client].buffer[v_telnet_device.clients[client].data_pointer++] = character;
+			}
 	}
 }
 
