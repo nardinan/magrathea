@@ -89,6 +89,10 @@ struct s_device v_initialized_devices[] = {
 };
 struct s_console *console;
 struct s_console_input input = { .ready = d_true };
+void p_magrathea_sigpipe_ignore(int signal) {
+	/* do nothing */
+}
+
 int p_magrathea_init_verbose(int descriptor, const char *subsystem) {
 	char buffer[d_string_buffer_size];
 	int result = d_true;
@@ -144,6 +148,7 @@ void f_magrathea_greetings(int descriptor) {
 int main (int argc, char *argv[]) {
 	f_memory_init();
 	if (f_magrathea_init(STDOUT_FILENO)) {
+		signal(SIGPIPE, p_magrathea_sigpipe_ignore);
 		while (d_true) {
 			f_console_read(console, &input, STDOUT_FILENO, 0, 10);
 			if (input.ready) {
