@@ -55,8 +55,8 @@ void p_view_loop_dump(struct s_interface *interface, unsigned short int ladder) 
 	FILE *stream;
 	int index, va, channel_on_va;
 	if (environment.calibration[ladder].computed) {
-		snprintf(directory, PATH_MAX, "%s_cals", environment.filename);
-		snprintf(filename, PATH_MAX, "%s/ladder_%02d.cal", directory, ladder);
+		snprintf(directory, PATH_MAX, "%s_%s", environment.filename, d_view_calibration_folder);
+		snprintf(filename, PATH_MAX, "%s/ladder_%02d.%s", directory, ladder, d_view_calibration_extension);
 		if ((mkdir(directory, 0777) == 0) || (errno == EEXIST))
 			if ((stream = fopen(filename, "w"))) {
 				for (index = 0; index < d_package_channels; ++index) {
@@ -103,7 +103,7 @@ void p_view_loop_refresh(struct s_interface *interface, unsigned short int ladde
 				f_chart_flush(&(interface->logic_charts[e_interface_chart_sigma_raw]));
 				f_chart_flush(&(interface->logic_charts[e_interface_chart_sigma]));
 				for (index = 0; index < d_package_channels; ++index) {
-					f_chart_append_signal(&(interface->logic_charts[e_interface_chart_pedestal]), 0, index, 
+					f_chart_append_signal(&(interface->logic_charts[e_interface_chart_pedestal]), 0, index,
 							environment.calibration[v_view_ladder].pedestal[index]);
 					f_chart_append_signal(&(interface->logic_charts[e_interface_chart_sigma_raw]), 0, index,
 							environment.calibration[v_view_ladder].sigma_raw[index]);

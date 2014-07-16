@@ -28,6 +28,8 @@
 #define d_view_window_width 640
 #define d_view_window_height 480
 #define d_view_window_title "Magrathea event viewer"
+#define d_view_calibration_folder "cals"
+#define d_view_calibration_extension "cal"
 typedef struct s_view_environment {
 	FILE *stream;
 	unsigned char buffer[d_package_buffer_size];
