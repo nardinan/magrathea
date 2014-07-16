@@ -6,6 +6,7 @@ DAMPE's TRB data acquisition system. This software is designed to acquire data f
 
 *	PLX SDK environment
 *	some environmental variables defined (take a look to bashrc.example)
+*	GTK 2.0+
 
 Furthermore this software requires additional custom hardware:
 
