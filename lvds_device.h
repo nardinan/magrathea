@@ -20,7 +20,7 @@
 #include "adlink.h"
 #include "console.h"
 #include "trb_device.h" /* it's needed to get output descriptor */
-#define d_lvds_device_timeout 5 /* milliseconds */
+#define d_lvds_device_timeout (10*1000) /* milliseconds */
 extern int f_lvds_device_refresh(unsigned char code, struct s_console *console);
 extern int f_lvds_device_initialize(unsigned char code);
 extern int f_lvds_device_destroy(unsigned char code);
