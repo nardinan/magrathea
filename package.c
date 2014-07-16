@@ -35,10 +35,10 @@ unsigned char *p_package_analyze_header_data(struct s_package *package, unsigned
 	static unsigned char header_data[] = {0xEE, 0xBB};
 	unsigned char *pointer = buffer, *backup, *result = NULL;
 	int index;
-	while ((size >= d_package_data_header_size) && ((*pointer) != header_data[0])) {
+	/*while ((size >= d_package_data_header_size) && ((*pointer) != header_data[0])) {
 		pointer++;
 		size--;
-	}
+	}*/
 	if (size >= d_package_data_header_size) {
 		for (index = 0; index < d_package_data_header_const_size; ++index, ++pointer)
 			if (*pointer != header_data[index])
@@ -105,6 +105,7 @@ unsigned char *f_package_analyze(struct s_package *package, unsigned char *buffe
 		package->damaged = d_false;
 		if (!(backup = p_package_analyze(package, pointer, size))) {
 			if (package->damaged) {
+				printf("damaged\n");
 				pointer++;
 				size--;
 			} else
