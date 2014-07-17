@@ -94,7 +94,7 @@ PLX_STATUS f_plx_read_dma(PLX_DEVICE_OBJECT *device, size_t size, size_t *readed
 		dma_parameters.Direction = PLX_DMA_LOC_TO_PCI;
 		if ((status = PlxPci_DmaTransferBlock(device, channel, &dma_parameters, 0)) == ApiSuccess)
 			if ((status = PlxPci_NotificationWait(device, notification, timeout /* millisec */)) == ApiSuccess)
-				(*readed) += size;
+				(*readed) = size;
 		PlxPci_InterruptDisable(device, &interrupt);
 	}
 	return status;
@@ -118,7 +118,7 @@ PLX_STATUS f_plx_read(PLX_DEVICE_OBJECT *device, size_t size, size_t *readed, PL
 	if ((available = f_plx_bytes_available(device, words_register_address)) > 0) {
 		required = d_plx_min(size, available);
 		required = d_plx_min(required, device_buffer->Size);
-		if ((status = f_plx_write_register(device, words_register_address, (required/4))) == ApiSuccess)
+		if ((status = f_plx_write_register(device, words_register_address, (required/d_plx_word_size))) == ApiSuccess)
 			status = f_plx_read_dma(device, required, readed, device_buffer, notification, dma_address, dma_channel, timeout /* millisec */);
 	}
 	return status;
