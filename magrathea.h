@@ -26,7 +26,7 @@
 #include "telnet_device.h"
 #include "package.h"
 #define d_magrathea_module(st,ds,mod) if(((st)==d_true)&&(p_magrathea_init_verbose((ds),(mod))))
-#define d_magrathea_loop_sleep 25000 /* microseconds */
+#define d_magrathea_loop_sleep 15000 /* microseconds */
 #define d_magrathea_version "0.1"
 #define d_magrathea_exit_command "quit"
 extern const char *quit_greetings[];

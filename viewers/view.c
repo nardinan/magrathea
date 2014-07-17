@@ -147,21 +147,25 @@ int f_view_loop(struct s_interface *interface) {
 		}
 		if ((readed = fread(environment.buffer+environment.bytes, 1, d_package_buffer_size-environment.bytes, environment.stream)) > 0)
 			environment.bytes += readed;
-		if ((backup = f_package_analyze(&package, environment.buffer, environment.bytes))) {
-			environment.bytes -= (backup-environment.buffer);
-			memmove(environment.buffer, backup, environment.bytes);
-			if (package.complete)
-				for (ladder = 0; ladder < d_package_ladders; ++ladder)
-					if ((package.data.values.raw.ladder[ladder] >= 0) && (package.data.values.raw.ladder[ladder] < d_view_ladders)) {
-						environment.data[package.data.values.raw.ladder[ladder]].events++;
-						p_view_loop_analyze(interface, package.data.values.raw.ladder[ladder], package.data.values.raw.values[ladder]);
-						p_view_loop_refresh(interface, package.data.values.raw.ladder[ladder], package.data.values.raw.values[ladder]);
-						if (package.data.values.raw.ladder[ladder] == v_view_ladder) {
-							snprintf(buffer, d_string_buffer_size, "events: %zu", environment.data[v_view_ladder].events);
-							gtk_label_set_text(interface->labels[e_interface_label_events], buffer);
+		if ((backup = f_package_analyze(&package, environment.buffer, environment.bytes)))
+			if (backup > environment.buffer) {
+				environment.bytes -= (backup-environment.buffer);
+				memmove(environment.buffer, backup, environment.bytes);
+				if (package.complete)
+					for (ladder = 0; ladder < d_package_ladders; ++ladder)
+						if ((package.data.values.raw.ladder[ladder] >= 0) &&
+								(package.data.values.raw.ladder[ladder] < d_view_ladders)) {
+							environment.data[package.data.values.raw.ladder[ladder]].events++;
+							p_view_loop_analyze(interface, package.data.values.raw.ladder[ladder],
+									package.data.values.raw.values[ladder]);
+							p_view_loop_refresh(interface, package.data.values.raw.ladder[ladder],
+									package.data.values.raw.values[ladder]);
+							if (package.data.values.raw.ladder[ladder] == v_view_ladder) {
+								snprintf(buffer, d_string_buffer_size, "events: %zu", environment.data[v_view_ladder].events);
+								gtk_label_set_text(interface->labels[e_interface_label_events], buffer);
+							}
 						}
-					}
-		}
+			}
 	}
 	for (index = 0; index < e_interface_chart_NULL; ++index)
 		f_chart_redraw(&(interface->logic_charts[index]));

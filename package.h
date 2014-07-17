@@ -25,9 +25,11 @@
 #define d_package_vas 6
 #define d_package_frame_header_size 8	 	/* total dimension of the header 	*/
 #define d_package_frame_header_const_size 2 	/* number of constants in the header 	*/
+#define d_package_frame_header_info_size 4	/* number of informations in the header */
 #define d_package_frame_tail_size 2 		/* total dimension of the tail 		*/
 #define d_package_data_header_size 6 		/* total dimension of the header 	*/
 #define d_package_data_header_const_size 2	/* number of constants in the header 	*/
+#define d_package_data_header_info_size 4	/* number of informations in the header */
 #define d_package_data_tail_size 4		/* total dimension of the tail		*/
 #define d_package_raw_size (d_package_ladders*(2+(2*d_package_channels)))
 #define d_package_buffer_size 10240

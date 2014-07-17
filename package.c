@@ -35,28 +35,30 @@ unsigned char *p_package_analyze_header_data(struct s_package *package, unsigned
 	static unsigned char header_data[] = {0xEE, 0xBB};
 	unsigned char *pointer = buffer, *backup, *result = NULL;
 	int index;
-	/*while ((size >= d_package_data_header_size) && ((*pointer) != header_data[0])) {
+	while ((size >= d_package_data_header_size) && ((*pointer) != header_data[0])) {
 		pointer++;
 		size--;
-	}*/
+	}
 	if (size >= d_package_data_header_size) {
 		for (index = 0; index < d_package_data_header_const_size; ++index, ++pointer)
 			if (*pointer != header_data[index])
 				break;
 		if (index >= d_package_data_header_const_size) {
-			package->data.kind = pointer[0];
-			pointer++;
-			package->data.trb = pointer[0];
-			pointer++;
-			package->data.frame_length = ((unsigned short int)pointer[1])|((unsigned short int)pointer[0])<<8;
-			pointer += 2;
-			backup = p_package_analyze_raw(package, pointer, (size-(pointer-buffer)));
-			if ((backup) && ((size-(backup-buffer)) >= d_package_data_tail_size)) {
-				pointer = backup;
-				package->data.trigger = ((unsigned short int)pointer[1])|((unsigned short int)pointer[0])<<8;
+			if ((size-(pointer-buffer)) > d_package_data_header_info_size) {
+				package->data.kind = (pointer[0]&0xff);
+				pointer++;
+				package->data.trb = (pointer[0]&0x3f);
+				pointer++;
+				package->data.frame_length = ((unsigned short int)pointer[1])|((unsigned short int)pointer[0])<<8;
 				pointer += 2;
-				package->data.sumcheck = ((unsigned short int)pointer[1])|((unsigned short int)pointer[0])<<8;
-				result = (pointer+2);
+				backup = p_package_analyze_raw(package, pointer, (size-(pointer-buffer)));
+				if ((backup) && ((size-(backup-buffer)) >= d_package_data_tail_size)) {
+					pointer = backup;
+					package->data.trigger = ((unsigned short int)pointer[1])|((unsigned short int)pointer[0])<<8;
+					pointer += 2;
+					package->data.sumcheck = ((unsigned short int)pointer[1])|((unsigned short int)pointer[0])<<8;
+					result = (pointer+2);
+				}
 			}
 		} else
 			package->damaged = d_true;
@@ -73,17 +75,19 @@ unsigned char *p_package_analyze_header(struct s_package *package, unsigned char
 			if (*pointer != header_frame[index])
 				break;
 		if (index >= d_package_frame_header_const_size) {
-			package->count = pointer[0];
-			pointer++;
-			package->trb = pointer[0];
-			pointer++;
-			package->frame_length = ((unsigned short int)pointer[1])|((unsigned short int)pointer[0])<<8;
-			pointer += 2;
-			backup = p_package_analyze_header_data(package, pointer, (size-(pointer-buffer)));
-			if ((backup) && ((size-(backup-buffer)) >= d_package_frame_tail_size)) {
-				pointer = backup;
-				package->sumcheck = ((unsigned short int)pointer[1])|((unsigned short int)pointer[0])<<8;
-				result = (pointer+2);
+			if ((size-(pointer-buffer)) > d_package_frame_header_info_size) {
+				package->count = pointer[0];
+				pointer++;
+				package->trb = pointer[0];
+				pointer++;
+				package->frame_length = ((unsigned short int)pointer[1])|((unsigned short int)pointer[0])<<8;
+				pointer += 2;
+				backup = p_package_analyze_header_data(package, pointer, (size-(pointer-buffer)));
+				if ((backup) && ((size-(backup-buffer)) >= d_package_frame_tail_size)) {
+					pointer = backup;
+					package->sumcheck = ((unsigned short int)pointer[1])|((unsigned short int)pointer[0])<<8;
+					result = (pointer+2);
+				}
 			}
 		} else
 			package->damaged = d_true;
@@ -105,7 +109,6 @@ unsigned char *f_package_analyze(struct s_package *package, unsigned char *buffe
 		package->damaged = d_false;
 		if (!(backup = p_package_analyze(package, pointer, size))) {
 			if (package->damaged) {
-				printf("damaged\n");
 				pointer++;
 				size--;
 			} else
