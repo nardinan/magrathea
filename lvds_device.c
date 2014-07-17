@@ -18,7 +18,7 @@
 #include "lvds_device.h"
 int f_lvds_device_refresh(unsigned char code, struct s_console *console) {
 	int index, result = d_true;
-	size_t readed;
+	size_t readed = 0;
 	for (index = 0; index < d_trb_device_boards; index++)
 		if ((v_trb_device_boards[index].descriptor != d_rs232_null) &&
 				(f_adlink_data_read(index, &readed, v_trb_device_boards[index].stream.stream, d_lvds_device_timeout)))
