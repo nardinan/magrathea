@@ -47,8 +47,6 @@ typedef enum e_trb_device_currents {
 	e_trb_device_currents_VSSA6,
 	e_trb_device_currents_33VDD1,
 	e_trb_device_currents_33VDD2,
-	e_trb_device_currents_S34,
-	e_trb_device_currents_S33,
 	e_trb_device_currents_null
 } e_trb_device_currents;
 typedef enum e_trb_device_temperatures {
@@ -94,13 +92,16 @@ typedef enum e_trb_device_bytes {
 	e_trb_device_bytes_0x07_current_VSSA6,
 	e_trb_device_bytes_0x07_current_33VDD1,
 	e_trb_device_bytes_0x07_current_33VDD2,
-	e_trb_device_bytes_0x07_current_S34,
-	e_trb_device_bytes_0x07_current_S33,
-	e_trb_device_bytes_0x07_voltage_HV1,
-	e_trb_device_bytes_0x07_voltage_HV2,
+	e_trb_device_bytes_0x07_control,
+	e_trb_device_bytes_0x07BB_current_S34,
+	e_trb_device_bytes_0x07BB_current_S33,
+	e_trb_device_bytes_0x07BB_current_S57,
+	e_trb_device_bytes_0x07BB_current_S12,
+	e_trb_device_bytes_0x07BB_voltage_HV1,
+	e_trb_device_bytes_0x07BB_voltage_HV2,
+	e_trb_device_bytes_0x07AA_status_HD,
 	e_trb_device_bytes_0x07_status_trigger_low,
 	e_trb_device_bytes_0x07_status_trigger_high,
-	e_trb_device_bytes_0x07_status_HD,
 	e_trb_device_bytes_0x07_status_version_M,
 	e_trb_device_bytes_0x07_status_version_L
 } e_trb_bytes;

@@ -18,37 +18,40 @@
 #include "trb_device.h"
 unsigned char v_trb_device_raw_head[] = {0x55, 0xaa}, v_trb_device_raw_tail[] = {0x5a, 0xa5};
 unsigned int v_trb_device_bytes[] = {
-	4, 	/* board_code 			*/
-	5, 	/* command code 		*/
-	10,	/* 0x05 			*/
-	6, 	/* 0x05 - current @ 3.4V	*/
-	7, 	/* 0x05 - current @ -3.3V	*/
-	8, 	/* 0x05 - current @ 5.7V	*/
-	9, 	/* 0x05 - current @ 12.0V	*/
-	58,	/* 0x06				*/
-	54,	/* 0x06 - temperature BUS A #1	*/
-	55,	/* 0x06 - temperature BUS B #1	*/
-	56,	/* 0x06 - temperature BUS A #2	*/
-	57,	/* 0x06 - temperature BUS B #3	*/
-	6,	/* 0x06 - first TFH temperature */
-	40,	/* 0x07				*/
-	32,	/* 0x07 - current on VSSA1	*/
-	33,	/* 0x07 - current on VSSA2	*/
-	34,	/* 0x07 - current on VSSA3	*/
-	35,	/* 0x07 - current on VSSA4	*/
-	36,	/* 0x07 - current on VSSA5	*/
-	37,	/* 0x07 - current on VSSA6	*/
-	38,	/* 0x07 - current VDD1 @ 3.3V	*/
-	39,	/* 0x07 - current VDD2 @ 3.3V	*/
-	9,	/* 0x07 - current @ 3.4V	*/
-	10,	/* 0x07 - current @ -3.3V	*/
-	11,	/* 0x07 - BIAS voltage #1	*/
-	12,	/* 0x07 - BIAS voltage #2	*/
-	14,	/* 0x07 - trigger low byte	*/
-	15,	/* 0x07 - trigger high byte	*/
-	22,	/* 0x07 - hold delay value	*/
-	29,	/* 0x07 - version code A	*/
-	31	/* 0x07 - version code B	*/
+	4, 	/* board_code 						*/
+	5, 	/* command code 					*/
+	10,	/* 0x05 						*/
+	6, 	/* 0x05 - current @ 3.4V - satellite small packet	*/
+	7, 	/* 0x05 - current @ -3.3V - satellite small packet	*/
+	8, 	/* 0x05 - current @ 5.7V - satellite small packet	*/
+	9, 	/* 0x05 - current @ 12.0V - satellite small packet	*/
+	58,	/* 0x06							*/
+	54,	/* 0x06 - temperature BUS A #1				*/
+	55,	/* 0x06 - temperature BUS B #1				*/
+	56,	/* 0x06 - temperature BUS A #2				*/
+	57,	/* 0x06 - temperature BUS B #3				*/
+	6,	/* 0x06 - first TFH temperature 			*/
+	40,	/* 0x07							*/
+	32,	/* 0x07 - current on VSSA1				*/
+	33,	/* 0x07 - current on VSSA2				*/
+	34,	/* 0x07 - current on VSSA3				*/
+	35,	/* 0x07 - current on VSSA4				*/
+	36,	/* 0x07 - current on VSSA5				*/
+	37,	/* 0x07 - current on VSSA6				*/
+	38,	/* 0x07 - current VDD1 @ 3.3V				*/
+	39,	/* 0x07 - current VDD2 @ 3.3V				*/
+	7,	/* 0x07 - control packet (AA/BB)			*/
+	10,	/* 0x07BB - current @ 3.4V				*/
+	11,	/* 0x07BB - current @ -3.3V				*/
+	12,	/* 0x07BB - current @ 5.7V				*/
+	13,	/* 0x07BB - current @ 12V				*/
+	8,	/* 0x07BB - BIAS voltage #1				*/
+	9,	/* 0x07BB - BIAS voltage #2				*/
+	11,	/* 0x07AA - hold delay value				*/
+	14,	/* 0x07 - trigger low byte				*/
+	15,	/* 0x07 - trigger high byte				*/
+	29,	/* 0x07 - version code A				*/
+	31	/* 0x07 - version code B				*/
 };
 struct s_trb_device v_trb_device_boards[d_trb_device_boards] = {
 	{d_rs232_null, d_false, d_false, 0x00, "/dev/ttyL0"},
@@ -125,7 +128,7 @@ void p_trb_device_status_dump(unsigned char code, const char *path) {
 }
 
 int p_trb_device_status_refresh(unsigned char code) {
-	static unsigned char status_requests[] = {0x05, 0x06, 0x07};
+	static unsigned char status_requests[] = {0x06, 0x07};
 	unsigned char raw_command[d_trb_device_raw_command_size];
 	int index, result = d_true;
 	if (v_trb_device_boards[code].descriptor != d_rs232_null) {
@@ -422,26 +425,36 @@ void p_trb_device_refresh_analyze(unsigned char code, unsigned char *buffer, siz
 						value = (int)(buffer[B(e_trb_device_bytes_0x07_current_33VDD2)]);
 						current = value*1.6;
 						v_trb_device_boards[code].status.currents[e_trb_device_currents_33VDD2] = (current<0.0f)?0.0f:current;
-						value = (int)(buffer[B(e_trb_device_bytes_0x07_current_S34)]);
-						current = (value*8.0f)+25.0f;
-						v_trb_device_boards[code].status.currents[e_trb_device_currents_S34] = (value==0)?value:current;
-						value = (int)(buffer[B(e_trb_device_bytes_0x07_current_S33)]);
-						current = (value*8.0f);
-						v_trb_device_boards[code].status.currents[e_trb_device_currents_S33] = (current<0.0f)?0.0f:current;
-						value = (int)(buffer[B(e_trb_device_bytes_0x07_voltage_HV1)]);
-						voltage = (value*0.7246)-21.6207;
-						v_trb_device_boards[code].status.voltages[e_trb_device_voltages_HV1] = (value<50)?0.0f:voltage;
-						value = (int)(buffer[B(e_trb_device_bytes_0x07_voltage_HV2)]);
-						voltage = (value*0.7246)-21.6207;
-						v_trb_device_boards[code].status.voltages[e_trb_device_voltages_HV2] = (value<50)?0.0f:voltage;
+						if (buffer[B(e_trb_device_bytes_0x07_control)] == 0xAA) {
+							v_trb_device_boards[code].status.status[e_trb_device_status_HD] =
+								buffer[B(e_trb_device_bytes_0x07AA_status_HD)];
+						} else if (buffer[B(e_trb_device_bytes_0x07_control)] == 0xBB) {
+							value = (int)(buffer[B(e_trb_device_bytes_0x07BB_current_S34)]);
+							current = (value*8.0f)+25.0f;
+							v_trb_device_boards[code].status.currents[e_trb_device_currents_34] = (value==0)?value:current;
+							value = (int)(buffer[B(e_trb_device_bytes_0x07BB_current_S33)]);
+							current = (value*8.0f);
+							v_trb_device_boards[code].status.currents[e_trb_device_currents_33] = (current<0.0f)?0.0f:current;
+							value = (int)(buffer[B(e_trb_device_bytes_0x07BB_current_S57)]);
+							current = (value*0.8f)-4.0f;
+							v_trb_device_boards[code].status.currents[e_trb_device_currents_57] = (current<0.0f)?0.0f:current;
+							value = (int)(buffer[B(e_trb_device_bytes_0x07BB_current_S12)]);
+							current = (value*0.8f)-2.7f;
+							v_trb_device_boards[code].status.currents[e_trb_device_currents_12] = (current<0.0f)?0.0f:current;
+							value = (int)(buffer[B(e_trb_device_bytes_0x07BB_voltage_HV1)]);
+							voltage = (value*0.7246)-21.6207;
+							v_trb_device_boards[code].status.voltages[e_trb_device_voltages_HV1] = (value<50)?0.0f:voltage;
+							value = (int)(buffer[B(e_trb_device_bytes_0x07BB_voltage_HV2)]);
+							voltage = (value*0.7246)-21.6207;
+							v_trb_device_boards[code].status.voltages[e_trb_device_voltages_HV2] = (value<50)?0.0f:voltage;
+						}
 						v_trb_device_boards[code].status.status[e_trb_device_status_trigger_low] =
 							buffer[B(e_trb_device_bytes_0x07_status_trigger_low)];
 						v_trb_device_boards[code].status.status[e_trb_device_status_trigger_high] =
 							buffer[B(e_trb_device_bytes_0x07_status_trigger_high)];
 						v_trb_device_boards[code].trigger =
-							(((unsigned int)buffer[B(e_trb_device_status_trigger_high)])&0xFF)||
-							((((unsigned int)buffer[B(e_trb_device_status_trigger_low)])<<8)&0xFF);
-						v_trb_device_boards[code].status.status[e_trb_device_status_HD] = buffer[B(e_trb_device_bytes_0x07_status_HD)];
+							(((unsigned int)buffer[B(e_trb_device_status_trigger_low)])&0xFF)||
+							((((unsigned int)buffer[B(e_trb_device_status_trigger_high)])<<8)&0xFF);
 						v_trb_device_boards[code].status.status[e_trb_device_status_version_M] =
 							buffer[B(e_trb_device_bytes_0x07_status_version_M)];
 						v_trb_device_boards[code].status.status[e_trb_device_status_version_L] =
