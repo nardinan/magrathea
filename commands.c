@@ -84,7 +84,7 @@ struct s_console_command v_commands[] = {
 	},
 	{"convert", "(usage: convert) convert acquired files in ttree format",
 		(struct s_console_parameter[]){
-			{.initialized = d_fals}
+			{.initialized = d_false}
 		},
 		&f_commands_convert, e_console_level_guest, d_true
 	},

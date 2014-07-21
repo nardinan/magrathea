@@ -312,12 +312,12 @@ int f_trb_device_view(unsigned char code, char **tokens, size_t elements, int ou
 
 int f_trb_device_convert(unsigned char code, char **tokens, size_t elements, int output) {
 	char buffer[d_string_buffer_size];
-	int argument, result = d_true;
+	int result = d_true;
 	FILE *process;
 	if (v_trb_device_boards[code].stream.stream) {
 		if (output != d_console_descriptor_null)
 			if (v_trb_device_boards[code].focused) {
-				snprintf(buffer, d_string_buffer_size, "magrathea's convert now on TRB #%d @ ladder %d\n", code, ladder);
+				snprintf(buffer, d_string_buffer_size, "magrathea is converting now data from TRB #%d\n", code);
 				write(output, buffer, f_string_strlen(buffer));
 				fsync(output);
 			}
