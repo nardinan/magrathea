@@ -33,7 +33,7 @@ unsigned char *p_package_analyze_raw(struct s_package *package, unsigned char *b
 
 unsigned char *p_package_analyze_header_data(struct s_package *package, unsigned char *buffer, size_t size) {
 	static unsigned char header_data[] = {0xEE, 0xBB};
-	unsigned char *pointer = buffer, *backup, *result = NULL;
+	unsigned char *pointer = buffer, *backup, *result = NULL, workmode, group;
 	int index;
 	while ((size >= d_package_data_header_size) && ((*pointer) != header_data[0])) {
 		pointer++;
@@ -46,19 +46,25 @@ unsigned char *p_package_analyze_header_data(struct s_package *package, unsigned
 		if (index >= d_package_data_header_const_size) {
 			if ((size-(pointer-buffer)) > d_package_data_header_info_size) {
 				package->data.kind = (pointer[0]&0xff);
-				pointer++;
-				package->data.trb = (pointer[0]&0x3f);
-				pointer++;
-				package->data.frame_length = ((unsigned short int)pointer[1])|((unsigned short int)pointer[0])<<8;
-				pointer += 2;
-				backup = p_package_analyze_raw(package, pointer, (size-(pointer-buffer)));
-				if ((backup) && ((size-(backup-buffer)) >= d_package_data_tail_size)) {
-					pointer = backup;
-					package->data.trigger = ((unsigned short int)pointer[1])|((unsigned short int)pointer[0])<<8;
+				workmode = (package->data.kind>>4)&0x0f;
+				group = (package->data.kind)&0x0f;
+				if (workmode == d_package_default_workmode) {
+					pointer++;
+					package->data.trb = (pointer[0]&0x3f);
+					pointer++;
+					package->data.frame_length = ((unsigned short int)pointer[1])|((unsigned short int)pointer[0])<<8;
 					pointer += 2;
-					package->data.sumcheck = ((unsigned short int)pointer[1])|((unsigned short int)pointer[0])<<8;
-					result = (pointer+2);
-				}
+					backup = p_package_analyze_raw(package, pointer, (size-(pointer-buffer)));
+					if ((backup) && ((size-(backup-buffer)) >= d_package_data_tail_size)) {
+						pointer = backup;
+						package->data.trigger_kind = ((unsigned short int)pointer[0])>>5;
+						package->data.trigger_counter = ((unsigned short int)pointer[1])|((unsigned short int)(pointer[0]&0x1f))<<8;
+						pointer += 2;
+						package->data.sumcheck = ((unsigned short int)pointer[1])|((unsigned short int)pointer[0])<<8;
+						result = (pointer+2);
+					}
+				} else
+					package->damaged = d_true;
 			}
 		} else
 			package->damaged = d_true;

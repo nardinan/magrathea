@@ -290,7 +290,6 @@ int f_trb_device_focus(unsigned char code, char **tokens, size_t elements, int o
 	return result;
 }
 
-
 int f_trb_device_view(unsigned char code, char **tokens, size_t elements, int output) {
 	char buffer[d_string_buffer_size];
 	int argument, result = d_true, ladder = 0;
@@ -311,6 +310,23 @@ int f_trb_device_view(unsigned char code, char **tokens, size_t elements, int ou
 	return result;
 }
 
+int f_trb_device_convert(unsigned char code, char **tokens, size_t elements, int output) {
+	char buffer[d_string_buffer_size];
+	int argument, result = d_true;
+	FILE *process;
+	if (v_trb_device_boards[code].stream.stream) {
+		if (output != d_console_descriptor_null)
+			if (v_trb_device_boards[code].focused) {
+				snprintf(buffer, d_string_buffer_size, "magrathea's convert now on TRB #%d @ ladder %d\n", code, ladder);
+				write(output, buffer, f_string_strlen(buffer));
+				fsync(output);
+			}
+		snprintf(buffer, d_string_buffer_size, "%s %s", d_trb_device_converter, v_trb_device_boards[code].stream.destination);
+		if ((process = popen(buffer, "r")))
+			fclose(process);
+	}
+	return result;
+}
 
 int f_trb_device_enabled(unsigned char code) {
 	return v_trb_device_boards[code].selected;

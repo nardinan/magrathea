@@ -34,6 +34,7 @@
 #define B(a) v_trb_device_bytes[(a)]
 #define V(a) v_trb_device_boards[(a)].status
 #define d_trb_device_viewer "./viewer.sh"
+#define d_trb_device_converter "./converter.sh"
 typedef enum e_trb_device_currents {
 	e_trb_device_currents_34 = 0,
 	e_trb_device_currents_33,
@@ -140,6 +141,7 @@ extern int f_trb_device_write(unsigned char code, char **tokens, size_t elements
 extern int f_trb_device_mask(unsigned char code, char **tokens, size_t elements, int output);
 extern int f_trb_device_focus(unsigned char code, char **tokens, size_t elements, int output);
 extern int f_trb_device_view(unsigned char code, char **tokens, size_t elements, int output);
+extern int f_trb_device_convert(unsigned char code, char **tokens, size_t elements, int output);
 extern int f_trb_device_enabled(unsigned char code);
 extern int f_trb_device_initialize(unsigned char code);
 extern void p_trb_device_destroy_descriptor(unsigned char code);

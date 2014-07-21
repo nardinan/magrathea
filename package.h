@@ -31,6 +31,7 @@
 #define d_package_data_header_const_size 2	/* number of constants in the header 	*/
 #define d_package_data_header_info_size 4	/* number of informations in the header */
 #define d_package_data_tail_size 4		/* total dimension of the tail		*/
+#define d_package_default_workmode 3
 #define d_package_raw_size (d_package_ladders*(2+(2*d_package_channels)))
 #define d_package_buffer_size 10240
 typedef enum e_package_kind {
@@ -50,14 +51,14 @@ typedef union u_package_data_values {
 } u_package_data_values;
 typedef struct s_package_data {
 	unsigned char kind, trb;
-	unsigned short frame_length, trigger, sumcheck;
+	unsigned short frame_length, trigger_counter, trigger_kind, sumcheck;
 	union u_package_data_values values;
 } s_package_data;
 typedef struct s_package {
 	unsigned char count, trb;
 	unsigned short frame_length, sumcheck;
 	struct s_package_data data;
-	int complete:1, damaged:1;
+	int complete:1, damaged:1, wrong_sumcheck:1;
 } s_package;
 extern size_t v_package_header_size, v_package_header_data_size, v_package_raw_size;
 extern unsigned char *p_package_analyze_raw(struct s_package *package, unsigned char *buffer, size_t size);

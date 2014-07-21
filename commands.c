@@ -82,6 +82,12 @@ struct s_console_command v_commands[] = {
 		},
 		&f_commands_view, e_console_level_guest, d_true
 	},
+	{"convert", "(usage: convert) convert acquired files in ttree format",
+		(struct s_console_parameter[]){
+			{.initialized = d_fals}
+		},
+		&f_commands_convert, e_console_level_guest, d_true
+	},
 	{.initialized = d_false}
 };
 int f_commands_trigger(struct s_console *console, struct s_console_command *command, char **tokens, size_t elements, int output) {
@@ -119,3 +125,8 @@ int f_commands_focus(struct s_console *console, struct s_console_command *comman
 int f_commands_view(struct s_console *console, struct s_console_command *command, char **tokens, size_t elements, int output) {
 	return f_device_recall(e_device_calls_view, d_true, tokens, elements, output);
 }
+
+int f_commands_convert(struct s_console *console, struct s_console_command *command, char **tokens, size_t elements, int output) {
+	return f_device_recall(e_device_calls_convert, d_true, tokens, elements, output);
+}
+

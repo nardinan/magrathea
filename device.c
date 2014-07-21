@@ -26,6 +26,7 @@ const char *v_device_call_description[] = {
 	"read",
 	"mask",
 	"view",
+	"convert",
 	"null"
 }, *v_device_system_call_description[] = {
 	"enabled",
