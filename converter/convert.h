@@ -22,7 +22,9 @@
 #include <TTree.h>
 #include <TFile.h>
 extern "C" {
+#include <linux/limits.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 #include <errno.h>
 #include "../package.h"
 }
