@@ -160,8 +160,9 @@ int f_view_loop(struct s_interface *interface) {
 							environment.data[package.data.values.raw.ladder[ladder]].events++;
 							p_view_loop_analyze(interface, package.data.values.raw.ladder[ladder],
 									package.data.values.raw.values[ladder]);
-							p_view_loop_refresh(interface, package.data.values.raw.ladder[ladder],
-									package.data.values.raw.values[ladder]);
+							if ((v_view_index%v_view_skip) == 0)
+								p_view_loop_refresh(interface, package.data.values.raw.ladder[ladder],
+										package.data.values.raw.values[ladder]);
 							if (package.data.values.raw.ladder[ladder] == v_view_ladder) {
 								snprintf(buffer, d_string_buffer_size, "events: %zu", environment.data[v_view_ladder].events);
 								gtk_label_set_text(interface->labels[e_interface_label_events], buffer);
@@ -169,7 +170,7 @@ int f_view_loop(struct s_interface *interface) {
 						}
 			}
 	}
-	if ((v_view_index%v_view_skip)==0)
+	if ((v_view_index%v_view_skip) == 0)
 		for (index = 0; index < e_interface_chart_NULL; ++index)
 			f_chart_redraw(&(interface->logic_charts[index]));
 	return result;
