@@ -17,7 +17,8 @@
  */
 #include "view.h"
 struct s_view_environment environment;
-int v_view_ladder, v_view_calibration_steps = d_view_calibration_steps;
+int v_view_ladder, v_view_calibration_steps = d_view_calibration_steps, v_view_skip = 1;
+long long v_view_index = 0;
 int f_view_initialize(struct s_interface *supplied, const char *builder_path) {
 	char buffer[d_string_buffer_size];
 	int result = d_false;
@@ -137,6 +138,7 @@ int f_view_loop(struct s_interface *interface) {
 	struct s_package package;
 	int result = d_true, index, ladder, selected;
 	ssize_t readed;
+	v_view_index++;
 	if (environment.stream) {
 		selected = gtk_spin_button_get_value_as_int(interface->spins[e_interface_spin_ladder]);
 		if ((selected != v_view_ladder) && (selected >= 0) && (selected < d_view_ladders)) {
@@ -167,8 +169,9 @@ int f_view_loop(struct s_interface *interface) {
 						}
 			}
 	}
-	for (index = 0; index < e_interface_chart_NULL; ++index)
-		f_chart_redraw(&(interface->logic_charts[index]));
+	if ((v_view_index%v_view_skip)==0)
+		for (index = 0; index < e_interface_chart_NULL; ++index)
+			f_chart_redraw(&(interface->logic_charts[index]));
 	return result;
 }
 
@@ -176,7 +179,7 @@ int main (int argc, char *argv[]) {
 	struct s_interface main_interface;
 	int index;
 	f_memory_init();
-	if (argc == 3) {
+	if (argc >= 3) {
 		v_view_ladder = atoi(argv[2]);
 		for (index = 0; index < d_view_ladders; ++index)
 			environment.calibration[index].steps = v_view_calibration_steps;
@@ -184,6 +187,8 @@ int main (int argc, char *argv[]) {
 		if ((environment.stream = fopen(environment.filename, "rb"))) {
 			gtk_init(&argc, &argv);
 			if (f_view_initialize(&main_interface, "UI/UI_main.glade")) {
+				if (argc == 4)
+					v_view_skip = atoi(argv[3]);
 				gtk_idle_add((GSourceFunc)f_view_loop, &main_interface);
 				gtk_main();
 			}
