@@ -26,8 +26,6 @@ int f_view_initialize(struct s_interface *supplied, const char *builder_path) {
 		gtk_widget_set_sensitive(GTK_WIDGET(supplied->buttons[e_interface_button_dump]), FALSE);
 		if (g_signal_connect(G_OBJECT(supplied->buttons[e_interface_button_dump]), "clicked", G_CALLBACK(f_view_dump), supplied) > 0) {
 			gtk_spin_button_set_value(supplied->spins[e_interface_spin_ladder], v_view_ladder);
-			snprintf(buffer, d_string_buffer_size, "%s (ladder %d)", d_view_window_title, v_view_ladder);
-			gtk_window_set_title(supplied->window, buffer);
 			gtk_window_set_default_size(supplied->window, d_view_window_width, d_view_window_height);
 			if (g_signal_connect(G_OBJECT(supplied->window), "delete-event", G_CALLBACK(f_view_destroy), supplied) > 0) {
 				gtk_widget_show_all(GTK_WIDGET(supplied->window));
@@ -147,8 +145,6 @@ int f_view_loop(struct s_interface *interface) {
 			for (index = 0; index < e_interface_chart_NULL; index++)
 				f_chart_flush(&(interface->logic_charts[index]));
 			environment.calibration[v_view_ladder].drawed = d_false;
-			snprintf(buffer, d_string_buffer_size, "%s (ladder %d)", d_view_window_title, v_view_ladder);
-			gtk_window_set_title(interface->window, buffer);
 		}
 		if ((readed = fread(environment.buffer+environment.bytes, 1, d_package_buffer_size-environment.bytes, environment.stream)) > 0)
 			environment.bytes += readed;
