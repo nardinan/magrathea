@@ -95,7 +95,7 @@ void p_view_loop_analyze(struct s_interface *interface, unsigned short int ladde
 	}
 }
 
-void p_view_loop_refresh(struct s_interface *interface, unsigned short int ladder, unsigned short int *values) {
+void p_view_loop_refresh(struct s_interface *interface, unsigned short int ladder) {
 	int index;
 	if (ladder == v_view_ladder) {
 		if (environment.calibration[v_view_ladder].computed) {
@@ -125,24 +125,27 @@ void p_view_loop_refresh(struct s_interface *interface, unsigned short int ladde
 		}
 		f_chart_flush(&(interface->logic_charts[e_interface_chart_adc]));
 		for (index = 0; index < d_package_channels; ++index)
-			f_chart_append_signal(&(interface->logic_charts[e_interface_chart_adc]), 0, index, values[index]);
+			f_chart_append_signal(&(interface->logic_charts[e_interface_chart_adc]), 0, index, environment.data[v_view_ladder].bucket[index]);
 	}
 	f_chart_flush(&(interface->logic_charts[e_interface_chart_adc_0+ladder]));
 	for (index = 0; index < d_package_channels; ++index)
-		f_chart_append_signal(&(interface->logic_charts[e_interface_chart_adc_0+ladder]), 0, index, values[index]);
+		f_chart_append_signal(&(interface->logic_charts[e_interface_chart_adc_0+ladder]), 0, index, environment.data[ladder].bucket[index]);
 }
 
 int f_view_loop(struct s_interface *interface) {
 	char buffer[d_string_buffer_size];
 	unsigned char *backup;
 	struct s_package package;
-	int result = d_true, index, ladder, selected;
+	int result = d_true, index, ladder, selected, refreshed = d_false;
 	ssize_t readed;
 	v_view_index++;
 	if (environment.stream) {
 		selected = gtk_spin_button_get_value_as_int(interface->spins[e_interface_spin_ladder]);
 		if ((selected != v_view_ladder) && (selected >= 0) && (selected < d_view_ladders)) {
+			refreshed = d_true;
 			v_view_ladder = selected;
+			for (index = 0; index < e_interface_chart_NULL; index++)
+				f_chart_flush(&(interface->logic_charts[index]));
 			environment.calibration[v_view_ladder].drawed = d_false;
 			snprintf(buffer, d_string_buffer_size, "%s (ladder %d)", d_view_window_title, v_view_ladder);
 			gtk_window_set_title(interface->window, buffer);
@@ -160,19 +163,20 @@ int f_view_loop(struct s_interface *interface) {
 							environment.data[package.data.values.raw.ladder[ladder]].events++;
 							p_view_loop_analyze(interface, package.data.values.raw.ladder[ladder],
 									package.data.values.raw.values[ladder]);
-							if ((v_view_index%v_view_skip) == 0)
-								p_view_loop_refresh(interface, package.data.values.raw.ladder[ladder],
-										package.data.values.raw.values[ladder]);
 							if (package.data.values.raw.ladder[ladder] == v_view_ladder) {
-								snprintf(buffer, d_string_buffer_size, "events: %zu", environment.data[v_view_ladder].events);
+								snprintf(buffer, d_string_buffer_size, "[events]: %zu",
+										environment.data[v_view_ladder].events);
 								gtk_label_set_text(interface->labels[e_interface_label_events], buffer);
 							}
 						}
 			}
 	}
-	if ((v_view_index%v_view_skip) == 0)
+	if (((v_view_index%v_view_skip) == 0) || (refreshed)) {
+		for (ladder = 0; ladder < d_package_ladders; ++ladder)
+			p_view_loop_refresh(interface, ladder);
 		for (index = 0; index < e_interface_chart_NULL; ++index)
 			f_chart_redraw(&(interface->logic_charts[index]));
+	}
 	return result;
 }
 
@@ -182,19 +186,22 @@ int main (int argc, char *argv[]) {
 	f_memory_init();
 	if (argc >= 3) {
 		v_view_ladder = atoi(argv[2]);
-		for (index = 0; index < d_view_ladders; ++index)
-			environment.calibration[index].steps = v_view_calibration_steps;
-		strncpy(environment.filename, argv[1], PATH_MAX);
-		if ((environment.stream = fopen(environment.filename, "rb"))) {
-			gtk_init(&argc, &argv);
-			if (f_view_initialize(&main_interface, "UI/UI_main.glade")) {
-				if (argc == 4)
-					v_view_skip = atoi(argv[3]);
-				gtk_idle_add((GSourceFunc)f_view_loop, &main_interface);
-				gtk_main();
-			}
+		if ((v_view_ladder >= 0) && (v_view_ladder < d_view_ladders)) {
+			for (index = 0; index < d_view_ladders; ++index)
+				environment.calibration[index].steps = v_view_calibration_steps;
+			strncpy(environment.filename, argv[1], PATH_MAX);
+			if ((environment.stream = fopen(environment.filename, "rb"))) {
+				gtk_init(&argc, &argv);
+				if (f_view_initialize(&main_interface, "UI/UI_main.glade")) {
+					if (argc == 4)
+						v_view_skip = atoi(argv[3]);
+					gtk_idle_add((GSourceFunc)f_view_loop, &main_interface);
+					gtk_main();
+				}
+			} else
+				fprintf(stderr, "file not found: %s\n", argv[1]);
 		} else
-			fprintf(stderr, "file not found: %s\n", argv[1]);
+			fprintf(stderr, "%s ladder doesn't exists\n", argv[1]);
 	} else
 		fprintf(stderr, "usage: %s <path> <laddder#>\n", argv[0]);
 	f_memory_destroy();
