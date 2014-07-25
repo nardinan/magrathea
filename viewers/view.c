@@ -20,7 +20,6 @@ struct s_view_environment environment;
 int v_view_ladder, v_view_calibration_steps = d_view_calibration_steps, v_view_skip = 1;
 long long v_view_index = 0;
 int f_view_initialize(struct s_interface *supplied, const char *builder_path) {
-	char buffer[d_string_buffer_size];
 	int result = d_false;
 	if (f_interface_initialize(supplied, builder_path)) {
 		gtk_widget_set_sensitive(GTK_WIDGET(supplied->buttons[e_interface_button_dump]), FALSE);
@@ -72,6 +71,8 @@ void p_view_loop_dump(struct s_interface *interface, unsigned short int ladder) 
 
 void p_view_loop_analyze(struct s_interface *interface, unsigned short int ladder, unsigned short int *values) {
 	int index;
+	for (index = 0; index < d_package_channels; ++index)
+		environment.data[ladder].bucket[index] = values[index];
 	if (environment.calibration[ladder].package < environment.calibration[ladder].steps) {
 		for (index = 0; index < d_package_channels; ++index)
 			environment.calibration[ladder].bucket[environment.calibration[ladder].package][index] = values[index];
@@ -85,8 +86,6 @@ void p_view_loop_analyze(struct s_interface *interface, unsigned short int ladde
 				environment.calibration[ladder].sigma_raw, environment.calibration[ladder].pedestal, environment.calibration[ladder].sigma);
 		environment.calibration[ladder].computed = d_true;
 	} else {
-		for (index = 0; index < d_package_channels; ++index)
-			environment.data[ladder].bucket[index] = values[index];
 		f_analyze_adc_pedestal(environment.data[ladder].bucket, environment.calibration[ladder].pedestal, environment.data[ladder].adc_pedestal);
 		f_analyze_adc_pedestal_cn(environment.data[ladder].bucket, d_view_calibration_sigma_k, environment.calibration[ladder].pedestal,
 				environment.calibration[ladder].sigma, environment.data[ladder].adc_pedestal_cn);
@@ -134,13 +133,13 @@ int f_view_loop(struct s_interface *interface) {
 	char buffer[d_string_buffer_size];
 	unsigned char *backup;
 	struct s_package package;
-	int result = d_true, index, ladder, selected, refreshed = d_false;
+	int result = d_true, index, ladder, selected, refresh = d_false;
 	ssize_t readed;
 	v_view_index++;
 	if (environment.stream) {
 		selected = gtk_spin_button_get_value_as_int(interface->spins[e_interface_spin_ladder]);
 		if ((selected != v_view_ladder) && (selected >= 0) && (selected < d_view_ladders)) {
-			refreshed = d_true;
+			refresh = d_true;
 			v_view_ladder = selected;
 			for (index = 0; index < e_interface_chart_NULL; index++)
 				f_chart_flush(&(interface->logic_charts[index]));
@@ -167,8 +166,8 @@ int f_view_loop(struct s_interface *interface) {
 						}
 			}
 	}
-	if (((v_view_index%v_view_skip) == 0) || (refreshed)) {
-		for (ladder = 0; ladder < d_package_ladders; ++ladder)
+	if (((v_view_index%v_view_skip) == 0) || (refresh)) {
+		for (ladder = 0; ladder < d_view_ladders; ++ladder)
 			p_view_loop_refresh(interface, ladder);
 		for (index = 0; index < e_interface_chart_NULL; ++index)
 			f_chart_redraw(&(interface->logic_charts[index]));
@@ -190,7 +189,8 @@ int main (int argc, char *argv[]) {
 				gtk_init(&argc, &argv);
 				if (f_view_initialize(&main_interface, "UI/UI_main.glade")) {
 					if (argc == 4)
-						v_view_skip = atoi(argv[3]);
+						if ((v_view_skip = atoi(argv[3])) < 1)
+							v_view_skip = 1;
 					gtk_idle_add((GSourceFunc)f_view_loop, &main_interface);
 					gtk_main();
 				}
@@ -199,7 +199,7 @@ int main (int argc, char *argv[]) {
 		} else
 			fprintf(stderr, "%s ladder doesn't exists\n", argv[1]);
 	} else
-		fprintf(stderr, "usage: %s <path> <laddder#>\n", argv[0]);
+		fprintf(stderr, "usage: %s <path> <laddder#> {frequecy of refresh}\n", argv[0]);
 	f_memory_destroy();
 	return 0;
 }
