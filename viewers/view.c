@@ -19,11 +19,33 @@
 struct s_view_environment environment;
 int v_view_ladder, v_view_calibration_steps = d_view_calibration_steps, v_view_skip = 1;
 long long v_view_index = 0;
+void f_view_action_dump(GtkWidget *widget, struct s_interface *interface) {
+	int index;
+	if (environment.calibrated >= d_view_ladders)
+		for (index = 0; index < d_view_ladders; ++index)
+			p_view_loop_dump(interface, index);
+}
+
+void f_view_action_redo(GtkWidget *widget, struct s_interface *interface) {
+	int index;
+	for (index = 0; index < d_view_ladders; ++index) {
+		environment.calibration[index].package = 0;
+		environment.calibration[index].computed = d_false;
+		environment.calibration[index].drawed = d_false;
+	}
+	environment.calibrated = d_false;
+	f_chart_flush(&(interface->logic_charts[e_interface_chart_pedestal]));
+	f_chart_flush(&(interface->logic_charts[e_interface_chart_sigma_raw]));
+	f_chart_flush(&(interface->logic_charts[e_interface_chart_sigma]));
+	gtk_widget_set_sensitive(GTK_WIDGET(interface->buttons[e_interface_button_dump]), FALSE);
+}
+
 int f_view_initialize(struct s_interface *supplied, const char *builder_path) {
 	int result = d_false;
 	if (f_interface_initialize(supplied, builder_path)) {
 		gtk_widget_set_sensitive(GTK_WIDGET(supplied->buttons[e_interface_button_dump]), FALSE);
-		if (g_signal_connect(G_OBJECT(supplied->buttons[e_interface_button_dump]), "clicked", G_CALLBACK(f_view_dump), supplied) > 0) {
+		if ((g_signal_connect(G_OBJECT(supplied->buttons[e_interface_button_dump]), "clicked", G_CALLBACK(f_view_action_dump), supplied) > 0) &&
+			(g_signal_connect(G_OBJECT(supplied->buttons[e_interface_button_redo]), "clicked", G_CALLBACK(f_view_action_redo), supplied) > 0)) {
 			gtk_spin_button_set_value(supplied->spins[e_interface_spin_ladder], v_view_ladder);
 			gtk_window_set_default_size(supplied->window, d_view_window_width, d_view_window_height);
 			if (g_signal_connect(G_OBJECT(supplied->window), "delete-event", G_CALLBACK(f_view_destroy), supplied) > 0) {
@@ -39,13 +61,6 @@ void f_view_destroy(GtkWidget *widget, struct s_interface *interface) {
 	if (environment.stream)
 		fclose(environment.stream);
 	exit(0);
-}
-
-void f_view_dump(GtkWidget *widget, struct s_interface *interface) {
-	int index;
-	if (environment.calibrated >= d_view_ladders)
-		for (index = 0; index < d_view_ladders; ++index)
-			p_view_loop_dump(interface, index);
 }
 
 void p_view_loop_dump(struct s_interface *interface, unsigned short int ladder) {

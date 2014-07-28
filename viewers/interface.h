@@ -61,6 +61,7 @@ typedef enum e_interface_spins {
 } e_interface_spins;
 typedef enum e_interface_buttons {
 	e_interface_button_dump = 0,
+	e_interface_button_redo,
 	e_interface_button_NULL
 } e_interface_buttons;
 typedef struct s_interface {

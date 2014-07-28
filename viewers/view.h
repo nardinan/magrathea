@@ -23,7 +23,7 @@
 #include "interface.h"
 #include "analyze.h"
 #define d_view_ladders 24
-#define d_view_calibration_steps 512
+#define d_view_calibration_steps 128
 #define d_view_calibration_sigma_k 10.0f
 #define d_view_window_width 640
 #define d_view_window_height 480
@@ -48,9 +48,10 @@ typedef struct s_view_environment {
 extern struct s_view_environment environment;
 extern int v_view_ladder, v_view_calibration_steps, v_view_calibrated, v_view_skip;
 extern long long v_view_index;
+extern void f_view_action_dump(GtkWidget *widget, struct s_interface *supplied);
+extern void f_view_action_redo(GtkWidget *widget, struct s_interface *supplied);
 extern int f_view_initialize(struct s_interface *supplied, const char *builder_path);
 extern void f_view_destroy(GtkWidget *widget, struct s_interface *supplied);
-extern void f_view_dump(GtkWidget *widget, struct s_interface *supplied);
 extern void p_view_loop_dump(struct s_interface *interface, unsigned short int ladder);
 extern void p_view_loop_analyze(struct s_interface *interface, unsigned short int ladder, unsigned short int *values);
 extern void p_view_loop_refresh(struct s_interface *interface, unsigned short int ladder);
