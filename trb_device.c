@@ -303,7 +303,8 @@ int f_trb_device_view(unsigned char code, char **tokens, size_t elements, int ou
 				write(output, buffer, f_string_strlen(buffer));
 				fsync(output);
 			}
-		snprintf(buffer, d_string_buffer_size, "%s %s %d", d_trb_device_viewer, v_trb_device_boards[code].stream.destination, ladder);
+		snprintf(buffer, d_string_buffer_size, "%s %s %d %d", d_trb_device_viewer, v_trb_device_boards[code].stream.destination, ladder,
+				d_trb_device_viewer_skip);
 		if ((process = popen(buffer, "r")))
 			fclose(process);
 	}

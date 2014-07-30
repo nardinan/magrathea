@@ -34,6 +34,7 @@
 #define B(a) v_trb_device_bytes[(a)]
 #define V(a) v_trb_device_boards[(a)].status
 #define d_trb_device_viewer "./viewer.sh"
+#define d_trb_device_viewer_skip 2
 #define d_trb_device_converter "./converter.sh"
 typedef enum e_trb_device_currents {
 	e_trb_device_currents_34 = 0,
