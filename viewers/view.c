@@ -140,8 +140,12 @@ void p_view_loop_refresh(struct s_interface *interface, unsigned short int ladde
 			f_chart_append_signal(&(interface->logic_charts[e_interface_chart_adc]), 0, index, environment.data[v_view_ladder].bucket[index]);
 	}
 	f_chart_flush(&(interface->logic_charts[e_interface_chart_adc_0+ladder]));
-	for (index = 0; index < d_package_channels; ++index)
+	f_chart_flush(&(interface->logic_charts[e_interface_chart_signal_0+ladder]));
+	for (index = 0; index < d_package_channels; ++index) {
 		f_chart_append_signal(&(interface->logic_charts[e_interface_chart_adc_0+ladder]), 0, index, environment.data[ladder].bucket[index]);
+		f_chart_append_signal(&(interface->logic_charts[e_interface_chart_signal_0+ladder]), 0, index,
+				environment.data[ladder].adc_pedestal_cn[index]);
+	}
 }
 
 int f_view_loop(struct s_interface *interface) {
