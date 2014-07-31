@@ -20,6 +20,11 @@
 #include <miranda/ground.h>
 #include <math.h>
 #include "../package.h"
+#define d_analyze_sigma_k_max 2.0
+typedef enum e_analyze_flags {
+	e_analyze_flag_bad = 0x01,
+	e_analyze_flag_bad_sigma = 0x02
+} e_analyze_flags;
 extern float p_analyze_mean_f(float *values, size_t size);
 extern float p_analyze_mean_i(float *values, size_t size);
 extern float *f_analyze_pedestal(float values[][d_package_channels], size_t size, float *supplied);
@@ -27,7 +32,8 @@ extern float *f_analyze_sigma_raw(float values[][d_package_channels], size_t siz
 extern float *f_analyze_cn_no_pedestal(float *no_pedestal, float sigma_multiplicator, float *sigma, float *supplied);
 extern float *f_analyze_cn(float *values, float sigma_multiplicator, float *pedestal, float *sigma, float *supplied);
 extern float *f_analyze_sigma(float values[][d_package_channels], size_t size, float sigma_multiplicator, float *sigma_raw, float *pedestal,
-		float *supplied);
+		float *supplied_values, unsigned short *supplied_flags);
 extern float *f_analyze_adc_pedestal(float values[d_package_channels], float *pedestal, float *supplied);
-extern float *f_analyze_adc_pedestal_cn(float values[d_package_channels], float sigma_multiplicator, float *pedestal, float *sigma, float *supplied);
+extern float *f_analyze_adc_pedestal_cn(float values[d_package_channels], float sigma_multiplicator, float *pedestal, float *sigma, unsigned short *flags,
+		float *supplied);
 #endif

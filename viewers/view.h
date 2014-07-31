@@ -19,6 +19,7 @@
 #define magrathea_view_h
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/time.h>
 #include <errno.h>
 #include "interface.h"
 #include "analyze.h"
@@ -36,7 +37,7 @@ typedef struct s_view_environment {
 	char filename[PATH_MAX];
 	size_t bytes, calibrated;
 	struct {
-		unsigned short int package, steps, computed:1, drawed:1;
+		unsigned short int package, steps, flags[d_package_channels], computed:1, drawed:1;
 		float bucket[d_view_calibration_steps][d_package_channels], pedestal[d_package_channels], sigma_raw[d_package_channels],
 		      sigma[d_package_channels];
 	} calibration[d_view_ladders];
@@ -46,10 +47,11 @@ typedef struct s_view_environment {
 	} data[d_view_ladders];
 } s_view_environment;
 extern struct s_view_environment environment;
-extern int v_view_ladder, v_view_calibration_steps, v_view_calibrated, v_view_skip;
-extern long long v_view_index;
+extern int v_view_ladder, v_view_calibration_steps, v_view_calibrated, v_view_skip, v_view_pause;
+extern long long v_view_index, v_starting_time;
 extern void f_view_action_dump(GtkWidget *widget, struct s_interface *supplied);
 extern void f_view_action_redo(GtkWidget *widget, struct s_interface *supplied);
+extern int f_view_action_press(GtkWidget *widget, GdkEventKey *event, struct s_interface *supplied);
 extern int f_view_initialize(struct s_interface *supplied, const char *builder_path);
 extern void f_view_destroy(GtkWidget *widget, struct s_interface *supplied);
 extern void p_view_loop_dump(struct s_interface *interface, unsigned short int ladder);

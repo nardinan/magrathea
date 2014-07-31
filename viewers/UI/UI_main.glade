@@ -16,6 +16,10 @@
       </row>
     </data>
   </object>
+  <object class="GtkAdjustment" id="v_interface_spin_delay_adjustement">
+    <property name="upper">1000000</property>
+    <property name="step_increment">1</property>
+  </object>
   <object class="GtkAdjustment" id="v_interface_spin_ladder_adjustement">
     <property name="upper">23</property>
     <property name="step_increment">1</property>
@@ -2015,6 +2019,7 @@
                   <object class="GtkLabel" id="v_selector_label">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
+                    <property name="xpad">6</property>
                     <property name="label" translatable="yes">Ladder</property>
                   </object>
                   <packing>
@@ -2040,10 +2045,65 @@
                     <property name="position">1</property>
                   </packing>
                 </child>
+                <child>
+                  <object class="GtkVSeparator" id="v_separator">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="padding">5</property>
+                    <property name="position">2</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="v_delay_label">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="xpad">6</property>
+                    <property name="label" translatable="yes">Delay</property>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">3</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkSpinButton" id="v_interface_spin_delay">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="invisible_char">•</property>
+                    <property name="primary_icon_activatable">False</property>
+                    <property name="secondary_icon_activatable">False</property>
+                    <property name="primary_icon_sensitive">True</property>
+                    <property name="secondary_icon_sensitive">True</property>
+                    <property name="adjustment">v_interface_spin_delay_adjustement</property>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">4</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="v_delay_extension">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="xpad">6</property>
+                    <property name="label" translatable="yes">uS</property>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">5</property>
+                  </packing>
+                </child>
               </object>
               <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
                 <property name="position">2</property>
               </packing>
             </child>

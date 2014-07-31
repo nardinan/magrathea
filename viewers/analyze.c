@@ -91,9 +91,10 @@ float *f_analyze_cn(float *values, float sigma_multiplicator, float *pedestal, f
 	return f_analyze_cn_no_pedestal(no_pedestal, sigma_multiplicator, sigma, supplied);
 }
 
-float *f_analyze_sigma(float values[][d_package_channels], size_t size, float sigma_multiplicator, float *sigma_raw, float *pedestal, float *supplied) {
-	float *result = supplied, common_noise[d_package_vas], common_noise_pure[d_package_channels] = {0},
-	common_noise_pure_square[d_package_channels] = {0}, value, fraction;
+float *f_analyze_sigma(float values[][d_package_channels], size_t size, float sigma_multiplicator, float *sigma_raw, float *pedestal, float *supplied_values,
+		unsigned short *supplied_flags) {
+	float *result = supplied_values, common_noise[d_package_vas], common_noise_pure[d_package_channels] = {0},
+		common_noise_pure_square[d_package_channels] = {0}, value, fraction, mean = 0;
 	int channel, event, local_entries[d_package_channels] = {0};
 	if (!result)
 		if (!(result = (float *) d_malloc(sizeof(float)*d_package_channels)))
@@ -115,7 +116,16 @@ float *f_analyze_sigma(float values[][d_package_channels], size_t size, float si
 			common_noise_pure[channel] *= fraction;
 			common_noise_pure_square[channel] *= fraction;
 			result[channel] = sqrt(fabs(common_noise_pure_square[channel]-(common_noise_pure[channel]*common_noise_pure[channel])));
+			mean += result[channel];
 		}
+	if (supplied_flags) {
+		mean /= (float)d_package_channels;
+		for (channel = 0; channel < d_package_channels; ++channel)
+			if (result[channel] > (d_analyze_sigma_k_max*mean))
+				supplied_flags[channel] |= (e_analyze_flag_bad_sigma|e_analyze_flag_bad);
+			else
+				supplied_flags[channel] &= (~e_analyze_flag_bad_sigma);
+	}
 	return result;
 }
 
@@ -130,7 +140,8 @@ float *f_analyze_adc_pedestal(float values[d_package_channels], float *pedestal,
 	return result;
 }
 
-float *f_analyze_adc_pedestal_cn(float values[d_package_channels], float sigma_multiplicator, float *pedestal, float *sigma, float *supplied) {
+float *f_analyze_adc_pedestal_cn(float values[d_package_channels], float sigma_multiplicator, float *pedestal, float *sigma, unsigned short *flags,
+		float *supplied) {
 	float *result = supplied, common_noise[d_package_vas];
 	int index;
 	if (!result)
@@ -138,7 +149,10 @@ float *f_analyze_adc_pedestal_cn(float values[d_package_channels], float sigma_m
 			d_die(d_error_malloc);
 	f_analyze_cn(values, sigma_multiplicator, pedestal, sigma, common_noise);
 	for (index = 0; index < d_package_channels; ++index)
-		supplied[index] = values[index]-pedestal[index]-common_noise[(index/d_package_channels_on_va)];
+		if ((flags) && ((flags[index]&e_analyze_flag_bad)==e_analyze_flag_bad))
+			supplied[index] = 0;
+		else
+			supplied[index] = values[index]-pedestal[index]-common_noise[(index/d_package_channels_on_va)];
 	return result;
 }
 

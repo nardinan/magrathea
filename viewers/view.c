@@ -17,8 +17,8 @@
  */
 #include "view.h"
 struct s_view_environment environment;
-int v_view_ladder, v_view_calibration_steps = d_view_calibration_steps, v_view_skip = 1;
-long long v_view_index = 0;
+int v_view_ladder, v_view_calibration_steps = d_view_calibration_steps, v_view_skip = 1, v_view_pause = d_false;
+long long v_view_index = 0, v_starting_time = 0;
 void f_view_action_dump(GtkWidget *widget, struct s_interface *interface) {
 	int index;
 	if (environment.calibrated >= d_view_ladders)
@@ -40,15 +40,26 @@ void f_view_action_redo(GtkWidget *widget, struct s_interface *interface) {
 	gtk_widget_set_sensitive(GTK_WIDGET(interface->buttons[e_interface_button_dump]), FALSE);
 }
 
+int f_view_action_press(GtkWidget *widget, GdkEventKey *event, struct s_interface *supplied) {
+	switch (event->keyval) {
+		case 32:
+			v_view_pause = !v_view_pause;
+			break;
+	}
+	return d_false;
+}
+
 int f_view_initialize(struct s_interface *supplied, const char *builder_path) {
 	int result = d_false;
 	if (f_interface_initialize(supplied, builder_path)) {
 		gtk_widget_set_sensitive(GTK_WIDGET(supplied->buttons[e_interface_button_dump]), FALSE);
 		if ((g_signal_connect(G_OBJECT(supplied->buttons[e_interface_button_dump]), "clicked", G_CALLBACK(f_view_action_dump), supplied) > 0) &&
-			(g_signal_connect(G_OBJECT(supplied->buttons[e_interface_button_redo]), "clicked", G_CALLBACK(f_view_action_redo), supplied) > 0)) {
+				(g_signal_connect(G_OBJECT(supplied->buttons[e_interface_button_redo]), "clicked", G_CALLBACK(f_view_action_redo), supplied) > 0)) {
 			gtk_spin_button_set_value(supplied->spins[e_interface_spin_ladder], v_view_ladder);
+			gtk_spin_button_set_value(supplied->spins[e_interface_spin_delay], 0);
 			gtk_window_set_default_size(supplied->window, d_view_window_width, d_view_window_height);
-			if (g_signal_connect(G_OBJECT(supplied->window), "delete-event", G_CALLBACK(f_view_destroy), supplied) > 0) {
+			if ((g_signal_connect(G_OBJECT(supplied->window), "delete-event", G_CALLBACK(f_view_destroy), supplied) > 0) &&
+					(g_signal_connect(G_OBJECT(supplied->window), "key-press-event", G_CALLBACK(f_view_action_press), supplied) > 0)) {
 				gtk_widget_show_all(GTK_WIDGET(supplied->window));
 				result = d_true;
 			}
@@ -61,6 +72,12 @@ void f_view_destroy(GtkWidget *widget, struct s_interface *interface) {
 	if (environment.stream)
 		fclose(environment.stream);
 	exit(0);
+}
+
+void p_view_loop_refresh_quick_view(struct s_interface *interface) {
+	int index;
+	for (index = e_interface_chart_adc_0; index < e_interface_chart_NULL; ++index)
+		f_chart_redraw(&(interface->logic_charts[index]));
 }
 
 void p_view_loop_dump(struct s_interface *interface, unsigned short int ladder) {
@@ -98,17 +115,18 @@ void p_view_loop_analyze(struct s_interface *interface, unsigned short int ladde
 		f_analyze_pedestal(environment.calibration[ladder].bucket, environment.calibration[ladder].package, environment.calibration[ladder].pedestal);
 		f_analyze_sigma_raw(environment.calibration[ladder].bucket, environment.calibration[ladder].package, environment.calibration[ladder].sigma_raw);
 		f_analyze_sigma(environment.calibration[ladder].bucket, environment.calibration[ladder].package, d_view_calibration_sigma_k,
-				environment.calibration[ladder].sigma_raw, environment.calibration[ladder].pedestal, environment.calibration[ladder].sigma);
+				environment.calibration[ladder].sigma_raw, environment.calibration[ladder].pedestal, environment.calibration[ladder].sigma,
+				environment.calibration[ladder].flags);
 		environment.calibration[ladder].computed = d_true;
 	} else {
 		f_analyze_adc_pedestal(environment.data[ladder].bucket, environment.calibration[ladder].pedestal, environment.data[ladder].adc_pedestal);
 		f_analyze_adc_pedestal_cn(environment.data[ladder].bucket, d_view_calibration_sigma_k, environment.calibration[ladder].pedestal,
-				environment.calibration[ladder].sigma, environment.data[ladder].adc_pedestal_cn);
+				environment.calibration[ladder].sigma, environment.calibration[ladder].flags, environment.data[ladder].adc_pedestal_cn);
 	}
 }
 
 void p_view_loop_refresh(struct s_interface *interface, unsigned short int ladder) {
-	int index;
+	int index, current_ladder;
 	if (ladder == v_view_ladder) {
 		if (environment.calibration[v_view_ladder].computed) {
 			if (!environment.calibration[v_view_ladder].drawed) {
@@ -118,11 +136,14 @@ void p_view_loop_refresh(struct s_interface *interface, unsigned short int ladde
 				for (index = 0; index < d_package_channels; ++index) {
 					f_chart_append_signal(&(interface->logic_charts[e_interface_chart_pedestal]), 0, index,
 							environment.calibration[v_view_ladder].pedestal[index]);
-					f_chart_append_signal(&(interface->logic_charts[e_interface_chart_sigma_raw]), 0, index,
+					f_chart_append_signal(&(interface->logic_charts[e_interface_chart_sigma_raw]), 1, index,
 							environment.calibration[v_view_ladder].sigma_raw[index]);
+					f_chart_append_signal(&(interface->logic_charts[e_interface_chart_sigma_raw]), 0, index,
+							-((float)environment.calibration[v_view_ladder].flags[index]));
 					f_chart_append_signal(&(interface->logic_charts[e_interface_chart_sigma]), 0, index,
 							environment.calibration[v_view_ladder].sigma[index]);
 				}
+				interface->logic_charts[e_interface_chart_sigma_raw].kind[0] = e_chart_kind_histogram;
 				environment.calibration[v_view_ladder].drawed = d_true;
 			} else {
 				f_chart_flush(&(interface->logic_charts[e_interface_chart_adc_pedestal]));
@@ -138,25 +159,31 @@ void p_view_loop_refresh(struct s_interface *interface, unsigned short int ladde
 		f_chart_flush(&(interface->logic_charts[e_interface_chart_adc]));
 		for (index = 0; index < d_package_channels; ++index)
 			f_chart_append_signal(&(interface->logic_charts[e_interface_chart_adc]), 0, index, environment.data[v_view_ladder].bucket[index]);
-	}
-	f_chart_flush(&(interface->logic_charts[e_interface_chart_adc_0+ladder]));
-	f_chart_flush(&(interface->logic_charts[e_interface_chart_signal_0+ladder]));
-	for (index = 0; index < d_package_channels; ++index) {
-		f_chart_append_signal(&(interface->logic_charts[e_interface_chart_adc_0+ladder]), 0, index, environment.data[ladder].bucket[index]);
-		f_chart_append_signal(&(interface->logic_charts[e_interface_chart_signal_0+ladder]), 0, index,
-				environment.data[ladder].adc_pedestal_cn[index]);
+		for (current_ladder = 0; current_ladder < d_view_ladders; ++current_ladder) {
+			f_chart_flush(&(interface->logic_charts[e_interface_chart_adc_0+current_ladder]));
+			f_chart_flush(&(interface->logic_charts[e_interface_chart_signal_0+current_ladder]));
+			for (index = 0; index < d_package_channels; ++index) {
+				f_chart_append_signal(&(interface->logic_charts[e_interface_chart_adc_0+current_ladder]), 0, index,
+						environment.data[current_ladder].bucket[index]);
+				f_chart_append_signal(&(interface->logic_charts[e_interface_chart_signal_0+current_ladder]), 0, index,
+						environment.data[current_ladder].adc_pedestal_cn[index]);
+			}
+		}
 	}
 }
 
 int f_view_loop(struct s_interface *interface) {
+	int result = d_true, index, ladder, selected, refresh = d_false;
 	char buffer[d_string_buffer_size];
 	unsigned char *backup;
 	struct s_package package;
-	int result = d_true, index, ladder, selected, refresh = d_false;
 	ssize_t readed;
+	struct timeval current_timeval;
+	long long current_time, delay;
 	v_view_index++;
 	if (environment.stream) {
 		selected = gtk_spin_button_get_value_as_int(interface->spins[e_interface_spin_ladder]);
+		delay = gtk_spin_button_get_value_as_int(interface->spins[e_interface_spin_delay]);
 		if ((selected != v_view_ladder) && (selected >= 0) && (selected < d_view_ladders)) {
 			refresh = d_true;
 			v_view_ladder = selected;
@@ -164,33 +191,37 @@ int f_view_loop(struct s_interface *interface) {
 				f_chart_flush(&(interface->logic_charts[index]));
 			environment.calibration[v_view_ladder].drawed = d_false;
 		}
-		if ((readed = fread(environment.buffer+environment.bytes, 1, d_package_buffer_size-environment.bytes, environment.stream)) > 0)
-			environment.bytes += readed;
+		gettimeofday(&current_timeval, NULL);
+		current_time = ((1000000l*((long long)current_timeval.tv_sec))+current_timeval.tv_usec);
+		if (((current_time-v_starting_time) > delay) && (!v_view_pause)) {
+			v_starting_time = current_time;
+			if ((readed = fread(environment.buffer+environment.bytes, 1, d_package_buffer_size-environment.bytes, environment.stream)) > 0)
+				environment.bytes += readed;
+		}
 		if ((backup = f_package_analyze(&package, environment.buffer, environment.bytes)))
 			if (backup > environment.buffer) {
 				environment.bytes -= (backup-environment.buffer);
 				memmove(environment.buffer, backup, environment.bytes);
 				if (package.complete)
-					for (ladder = 0; ladder < d_package_ladders; ++ladder)
+					for (ladder = 0; ladder < d_package_ladders; ++ladder) {
 						if ((package.data.values.raw.ladder[ladder] >= 0) &&
 								(package.data.values.raw.ladder[ladder] < d_view_ladders)) {
 							environment.data[package.data.values.raw.ladder[ladder]].events++;
 							p_view_loop_analyze(interface, package.data.values.raw.ladder[ladder],
 									package.data.values.raw.values[ladder]);
-							if (package.data.values.raw.ladder[ladder] == v_view_ladder) {
-								snprintf(buffer, d_string_buffer_size, "[events]: %zu",
-										environment.data[v_view_ladder].events);
-								gtk_label_set_text(interface->labels[e_interface_label_events], buffer);
-							}
+							p_view_loop_refresh(interface, package.data.values.raw.ladder[ladder]);
 						}
+					}
 			}
 	}
-	if (((v_view_index%v_view_skip) == 0) || (refresh)) {
-		for (ladder = 0; ladder < d_view_ladders; ++ladder)
-			p_view_loop_refresh(interface, ladder);
+	if (v_view_pause)
+		strncpy(buffer, "[events]: pause", d_string_buffer_size);
+	else
+		snprintf(buffer, d_string_buffer_size, "[events]: %zu", environment.data[v_view_ladder].events);
+	gtk_label_set_text(interface->labels[e_interface_label_events], buffer);
+	if (((v_view_index%v_view_skip) == 0) || (refresh))
 		for (index = 0; index < e_interface_chart_NULL; ++index)
 			f_chart_redraw(&(interface->logic_charts[index]));
-	}
 	return result;
 }
 

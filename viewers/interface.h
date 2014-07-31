@@ -81,6 +81,7 @@ typedef enum e_interface_labels {
 } e_interface_labels;
 typedef enum e_interface_spins {
 	e_interface_spin_ladder = 0,
+	e_interface_spin_delay,
 	e_interface_spin_NULL
 } e_interface_spins;
 typedef enum e_interface_buttons {
