@@ -160,14 +160,24 @@ int f_trb_device_status(unsigned char code, char **tokens, size_t elements, int 
 		if ((result = f_trb_device_description(code, tokens, elements, output))) {
 			if (output != d_console_descriptor_null) {
 				snprintf(currents, d_string_buffer_size, "%scurrents%s\n\t[+3.4V % 4.02fmA]\n\t[-3.3V % 4.02fmA]\n"
-						"\t[+5.7V % 4.02fmA]\n\t[+12V  % 4.02fmA]\n",
+						"\t[+5.7V % 4.02fmA]\n\t[+12V  % 4.02fmA]\n\t[VSSA1 % 4.02fmA|% 4.02f VSSA2mA]\n"
+						"\t[VSSA3 % 4.02fmA|% 4.02fmA VSSA4]\n\t[VSSA5 % 4.02fmA|% 4.02fmA VSSA6]\n"
+						"\t[VDD1  % 4.02fmA|% 4.02fmA  VDD2]\n",
 						v_console_styles[e_console_style_yellow], v_console_styles[e_console_style_reset],
 						v_trb_device_boards[code].status.currents[e_trb_device_currents_34],
 						v_trb_device_boards[code].status.currents[e_trb_device_currents_33],
 						v_trb_device_boards[code].status.currents[e_trb_device_currents_57],
-						v_trb_device_boards[code].status.currents[e_trb_device_currents_12]);
+						v_trb_device_boards[code].status.currents[e_trb_device_currents_12],
+						v_trb_device_boards[code].status.currents[e_trb_device_currents_VSSA1],
+						v_trb_device_boards[code].status.currents[e_trb_device_currents_VSSA2],
+						v_trb_device_boards[code].status.currents[e_trb_device_currents_VSSA3],
+						v_trb_device_boards[code].status.currents[e_trb_device_currents_VSSA4],
+						v_trb_device_boards[code].status.currents[e_trb_device_currents_VSSA5],
+						v_trb_device_boards[code].status.currents[e_trb_device_currents_VSSA6],
+						v_trb_device_boards[code].status.currents[e_trb_device_currents_33VDD1],
+						v_trb_device_boards[code].status.currents[e_trb_device_currents_33VDD2]);
 				write(output, currents, f_string_strlen(currents));
-				snprintf(temperatures, d_string_buffer_size, "%stemperatures%s\n\t[A %4.02fC %4.02fC]\n\t[B %4.02fC %4.02fC]\n",
+				snprintf(temperatures, d_string_buffer_size, "%stemperatures%s\n\t[A %4.02fC | %4.02fC]\n\t[B %4.02fC | %4.02fC]\n",
 						v_console_styles[e_console_style_yellow], v_console_styles[e_console_style_reset],
 						v_trb_device_boards[code].status.temperatures[e_trb_device_temperatures_BUSA_1],
 						v_trb_device_boards[code].status.temperatures[e_trb_device_temperatures_BUSB_1],
@@ -470,8 +480,8 @@ void p_trb_device_refresh_analyze(unsigned char code, unsigned char *buffer, siz
 						v_trb_device_boards[code].status.status[e_trb_device_status_trigger_high] =
 							buffer[B(e_trb_device_bytes_0x07_status_trigger_high)];
 						v_trb_device_boards[code].trigger =
-							(((unsigned int)buffer[B(e_trb_device_status_trigger_low)])&0xFF)||
-							((((unsigned int)buffer[B(e_trb_device_status_trigger_high)])<<8)&0xFF);
+							(((unsigned int)buffer[B(e_trb_device_bytes_0x07_status_trigger_low)])&0xFF)|
+							(((unsigned int)buffer[B(e_trb_device_bytes_0x07_status_trigger_high)])<<8);
 						v_trb_device_boards[code].status.status[e_trb_device_status_version_M] =
 							buffer[B(e_trb_device_bytes_0x07_status_version_M)];
 						v_trb_device_boards[code].status.status[e_trb_device_status_version_L] =
