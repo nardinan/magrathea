@@ -79,7 +79,11 @@ void p_trb_device_description_format(unsigned char code, char *destination, size
 	snprintf(destination, size, "#%d [%s]%s TRB 0x%02x ", code, v_trb_device_boards[code].location, (v_trb_device_boards[code].selected)?"[*]":"",
 			v_trb_device_boards[code].code);
 	if (f_trb_device_initialize(code)) {
-		snprintf(status, d_string_buffer_size, "[%sready%s]", v_console_styles[e_console_style_green], v_console_styles[e_console_style_reset]);
+		if (v_trb_device_boards[code].wrong)
+			snprintf(status, d_string_buffer_size, "[%swrong connector%s]", v_console_styles[e_console_style_yellow],
+					v_console_styles[e_console_style_reset]);
+		else
+			snprintf(status, d_string_buffer_size, "[%sready%s]", v_console_styles[e_console_style_green], v_console_styles[e_console_style_reset]);
 		if (v_trb_device_boards[code].stream.stream) {
 			value = v_trb_device_boards[code].stream.written_bytes;
 			for (postfix = 0; (bytes_postfixes[postfix+1]) && (value >= 1024.0); ++postfix)
@@ -216,15 +220,15 @@ int f_trb_device_stream(unsigned char code, char **tokens, size_t elements, int 
 }
 
 void p_trb_device_write_packet(unsigned char *supplied, unsigned char code, unsigned char type, unsigned char high_byte, unsigned char low_byte) {
-	static unsigned char raw_command[d_trb_device_raw_command_size] = {0x55, 0xaa, 0xeb, 0x90, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x5a, 0xa5};
+	static unsigned char raw_command[d_trb_device_raw_command_size] = {0x55, 0xaa, 0xeb, 0x90, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x5a, 0xa5};
 	unsigned int checksum = (code+type+high_byte+low_byte);
 	memcpy(supplied, raw_command, d_trb_device_raw_command_size);
-	supplied[5] = code;
-	supplied[6] = type;
-	supplied[7] = high_byte;
-	supplied[8] = low_byte;
-	supplied[9] = (checksum>>8)&0xff;
-	supplied[10] = (checksum)&0xff;
+	supplied[4] = code;
+	supplied[5] = type;
+	supplied[6] = high_byte;
+	supplied[7] = low_byte;
+	supplied[8] = (checksum>>8)&0xff;
+	supplied[9] = (checksum)&0xff;
 }
 
 int f_trb_device_write(unsigned char code, char **tokens, size_t elements, int output) {
@@ -344,7 +348,7 @@ int f_trb_device_enabled(unsigned char code) {
 }
 
 int f_trb_device_initialize(unsigned char code) {
-	static unsigned char bus_loopback[] = {0x55, 0xaa, 0xeb, 0x90, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x5a, 0xa5};
+	static unsigned char bus_loopback[] = {0x55, 0xaa, 0xeb, 0x90, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x5a, 0xa5};
 	unsigned char loopback_answer[d_trb_device_raw_command_size];
 	int readed, result = d_false;
 	if (v_trb_device_boards[code].descriptor == d_rs232_null)
@@ -354,9 +358,12 @@ int f_trb_device_initialize(unsigned char code) {
 	if (v_trb_device_boards[code].descriptor != d_rs232_null) {
 		f_rs232_write(v_trb_device_boards[code].descriptor, bus_loopback, d_trb_device_raw_command_size);
 		if ((readed = f_rs232_read_packet(v_trb_device_boards[code].descriptor, loopback_answer, d_trb_device_raw_command_size, d_trb_device_timeout,
-						v_trb_device_raw_head, v_trb_device_raw_tail, d_trb_device_sentinel_size)) > 0)
+						v_trb_device_raw_head, v_trb_device_raw_tail, d_trb_device_sentinel_size)) > 0) {
+			v_trb_device_boards[code].wrong = d_false;
+			if (v_trb_device_boards[code].code != loopback_answer[4])
+				v_trb_device_boards[code].wrong = d_true;
 			result = d_true;
-		else
+		} else
 			f_trb_device_destroy(code);
 	}
 	return result;

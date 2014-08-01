@@ -20,15 +20,16 @@
 #include "rs232.h"
 #include "console.h"
 #define d_trb_device_boards 8
-#define d_trb_device_raw_command_size 13
+#define d_trb_device_raw_command_size 12
+#define d_trb_device_raw_command_id_byte 4
 #define d_trb_device_raw_answer_size 256
 #define d_trb_device_command_size 4
 #define d_trb_device_sentinel_size 2
 #define d_trb_device_hexadecimal_size 2
 #define d_trb_device_temperatures_size 48
-#define d_trb_device_timeout 5000 /* microseconds */
+#define d_trb_device_timeout 5000 	/* microseconds */
 #define d_trb_device_timeout_refresh 10 /* milliseconds */
-#define d_trb_device_timeout_status 10 /* seconds */
+#define d_trb_device_timeout_status 10 	/* seconds */
 #define d_trb_device_log "./magrathea.log"
 #define d_trb_device_csv_character '\t'
 #define B(a) v_trb_device_bytes[(a)]
@@ -109,7 +110,7 @@ typedef enum e_trb_device_bytes {
 } e_trb_bytes;
 typedef struct s_trb_device {
 	/* do not touch */
-	int descriptor, selected:1, focused:1;
+	int descriptor, selected:1, focused:1, wrong:1;
 	unsigned char code;
 	const char *location;
 	/* ok, now you can add your values */
