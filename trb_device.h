@@ -53,10 +53,10 @@ typedef enum e_trb_device_currents {
 	e_trb_device_currents_null
 } e_trb_device_currents;
 typedef enum e_trb_device_temperatures {
-	e_trb_device_temperatures_BUSA_1 = 0,
-	e_trb_device_temperatures_BUSB_1,
-	e_trb_device_temperatures_BUSA_2,
-	e_trb_device_temperatures_BUSB_2,
+	e_trb_device_temperatures_adc = 0,
+	e_trb_device_temperatures_power,
+	e_trb_device_temperatures_fpga_A,
+	e_trb_device_temperatures_fpga_B,
 	e_trb_device_temperatures_null
 } e_trb_device_temperatures;
 typedef enum e_trb_device_voltages {
@@ -81,10 +81,10 @@ typedef enum e_trb_device_bytes {
 	e_trb_device_bytes_0x05_current_57,
 	e_trb_device_bytes_0x05_current_12,
 	e_trb_device_bytes_0x06,
-	e_trb_device_bytes_0x06_temperature_A1,
-	e_trb_device_bytes_0x06_temperature_B1,
-	e_trb_device_bytes_0x06_temperature_A2,
-	e_trb_device_bytes_0x06_temperature_B2,
+	e_trb_device_bytes_0x06_temperature_adc,
+	e_trb_device_bytes_0x06_temperature_power,
+	e_trb_device_bytes_0x06_temperature_fpga_A,
+	e_trb_device_bytes_0x06_temperature_fpga_B,
 	e_trb_device_bytes_0x06_temperature_TFH,
 	e_trb_device_bytes_0x07,
 	e_trb_device_bytes_0x07_current_VSSA1,

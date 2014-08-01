@@ -26,10 +26,10 @@ unsigned int v_trb_device_bytes[] = {
 	8, 	/* 0x05 - current @ 5.7V - satellite small packet	*/
 	9, 	/* 0x05 - current @ 12.0V - satellite small packet	*/
 	58,	/* 0x06							*/
-	54,	/* 0x06 - temperature BUS A #1				*/
-	55,	/* 0x06 - temperature BUS B #1				*/
-	56,	/* 0x06 - temperature BUS A #2				*/
-	57,	/* 0x06 - temperature BUS B #3				*/
+	54,	/* 0x06 - temperature ADC BOARD				*/
+	55,	/* 0x06 - temperature POWER BOARD			*/
+	56,	/* 0x06 - temperature FPGA BUS A #1			*/
+	57,	/* 0x06 - temperature FPGA BUS B #2			*/
 	6,	/* 0x06 - first TFH temperature 			*/
 	40,	/* 0x07							*/
 	32,	/* 0x07 - current on VSSA1				*/
@@ -181,12 +181,13 @@ int f_trb_device_status(unsigned char code, char **tokens, size_t elements, int 
 						v_trb_device_boards[code].status.currents[e_trb_device_currents_33VDD1],
 						v_trb_device_boards[code].status.currents[e_trb_device_currents_33VDD2]);
 				write(output, currents, f_string_strlen(currents));
-				snprintf(temperatures, d_string_buffer_size, "%stemperatures%s\n\t[A %4.02fC | %4.02fC]\n\t[B %4.02fC | %4.02fC]\n",
+				snprintf(temperatures, d_string_buffer_size, "%stemperatures%s\n\t[ADC    %4.02fC | %4.02fC    PWR]\n"
+						"\t[FPGA A %4.02fC | %4.02fC FPGA B]\n",
 						v_console_styles[e_console_style_yellow], v_console_styles[e_console_style_reset],
-						v_trb_device_boards[code].status.temperatures[e_trb_device_temperatures_BUSA_1],
-						v_trb_device_boards[code].status.temperatures[e_trb_device_temperatures_BUSB_1],
-						v_trb_device_boards[code].status.temperatures[e_trb_device_temperatures_BUSA_2],
-						v_trb_device_boards[code].status.temperatures[e_trb_device_temperatures_BUSB_2]);
+						v_trb_device_boards[code].status.temperatures[e_trb_device_temperatures_adc],
+						v_trb_device_boards[code].status.temperatures[e_trb_device_temperatures_power],
+						v_trb_device_boards[code].status.temperatures[e_trb_device_temperatures_fpga_A],
+						v_trb_device_boards[code].status.temperatures[e_trb_device_temperatures_fpga_B]);
 				write(output, temperatures, f_string_strlen(temperatures));
 				snprintf(voltages, d_string_buffer_size, "%svoltages%s\n\t[HV#1 %s%4.02f%sV]\n\t[HV#2 %s%4.02f%sV]\n",
 						v_console_styles[e_console_style_yellow], v_console_styles[e_console_style_reset],
@@ -416,18 +417,18 @@ void p_trb_device_refresh_analyze(unsigned char code, unsigned char *buffer, siz
 					break;
 				case 0x06:
 					if (size > B(e_trb_device_bytes_0x06)) {
-						value = (buffer[B(e_trb_device_bytes_0x06_temperature_A1)])*0.008;
+						value = (buffer[B(e_trb_device_bytes_0x06_temperature_adc)])*0.008;
 						temperature = (-136.64*value*value*value)+(304.47*value*value)-(285.48*value)+139.21;
-						v_trb_device_boards[code].status.temperatures[e_trb_device_temperatures_BUSA_1] = temperature;
-						value = (buffer[B(e_trb_device_bytes_0x06_temperature_B1)])*0.008;
+						v_trb_device_boards[code].status.temperatures[e_trb_device_temperatures_adc] = temperature;
+						value = (buffer[B(e_trb_device_bytes_0x06_temperature_power)])*0.008;
 						temperature = (-136.64*value*value*value)+(304.47*value*value)-(285.48*value)+139.21;
-						v_trb_device_boards[code].status.temperatures[e_trb_device_temperatures_BUSB_1] = temperature;
-						value = (buffer[B(e_trb_device_bytes_0x06_temperature_A2)])*0.008;
+						v_trb_device_boards[code].status.temperatures[e_trb_device_temperatures_power] = temperature;
+						value = (buffer[B(e_trb_device_bytes_0x06_temperature_fpga_A)])*0.008;
 						temperature = (-136.64*value*value*value)+(304.47*value*value)-(285.48*value)+139.21;
-						v_trb_device_boards[code].status.temperatures[e_trb_device_temperatures_BUSA_2] = temperature;
-						value = (buffer[B(e_trb_device_bytes_0x06_temperature_B2)])*0.008;
+						v_trb_device_boards[code].status.temperatures[e_trb_device_temperatures_fpga_A] = temperature;
+						value = (buffer[B(e_trb_device_bytes_0x06_temperature_fpga_B)])*0.008;
 						temperature = (-136.64*value*value*value)+(304.47*value*value)-(285.48*value)+139.21;
-						v_trb_device_boards[code].status.temperatures[e_trb_device_temperatures_BUSB_2] = temperature;
+						v_trb_device_boards[code].status.temperatures[e_trb_device_temperatures_fpga_B] = temperature;
 						for (index = 0; index < d_trb_device_temperatures_size; ++index)
 							v_trb_device_boards[code].status.tfh_temperatures[index] =
 								buffer[index+B(e_trb_device_bytes_0x06_temperature_TFH)];
