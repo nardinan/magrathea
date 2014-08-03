@@ -108,6 +108,11 @@ typedef enum e_trb_device_bytes {
 	e_trb_device_bytes_0x07_status_version_M,
 	e_trb_device_bytes_0x07_status_version_L
 } e_trb_bytes;
+typedef struct s_trb_status {
+	float currents[e_trb_device_currents_null], temperatures[e_trb_device_temperatures_null], tfh_temperatures[d_trb_device_temperatures_size],
+	      voltages[e_trb_device_voltages_null];
+	unsigned char status[e_trb_device_status_null];
+} s_trb_status;
 typedef struct s_trb_device {
 	/* do not touch */
 	int descriptor, selected:1, focused:1, wrong:1;
@@ -122,11 +127,7 @@ typedef struct s_trb_device {
 		FILE *stream;
 		size_t written_bytes;
 	} stream;
-	struct s_trb_status {
-		float currents[e_trb_device_currents_null], temperatures[e_trb_device_temperatures_null], tfh_temperatures[d_trb_device_temperatures_size],
-		      voltages[e_trb_device_voltages_null];
-		unsigned char status[e_trb_device_status_null];
-	} status;
+	struct s_trb_status status;
 } s_trb_device;
 extern unsigned char v_trb_device_raw_head[], v_trb_device_raw_tail[];
 extern unsigned int v_trb_device_bytes[];
