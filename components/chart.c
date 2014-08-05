@@ -445,9 +445,9 @@ int p_chart_callback(GtkWidget *widget, GdkEvent *event, void *v_chart) {
 									chart->data.extension[code]);
 							cairo_text_extents(chart->cairo_brush, buffer, &extents);
 							if (chart->values[code][index].normalized.y > chart->normalized.x_axis)
-								current_position_y = chart->normalized.x_axis+d_chart_giant_font_size+extents.height;
+								current_position_y = chart->normalized.x_axis+(d_chart_giant_font_size/2.0)+extents.height;
 							else
-								current_position_y = chart->normalized.x_axis-d_chart_giant_font_size;
+								current_position_y = chart->normalized.x_axis-(d_chart_giant_font_size/2.0);
 
 							cairo_move_to(chart->cairo_brush, (chart->values[code][index].normalized.x-(extents.width/2.0f)),
 									current_position_y);
