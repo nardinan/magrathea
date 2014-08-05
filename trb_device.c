@@ -322,6 +322,9 @@ int f_trb_device_view(unsigned char code, char **tokens, size_t elements, int ou
 				d_trb_device_viewer_skip);
 		if ((process = popen(buffer, "r")))
 			fclose(process);
+		snprintf(buffer, d_string_buffer_size, "%s %s 0x%02x", d_trb_device_status, d_trb_device_log, v_trb_device_boards[code].code);
+		if ((process = popen(buffer, "r")))
+			fclose(process);
 	}
 	return result;
 }

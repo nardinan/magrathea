@@ -30,11 +30,12 @@
 #define d_trb_device_timeout 5000 	/* microseconds */
 #define d_trb_device_timeout_refresh 10 /* milliseconds */
 #define d_trb_device_timeout_status 10 	/* seconds */
-#define d_trb_device_log "./magrathea.log"
+#define d_trb_device_log "/var/log/magrathea.log"
 #define d_trb_device_csv_character '\t'
 #define B(a) v_trb_device_bytes[(a)]
 #define V(a) v_trb_device_boards[(a)].status
 #define d_trb_device_viewer "./viewer.sh"
+#define d_trb_device_status "./status.sh"
 #define d_trb_device_viewer_skip 2
 #define d_trb_device_converter "./converter.sh"
 typedef enum e_trb_device_currents {
