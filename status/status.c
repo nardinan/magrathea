@@ -142,6 +142,7 @@ int f_status_loop(struct s_interface *interface) {
 }
 
 int main (int argc, char *argv[]) {
+	char buffer[d_string_buffer_size];
 	struct s_interface main_interface;
 	f_memory_init();
 	if (argc == 3) {
@@ -149,6 +150,8 @@ int main (int argc, char *argv[]) {
 		if ((environment.stream = fopen(argv[1], "r"))) {
 			gtk_init(&argc, &argv);
 			if (f_status_initialize(&main_interface, "UI/UI_main.glade")) {
+				snprintf(buffer, d_string_buffer_size, "Magrathea status viewer (TRB %s)", argv[2]);
+				gtk_window_set_title(main_interface.window, buffer);
 				gtk_idle_add((GSourceFunc)f_status_loop, &main_interface);
 				gtk_main();
 			}
