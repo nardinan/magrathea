@@ -89,11 +89,11 @@ void p_status_loop_fill_map(struct s_interface *interface) {
 	f_chart_flush(&(interface->logic_charts[e_interface_chart_temperature]));
 	f_chart_flush(&(interface->logic_charts[e_interface_chart_current]));
 	for (index = 0; index < environment.entries; ++index) {
-		f_chart_append_signal(&(interface->logic_charts[e_interface_chart_temperature]), 0, index, environment.tfh_mean[index]);
-		f_chart_append_signal(&(interface->logic_charts[e_interface_chart_temperature]), 1, index, environment.power_board[index]);
-		f_chart_append_signal(&(interface->logic_charts[e_interface_chart_temperature]), 2, index, environment.adc_board[index]);
-		f_chart_append_signal(&(interface->logic_charts[e_interface_chart_temperature]), 3, index, environment.fpga_board_busa[index]);
-		f_chart_append_signal(&(interface->logic_charts[e_interface_chart_temperature]), 4, index, environment.fpga_board_busb[index]);
+		f_chart_append_signal(&(interface->logic_charts[e_interface_chart_temperature]), 0, index, environment.temperatures.tfh_mean[index]);
+		f_chart_append_signal(&(interface->logic_charts[e_interface_chart_temperature]), 1, index, environment.temperatures.power_board[index]);
+		f_chart_append_signal(&(interface->logic_charts[e_interface_chart_temperature]), 2, index, environment.temperatures.adc_board[index]);
+		f_chart_append_signal(&(interface->logic_charts[e_interface_chart_temperature]), 3, index, environment.temperatures.fpga_board_busa[index]);
+		f_chart_append_signal(&(interface->logic_charts[e_interface_chart_temperature]), 4, index, environment.temperatures.fpga_board_busb[index]);
 	}
 }
 
@@ -107,17 +107,17 @@ void p_status_loop_fill_values(void) {
 		}
 	if (tfh_elements > 1)
 		tfh_mean /= (float)tfh_elements;
-	environment.tfh_mean[environment.entries] = tfh_mean;
-	environment.power_board[environment.entries] = v_current_status.temperatures[e_trb_device_temperatures_power];
-	environment.adc_board[environment.entries] = v_current_status.temperatures[e_trb_device_temperatures_adc];
-	environment.fpga_board_busa[environment.entries] = v_current_status.temperatures[e_trb_device_temperatures_fpga_A];
-	environment.fpga_board_busb[environment.entries] = v_current_status.temperatures[e_trb_device_temperatures_fpga_B];
+	environment.temperatures.tfh_mean[environment.entries] = tfh_mean;
+	environment.temperatures.power_board[environment.entries] = v_current_status.temperatures[e_trb_device_temperatures_power];
+	environment.temperatures.adc_board[environment.entries] = v_current_status.temperatures[e_trb_device_temperatures_adc];
+	environment.temperatures.fpga_board_busa[environment.entries] = v_current_status.temperatures[e_trb_device_temperatures_fpga_A];
+	environment.temperatures.fpga_board_busb[environment.entries] = v_current_status.temperatures[e_trb_device_temperatures_fpga_B];
 	if (environment.entries >= (d_status_temperature_data-1)) {
 		for (index = 1; index < d_status_temperature_data; ++index) {
-			environment.power_board[index-1] = environment.power_board[index];
-			environment.adc_board[index-1] = environment.adc_board[index];
-			environment.fpga_board_busa[index-1] = environment.fpga_board_busa[index];
-			environment.fpga_board_busb[index-1] = environment.fpga_board_busb[index];
+			environment.temperatures.power_board[index-1] = environment.temperatures.power_board[index];
+			environment.temperatures.adc_board[index-1] = environment.temperatures.adc_board[index];
+			environment.temperatures.fpga_board_busa[index-1] = environment.temperatures.fpga_board_busa[index];
+			environment.temperatures.fpga_board_busb[index-1] = environment.temperatures.fpga_board_busb[index];
 		}
 	} else
 		environment.entries++;
@@ -134,6 +134,7 @@ int f_status_loop(struct s_interface *interface) {
 			snprintf(label_buffer, d_string_buffer_size, "Last entry: %s", time_buffer);
 			gtk_label_set_text(interface->labels[e_interface_label_update], label_buffer);
 		}
+		usleep(d_status_timeout);
 	}
 	for (index = 0; index < e_interface_chart_NULL; ++index)
 		f_chart_redraw(&(interface->logic_charts[index]));

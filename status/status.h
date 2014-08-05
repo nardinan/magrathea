@@ -28,12 +28,15 @@
 #define d_status_window_width 800
 #define d_status_window_height 600
 #define d_status_timestamp_format "%d %b %Y %H:%M:%S"
+#define d_status_timeout 50000
 typedef struct s_status_environment {
 	FILE *stream;
 	unsigned char code;
 	time_t timestamp;
-	float tfh_mean[d_status_temperature_data], power_board[d_status_temperature_data], adc_board[d_status_temperature_data],
-		fpga_board_busa[d_status_temperature_data], fpga_board_busb[d_status_temperature_data];
+	struct {
+		float tfh_mean[d_status_temperature_data], power_board[d_status_temperature_data], adc_board[d_status_temperature_data],
+		      fpga_board_busa[d_status_temperature_data], fpga_board_busb[d_status_temperature_data];
+	} temperatures;
 	int entries;
 } s_status_environment;
 extern struct s_status_environment environment;
