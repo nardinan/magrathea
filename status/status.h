@@ -22,8 +22,9 @@
 #define d_status_temperature_max 373.15f
 #define d_status_temperature_min 173.15f
 #define d_status_temperature_kelvin 273.15f
-#define d_status_temperature_data 61
+#define d_status_temperature_data 185
 #define d_status_temperature_entries 10
+#define d_status_temperature_wrong 221.0f
 #define d_status_window_width 800
 #define d_status_window_height 600
 #define d_status_timestamp_format "%d %b %Y %H:%M:%S"

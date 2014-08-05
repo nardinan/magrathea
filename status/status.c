@@ -99,10 +99,14 @@ void p_status_loop_fill_map(struct s_interface *interface) {
 
 void p_status_loop_fill_values(void) {
 	float tfh_mean = 0;
-	int index;
+	int index, tfh_elements = 0;
 	for (index = 0; index < d_trb_device_temperatures_size; ++index)
-		tfh_mean += v_current_status.tfh_temperatures[index];
-	tfh_mean /= (float)d_trb_device_temperatures_size;
+		if (v_current_status.tfh_temperatures[index] != d_status_temperature_wrong) {
+			tfh_mean += v_current_status.tfh_temperatures[index];
+			tfh_elements++;
+		}
+	if (tfh_elements > 1)
+		tfh_mean /= (float)tfh_elements;
 	environment.tfh_mean[environment.entries] = tfh_mean;
 	environment.power_board[environment.entries] = v_current_status.temperatures[e_trb_device_temperatures_power];
 	environment.adc_board[environment.entries] = v_current_status.temperatures[e_trb_device_temperatures_adc];
