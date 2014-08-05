@@ -55,13 +55,13 @@ unsigned int v_trb_device_bytes[] = {
 };
 struct s_trb_device v_trb_device_boards[d_trb_device_boards] = {
 	{d_rs232_null, d_false, d_false, d_false, 0x00, "/dev/ttyL0"},
-	{d_rs232_null, d_false, d_false, d_false, 0x01, "/dev/ttyL3"},
-	{d_rs232_null, d_false, d_false, d_false, 0x08, "/dev/ttyL1"},
-	{d_rs232_null, d_false, d_false, d_false, 0x09, "/dev/ttyL2"},
+	{d_rs232_null, d_false, d_false, d_false, 0x01, "/dev/ttyL1"},
+	{d_rs232_null, d_false, d_false, d_false, 0x08, "/dev/ttyL2"},
+	{d_rs232_null, d_false, d_false, d_false, 0x09, "/dev/ttyL3"},
 	{d_rs232_null, d_false, d_false, d_false, 0x04, "/dev/ttyL4"},
-	{d_rs232_null, d_false, d_false, d_false, 0x05, "/dev/ttyL7"},
-	{d_rs232_null, d_false, d_false, d_false, 0x0C, "/dev/ttyL5"},
-	{d_rs232_null, d_false, d_false, d_false, 0x0D, "/dev/ttyL6"}
+	{d_rs232_null, d_false, d_false, d_false, 0x05, "/dev/ttyL5"},
+	{d_rs232_null, d_false, d_false, d_false, 0x0C, "/dev/ttyL6"},
+	{d_rs232_null, d_false, d_false, d_false, 0x0D, "/dev/ttyL7"}
 };
 void p_trb_device_description_format(unsigned char code, char *destination, size_t size) {
 	static const char *bytes_postfixes[] = {
@@ -164,7 +164,7 @@ int f_trb_device_status(unsigned char code, char **tokens, size_t elements, int 
 		if ((result = f_trb_device_description(code, tokens, elements, output))) {
 			if (output != d_console_descriptor_null) {
 				snprintf(currents, d_string_buffer_size, "%scurrents%s\n\t[+3.4V % 4.02fmA]\n\t[-3.3V % 4.02fmA]\n"
-						"\t[+5.7V % 4.02fmA]\n\t[+12V  % 4.02fmA]\n\t[VSSA1 % 4.02fmA|% 4.02f VSSA2mA]\n"
+						"\t[+5.7V % 4.02fmA]\n\t[+12V  % 4.02fmA]\n\t[VSSA1 % 4.02fmA|% 4.02fmA VSSA2]\n"
 						"\t[VSSA3 % 4.02fmA|% 4.02fmA VSSA4]\n\t[VSSA5 % 4.02fmA|% 4.02fmA VSSA6]\n"
 						"\t[VDD1  % 4.02fmA|% 4.02fmA  VDD2]\n",
 						v_console_styles[e_console_style_yellow], v_console_styles[e_console_style_reset],
@@ -405,32 +405,32 @@ void p_trb_device_refresh_analyze(unsigned char code, unsigned char *buffer, siz
 				case 0x05:
 					if (size > B(e_trb_device_bytes_0x05)) {
 						value = (int)(buffer[B(e_trb_device_bytes_0x05_current_34)]);
-						current = (value*8.0f)+25.0f;
+						current = (value*8.0f)-19.6f;
 						v_trb_device_boards[code].status.currents[e_trb_device_currents_34] = (value==0)?value:current;
 						value = (int)(buffer[B(e_trb_device_bytes_0x05_current_33)]);
-						current = (value*8.0f);
+						current = (value*8.0f)-7.1f;
 						v_trb_device_boards[code].status.currents[e_trb_device_currents_33] = (current<0.0f)?0.0f:current;
 						value = (int)(buffer[B(e_trb_device_bytes_0x05_current_57)]);
-						current = (value*0.8f)-4.0f;
+						current = (value*0.8f)-5.1f;
 						v_trb_device_boards[code].status.currents[e_trb_device_currents_57] = (current<0.0f)?0.0f:current;
 						value = (int)(buffer[B(e_trb_device_bytes_0x05_current_12)]);
-						current = (value*0.8f)-2.7f;
+						current = value;
 						v_trb_device_boards[code].status.currents[e_trb_device_currents_12] = (current<0.0f)?0.0f:current;
 					}
 					break;
 				case 0x06:
 					if (size > B(e_trb_device_bytes_0x06)) {
 						value = (buffer[B(e_trb_device_bytes_0x06_temperature_adc)])*0.008;
-						temperature = (-136.64*value*value*value)+(304.47*value*value)-(285.48*value)+139.21;
+						temperature = (-106.7*value*value*value)+(244.4*value*value)-(238.6*value)+108.7;
 						v_trb_device_boards[code].status.temperatures[e_trb_device_temperatures_adc] = temperature;
 						value = (buffer[B(e_trb_device_bytes_0x06_temperature_power)])*0.008;
-						temperature = (-136.64*value*value*value)+(304.47*value*value)-(285.48*value)+139.21;
+						temperature = (-106.7*value*value*value)+(244.4*value*value)-(238.6*value)+108.7;
 						v_trb_device_boards[code].status.temperatures[e_trb_device_temperatures_power] = temperature;
 						value = (buffer[B(e_trb_device_bytes_0x06_temperature_fpga_A)])*0.008;
-						temperature = (-136.64*value*value*value)+(304.47*value*value)-(285.48*value)+139.21;
+						temperature = (-106.7*value*value*value)+(244.4*value*value)-(238.6*value)+108.7;
 						v_trb_device_boards[code].status.temperatures[e_trb_device_temperatures_fpga_A] = temperature;
 						value = (buffer[B(e_trb_device_bytes_0x06_temperature_fpga_B)])*0.008;
-						temperature = (-136.64*value*value*value)+(304.47*value*value)-(285.48*value)+139.21;
+						temperature = (-106.7*value*value*value)+(244.4*value*value)-(238.6*value)+108.7;
 						v_trb_device_boards[code].status.temperatures[e_trb_device_temperatures_fpga_B] = temperature;
 						for (index = 0; index < d_trb_device_temperatures_size; ++index)
 							v_trb_device_boards[code].status.tfh_temperatures[index] =
@@ -458,26 +458,26 @@ void p_trb_device_refresh_analyze(unsigned char code, unsigned char *buffer, siz
 						current = (value*1.7422)-2.5795;
 						v_trb_device_boards[code].status.currents[e_trb_device_currents_VSSA6] = (current<0.0f)?0.0f:current;
 						value = (int)(buffer[B(e_trb_device_bytes_0x07_current_33VDD1)]);
-						current = value*1.6;
+						current = value*0.8;
 						v_trb_device_boards[code].status.currents[e_trb_device_currents_33VDD1] = (current<0.0f)?0.0f:current;
 						value = (int)(buffer[B(e_trb_device_bytes_0x07_current_33VDD2)]);
-						current = value*1.6;
+						current = value*0.8;
 						v_trb_device_boards[code].status.currents[e_trb_device_currents_33VDD2] = (current<0.0f)?0.0f:current;
 						if (buffer[B(e_trb_device_bytes_0x07_control)] == 0xAA) {
 							v_trb_device_boards[code].status.status[e_trb_device_status_HD] =
 								buffer[B(e_trb_device_bytes_0x07AA_status_HD)];
 						} else if (buffer[B(e_trb_device_bytes_0x07_control)] == 0xBB) {
 							value = (int)(buffer[B(e_trb_device_bytes_0x07BB_current_S34)]);
-							current = (value*8.0f)+25.0f;
+							current = (value*8.0f)-19.6f;
 							v_trb_device_boards[code].status.currents[e_trb_device_currents_34] = (value==0)?value:current;
 							value = (int)(buffer[B(e_trb_device_bytes_0x07BB_current_S33)]);
-							current = (value*8.0f);
+							current = (value*8.0f)-7.1f;
 							v_trb_device_boards[code].status.currents[e_trb_device_currents_33] = (current<0.0f)?0.0f:current;
 							value = (int)(buffer[B(e_trb_device_bytes_0x07BB_current_S57)]);
-							current = (value*0.8f)-4.0f;
+							current = (value*0.8f)-5.1f;
 							v_trb_device_boards[code].status.currents[e_trb_device_currents_57] = (current<0.0f)?0.0f:current;
 							value = (int)(buffer[B(e_trb_device_bytes_0x07BB_current_S12)]);
-							current = (value*0.8f)-2.7f;
+							current = value;
 							v_trb_device_boards[code].status.currents[e_trb_device_currents_12] = (current<0.0f)?0.0f:current;
 							value = (int)(buffer[B(e_trb_device_bytes_0x07BB_voltage_HV1)]);
 							voltage = (value*0.7246)-21.6207;
