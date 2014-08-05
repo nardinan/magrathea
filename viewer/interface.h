@@ -17,7 +17,7 @@
  */
 #ifndef magrathea_interface_h
 #define magrathea_interface_h
-#include "components/chart.h"
+#include "../components/chart.h"
 typedef enum e_interface_charts {
 	e_interface_chart_adc = 0,
 	e_interface_chart_pedestal,

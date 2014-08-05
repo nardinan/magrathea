@@ -368,11 +368,12 @@ void p_chart_normalize(struct s_chart *chart, float full_h, float full_w, unsign
 
 int p_chart_callback(GtkWidget *widget, GdkEvent *event, void *v_chart) {
 	GtkAllocation dimension;
+	cairo_text_extents_t extents;
 	struct s_chart *chart = (struct s_chart *)v_chart;
 	float full_w = fabs(chart->axis_x.range[1]-chart->axis_x.range[0]), full_h = fabs(chart->axis_y.range[1]-chart->axis_y.range[0]),
 	      arc_size = (2.0*G_PI), min_value[d_chart_max_nested] = {0}, max_value[d_chart_max_nested] = {0}, min_channel[d_chart_max_nested] = {0},
 	      max_channel[d_chart_max_nested] = {0}, rms[d_chart_max_nested], pedestal[d_chart_max_nested], total_square, fraction;
-	int index, code, first;
+	int index, code, first, current_position_y;
 	char buffer[d_string_buffer_size];
 	if ((chart->cairo_brush = gdk_cairo_create(chart->plane->window))) {
 		gtk_widget_get_allocation(GTK_WIDGET(chart->plane), &dimension);
@@ -403,7 +404,7 @@ int p_chart_callback(GtkWidget *widget, GdkEvent *event, void *v_chart) {
 							min_value[code] = chart->values[code][index].y;
 							min_channel[code] = chart->values[code][index].x;
 						}
-						if (chart->kind[code] == e_chart_kind_histogram) {
+						if ((chart->kind[code] == e_chart_kind_histogram) || (chart->kind[code] == e_chart_kind_histogram_numeric)) {
 							cairo_move_to(chart->cairo_brush, chart->values[code][index].normalized.x, chart->normalized.x_axis);
 							cairo_line_to(chart->cairo_brush, chart->values[code][index].normalized.x,
 									chart->values[code][index].normalized.y);
@@ -430,22 +431,46 @@ int p_chart_callback(GtkWidget *widget, GdkEvent *event, void *v_chart) {
 					rms[code] = sqrtf(fabs(total_square-(pedestal[code]*pedestal[code])));
 				}
 				if (chart->show_borders) {
+					cairo_set_font_size(chart->cairo_brush, d_chart_default_font_size);
 					cairo_move_to(chart->cairo_brush, (chart->border_x-d_chart_font_size), (chart->border_y+(code*d_chart_font_height)));
 					cairo_show_text(chart->cairo_brush, "@");
 				}
 				cairo_stroke(chart->cairo_brush);
+				if (chart->kind[code] == e_chart_kind_histogram_numeric) {
+					cairo_set_source_rgb(chart->cairo_brush, 0.0, 0.0, 0.0);
+					cairo_set_font_size(chart->cairo_brush, d_chart_giant_font_size);
+					for (index = 0; index < chart->head[code]; index++)
+						if (chart->values[code][index].normalized.done) {
+							snprintf(buffer, d_string_buffer_size, "%g%s", chart->values[code][index].y,
+									chart->data.extension[code]);
+							cairo_text_extents(chart->cairo_brush, buffer, &extents);
+							if (chart->values[code][index].normalized.y > chart->normalized.x_axis)
+								current_position_y = chart->normalized.x_axis+d_chart_giant_font_size+extents.height;
+							else
+								current_position_y = chart->normalized.x_axis-d_chart_giant_font_size;
+
+							cairo_move_to(chart->cairo_brush, (chart->values[code][index].normalized.x-(extents.width/2.0f)),
+									current_position_y);
+							cairo_show_text(chart->cairo_brush, buffer);
+						}
+					cairo_stroke(chart->cairo_brush);
+				}
 			}
 		if (chart->show_borders) {
 			cairo_set_source_rgb(chart->cairo_brush, 0.0, 0.0, 0.0);
+			cairo_set_font_size(chart->cairo_brush, d_chart_default_font_size);
 			for (code = 0; code < d_chart_max_nested; code++)
 				if (chart->head[code]) {
-					cairo_move_to(chart->cairo_brush, chart->border_x+d_chart_font_size, (chart->border_y+(code*d_chart_font_height)));
+					cairo_move_to(chart->cairo_brush, (chart->border_x+d_chart_default_font_size),
+							(chart->border_y+(code*d_chart_font_height)));
 					if (chart->kind[code] == e_chart_kind_envelope)
-						snprintf(buffer, d_string_buffer_size, "min %.02f (%.0f)| max: %.02f (%.0f)", min_value[code],
-								min_channel[code], max_value[code], max_channel[code]);
+						snprintf(buffer, d_string_buffer_size, "%s [min %.02f (%.0f)| max: %.02f (%.0f)]",
+								chart->data.description[code], min_value[code], min_channel[code], max_value[code],
+								max_channel[code]);
 					else
-						snprintf(buffer, d_string_buffer_size, "min: %.02f (%.0f)| max: %.02f (%.0f)| mean: %.02f | RMS: %.02f ",
-								min_value[code], min_channel[code], max_value[code], max_channel[code], pedestal[code],
+						snprintf(buffer, d_string_buffer_size, "%s [min: %.02f (%.0f)| max: %.02f (%.0f)| mean: %.02f | RMS: %.02f]",
+								chart->data.description[code], min_value[code], min_channel[code], max_value[code],
+								max_channel[code], pedestal[code],
 								rms[code]);
 					cairo_show_text(chart->cairo_brush, buffer);
 				}

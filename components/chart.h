@@ -21,13 +21,16 @@
 #include <math.h>
 #include "keys.h"
 #define d_chart_bucket 1024
-#define d_chart_max_nested 4
+#define d_chart_max_nested 6
 #define d_chart_font_size 7.0
 #define d_chart_font_height 12.0
+#define d_chart_giant_font_size 20.0
+#define d_chart_default_font_size 10.0
 #define d_same_sign(a,b) (((a)>=0)^((b)<0))
 typedef enum e_chart_kinds {
 	e_chart_kind_signal = 0,
 	e_chart_kind_histogram,
+	e_chart_kind_histogram_numeric,
 	e_chart_kind_envelope
 } e_chart_kinds;
 typedef struct s_chart_value {
@@ -58,6 +61,7 @@ typedef struct s_chart {
 	struct {
 		float dot_size[d_chart_max_nested], line_size[d_chart_max_nested];
 		struct s_chart_color color[d_chart_max_nested];
+		char extension[d_chart_max_nested][d_string_buffer_size], description[d_chart_max_nested][d_string_buffer_size];
 	} data;
 	struct s_chart_value values[d_chart_max_nested][d_chart_bucket];
 	float total[d_chart_max_nested], total_square[d_chart_max_nested], elements[d_chart_max_nested];

@@ -15,14 +15,14 @@ view.o: view.c view.h interface.h analyze.h
 analyze.o: analyze.c analyze.h ../package.h
 	$(cc) $(cflags) analyze.c
 
-interface.o: interface.c interface.h components/chart.h
+interface.o: interface.c interface.h ../components/chart.h
 	$(cc) $(cflags) interface.c
 
-chart.o: components/chart.c components/chart.h components/keys.h
-	$(cc) $(cflags) components/chart.c
+chart.o: ../components/chart.c ../components/chart.h ../components/keys.h
+	$(cc) $(cflags) ../components/chart.c
 
-keys.o: components/keys.c components/keys.h
-	$(cc) $(cflags) components/keys.c
+keys.o: ../components/keys.c ../components/keys.h
+	$(cc) $(cflags) ../components/keys.c
 
 package.o: ../package.c ../package.h
 	$(cc) $(cflags) ../package.c
