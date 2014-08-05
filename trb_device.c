@@ -54,14 +54,14 @@ unsigned int v_trb_device_bytes[] = {
 	31	/* 0x07 - version code B				*/
 };
 struct s_trb_device v_trb_device_boards[d_trb_device_boards] = {
-	{d_rs232_null, d_false, d_false, 0x00, "/dev/ttyL0"},
-	{d_rs232_null, d_false, d_false, 0x01, "/dev/ttyL3"},
-	{d_rs232_null, d_false, d_false, 0x08, "/dev/ttyL1"},
-	{d_rs232_null, d_false, d_false, 0x09, "/dev/ttyL2"},
-	{d_rs232_null, d_false, d_false, 0x04, "/dev/ttyL4"},
-	{d_rs232_null, d_false, d_false, 0x05, "/dev/ttyL7"},
-	{d_rs232_null, d_false, d_false, 0x0C, "/dev/ttyL5"},
-	{d_rs232_null, d_false, d_false, 0x0D, "/dev/ttyL6"}
+	{d_rs232_null, d_false, d_false, d_false, 0x00, "/dev/ttyL0"},
+	{d_rs232_null, d_false, d_false, d_false, 0x01, "/dev/ttyL3"},
+	{d_rs232_null, d_false, d_false, d_false, 0x08, "/dev/ttyL1"},
+	{d_rs232_null, d_false, d_false, d_false, 0x09, "/dev/ttyL2"},
+	{d_rs232_null, d_false, d_false, d_false, 0x04, "/dev/ttyL4"},
+	{d_rs232_null, d_false, d_false, d_false, 0x05, "/dev/ttyL7"},
+	{d_rs232_null, d_false, d_false, d_false, 0x0C, "/dev/ttyL5"},
+	{d_rs232_null, d_false, d_false, d_false, 0x0D, "/dev/ttyL6"}
 };
 void p_trb_device_description_format(unsigned char code, char *destination, size_t size) {
 	static const char *bytes_postfixes[] = {
@@ -115,7 +115,7 @@ void p_trb_device_status_dump(unsigned char code, const char *path) {
 	FILE *stream;
 	int index;
 	if ((stream = fopen(path, "a"))) {
-		fprintf(stream, "%zu%c0x%02x", v_trb_device_boards[code].last_refresh, d_trb_device_csv_character, code);
+		fprintf(stream, "%ld%c0x%02x", v_trb_device_boards[code].last_refresh, d_trb_device_csv_character, code);
 		for (index = 0; index < e_trb_device_currents_null; ++index)
 			fprintf(stream, "%c%.02f", d_trb_device_csv_character, V(code).currents[index]);
 		for (index = 0; index < e_trb_device_temperatures_null; ++index)
