@@ -164,20 +164,22 @@ int main (int argc, char *argv[]) {
 	char buffer[d_string_buffer_size];
 	struct s_interface *main_interface = (struct s_interface *) malloc(sizeof(struct s_interface));
 	f_memory_init();
-	if (argc == 3) {
+	if (argc >= 3) {
 		environment.code = (unsigned char)strtol(argv[2], NULL, 16);
 		if ((environment.stream = fopen(argv[1], "r"))) {
+			if ((argc >= 4) && (f_string_strcmp(argv[3], "-l") == 0))
+				fseek(environment.stream, 0, SEEK_END);
 			gtk_init(&argc, &argv);
 			if (f_status_initialize(main_interface, "UI/UI_main.glade")) {
 				snprintf(buffer, d_string_buffer_size, "Magrathea status viewer (TRB %s)", argv[2]);
 				gtk_window_set_title(main_interface->window, buffer);
-				gtk_idle_add((GSourceFunc)f_status_loop, &main_interface);
+				gtk_idle_add((GSourceFunc)f_status_loop, main_interface);
 				gtk_main();
 			}
 		} else
 			fprintf(stderr, "404 - file %s not found\n", argv[1]);
 	} else
-		fprintf(stderr, "usage:\n%s <file> <code>\n", argv[0]);
+		fprintf(stderr, "usage:\n%s <file> <code> {-l: skip to last position}\n", argv[0]);
 	f_memory_destroy();
 	return 0;
 }

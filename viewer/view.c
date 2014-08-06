@@ -234,7 +234,7 @@ int f_view_loop(struct s_interface *interface) {
 
 int main (int argc, char *argv[]) {
 	char buffer[d_string_buffer_size];
-	struct s_interface *main_interface = NULL;
+	struct s_interface *main_interface = (struct s_interface *) malloc(sizeof(struct s_interface));
 	int index;
 	f_memory_init();
 	if (argc >= 3) {
@@ -244,15 +244,16 @@ int main (int argc, char *argv[]) {
 				environment.calibration[index].steps = v_view_calibration_steps;
 			strncpy(environment.filename, argv[1], PATH_MAX);
 			if ((environment.stream = fopen(environment.filename, "rb"))) {
+				if ((argc >= 5) && (f_string_strcmp(argv[4], "-l") == 0))
+					fseek(environment.stream, 0, SEEK_END);
 				gtk_init(&argc, &argv);
-				if ((main_interface = (struct s_interface *) d_malloc(sizeof(struct s_interface))) &&
-						(f_view_initialize(main_interface, "UI/UI_main.glade"))) {
-					if (argc == 4)
+				if (f_view_initialize(main_interface, "UI/UI_main.glade")) {
+					if (argc >= 4)
 						if ((v_view_skip = atoi(argv[3])) < 1)
 							v_view_skip = 1;
 					snprintf(buffer, d_string_buffer_size, "Magrathea event viewer (file %s)", argv[1]);
 					gtk_window_set_title(main_interface->window, buffer);
-					gtk_idle_add((GSourceFunc)f_view_loop, &main_interface);
+					gtk_idle_add((GSourceFunc)f_view_loop, main_interface);
 					gtk_main();
 				}
 			} else
@@ -260,7 +261,7 @@ int main (int argc, char *argv[]) {
 		} else
 			fprintf(stderr, "%s ladder doesn't exists\n", argv[1]);
 	} else
-		fprintf(stderr, "usage: %s <path> <laddder#> {frequecy of refresh}\n", argv[0]);
+		fprintf(stderr, "usage: %s <path> <laddder#> {frequecy of refresh} {-l: skip to last position}\n", argv[0]);
 	f_memory_destroy();
 	return 0;
 }
