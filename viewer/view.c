@@ -226,6 +226,7 @@ int f_view_loop(struct s_interface *interface) {
 }
 
 int main (int argc, char *argv[]) {
+	char buffer[d_string_buffer_size];
 	struct s_interface main_interface;
 	int index;
 	f_memory_init();
@@ -241,6 +242,8 @@ int main (int argc, char *argv[]) {
 					if (argc == 4)
 						if ((v_view_skip = atoi(argv[3])) < 1)
 							v_view_skip = 1;
+					snprintf(buffer, d_string_buffer_size, "Magrathea event viewer (file %s)", argv[1]);
+					gtk_window_set_title(main_interface.window, buffer);
 					gtk_idle_add((GSourceFunc)f_view_loop, &main_interface);
 					gtk_main();
 				}
