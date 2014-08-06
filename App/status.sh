@@ -1,3 +1,3 @@
 #!/bin/bash
-cd ../status && ./magrathea_status.bin "$@" &
+cd ../status && ./magrathea_status.bin ../App/magrathea.log "$@" &
 
