@@ -355,13 +355,16 @@ int f_trb_device_initialize(unsigned char code) {
 	static unsigned char bus_loopback[] = {0x55, 0xaa, 0xeb, 0x90, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x5a, 0xa5};
 	unsigned char loopback_answer[d_trb_device_raw_command_size];
 	int readed, result = d_false;
-	if (v_trb_device_boards[code].descriptor == d_rs232_null)
+	time_t timeout = d_trb_device_timeout_online;
+	if (v_trb_device_boards[code].descriptor == d_rs232_null) {
+		timeout = d_trb_device_timeout;
 		if (!f_rs232_open(v_trb_device_boards[code].location, e_rs232_baud_115200, e_rs232_bits_8, e_rs232_stops_2_bit, e_rs232_parity_odd,
 					e_rs232_flow_control_no, &(v_trb_device_boards[code].descriptor), &(v_trb_device_boards[code].old_configuration)))
 			v_trb_device_boards[code].descriptor = d_rs232_null;
+	}
 	if (v_trb_device_boards[code].descriptor != d_rs232_null) {
 		f_rs232_write(v_trb_device_boards[code].descriptor, bus_loopback, d_trb_device_raw_command_size);
-		if ((readed = f_rs232_read_packet(v_trb_device_boards[code].descriptor, loopback_answer, d_trb_device_raw_command_size, d_trb_device_timeout,
+		if ((readed = f_rs232_read_packet(v_trb_device_boards[code].descriptor, loopback_answer, d_trb_device_raw_command_size, timeout,
 						v_trb_device_raw_head, v_trb_device_raw_tail, d_trb_device_sentinel_size)) > 0) {
 			v_trb_device_boards[code].wrong = d_false;
 			if (v_trb_device_boards[code].code != loopback_answer[4])
