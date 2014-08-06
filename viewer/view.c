@@ -40,6 +40,13 @@ void f_view_action_redo(GtkWidget *widget, struct s_interface *interface) {
 	gtk_widget_set_sensitive(GTK_WIDGET(interface->buttons[e_interface_button_dump]), FALSE);
 }
 
+void f_view_action_last(GtkWidget *widget, struct s_interface *supplied) {
+	unsigned char buffer[d_package_channels];
+	if (environment.stream)
+		while (fread(buffer, 1, d_package_buffer_size, environment.stream) > 0);
+	environment.bytes = 0;
+}
+
 int f_view_action_press(GtkWidget *widget, GdkEventKey *event, struct s_interface *supplied) {
 	switch (event->keyval) {
 		case 32:
@@ -54,7 +61,8 @@ int f_view_initialize(struct s_interface *supplied, const char *builder_path) {
 	if (f_interface_initialize(supplied, builder_path)) {
 		gtk_widget_set_sensitive(GTK_WIDGET(supplied->buttons[e_interface_button_dump]), FALSE);
 		if ((g_signal_connect(G_OBJECT(supplied->buttons[e_interface_button_dump]), "clicked", G_CALLBACK(f_view_action_dump), supplied) > 0) &&
-				(g_signal_connect(G_OBJECT(supplied->buttons[e_interface_button_redo]), "clicked", G_CALLBACK(f_view_action_redo), supplied) > 0)) {
+				(g_signal_connect(G_OBJECT(supplied->buttons[e_interface_button_redo]), "clicked", G_CALLBACK(f_view_action_redo), supplied) > 0) &&
+				(g_signal_connect(G_OBJECT(supplied->buttons[e_interface_button_last]), "clicked", G_CALLBACK(f_view_action_last), supplied) > 0)) {
 			gtk_spin_button_set_value(supplied->spins[e_interface_spin_ladder], v_view_ladder);
 			gtk_spin_button_set_value(supplied->spins[e_interface_spin_delay], 0);
 			gtk_window_set_default_size(supplied->window, d_view_window_width, d_view_window_height);

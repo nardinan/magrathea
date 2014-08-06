@@ -78,7 +78,8 @@ const char *v_interface_charts[] = {
 	"v_interface_spin_delay"
 }, *v_interface_buttons[] = {
 	"v_interface_button_dump",
-	"v_interface_button_redo"
+	"v_interface_button_redo",
+	"v_interface_button_last"
 }, *v_interface_chart_labels[] = {
 	"ADC_count",
 	"Pedestal",
