@@ -31,6 +31,7 @@
 #define d_view_window_title "Magrathea event viewer"
 #define d_view_calibration_folder "cals"
 #define d_view_calibration_extension "cal"
+#define d_view_timeout 25000
 typedef struct s_view_environment {
 	FILE *stream;
 	unsigned char buffer[d_package_buffer_size];

@@ -229,6 +229,7 @@ int f_view_loop(struct s_interface *interface) {
 	if (((v_view_index%v_view_skip) == 0) || (refresh))
 		for (index = 0; index < e_interface_chart_NULL; ++index)
 			f_chart_redraw(&(interface->logic_charts[index]));
+	usleep(d_view_timeout);
 	return result;
 }
 
