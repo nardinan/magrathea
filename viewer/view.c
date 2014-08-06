@@ -41,9 +41,8 @@ void f_view_action_redo(GtkWidget *widget, struct s_interface *interface) {
 }
 
 void f_view_action_last(GtkWidget *widget, struct s_interface *supplied) {
-	unsigned char buffer[d_package_channels];
 	if (environment.stream)
-		while (fread(buffer, 1, d_package_buffer_size, environment.stream) > 0);
+		fseek(environment.stream, 0, SEEK_END);
 	environment.bytes = 0;
 }
 
