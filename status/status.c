@@ -16,6 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "status.h"
+int v_frames = 0;
 struct s_status_environment environment;
 struct s_chart_color temperature_colors[] = {
 	{179,	204,	255},
@@ -30,9 +31,9 @@ struct s_chart_color temperature_colors[] = {
 	{255,	0,	0},
 	{0,	0,	0}
 };
-int f_status_initialize(struct s_interface *supplied, const char *buiilder_path) {
+int f_status_initialize(struct s_interface *supplied, const char *builder_path) {
 	int result = d_false, index;
-	if (f_interface_initialize(supplied, buiilder_path)) {
+	if (f_interface_initialize(supplied, builder_path)) {
 		gtk_window_set_default_size(supplied->window, d_status_window_width, d_status_window_height);
 		if (g_signal_connect(G_OBJECT(supplied->window), "delete-event", G_CALLBACK(f_status_destroy), supplied) > 0) {
 			gtk_widget_show_all(GTK_WIDGET(supplied->window));
@@ -94,6 +95,10 @@ void p_status_loop_fill_map(struct s_interface *interface) {
 		f_chart_append_signal(&(interface->logic_charts[e_interface_chart_temperature]), 2, index, environment.temperatures.adc_board[index]);
 		f_chart_append_signal(&(interface->logic_charts[e_interface_chart_temperature]), 3, index, environment.temperatures.fpga_board_busa[index]);
 		f_chart_append_signal(&(interface->logic_charts[e_interface_chart_temperature]), 4, index, environment.temperatures.fpga_board_busb[index]);
+		f_chart_append_signal(&(interface->logic_charts[e_interface_chart_current]), 0, index, environment.currents.current_34[index]);
+		f_chart_append_signal(&(interface->logic_charts[e_interface_chart_current]), 1, index, environment.currents.current_negative_33[index]);
+		f_chart_append_signal(&(interface->logic_charts[e_interface_chart_current]), 2, index, environment.currents.current_57[index]);
+		f_chart_append_signal(&(interface->logic_charts[e_interface_chart_current]), 3, index, environment.currents.current_12[index]);
 	}
 }
 
@@ -112,13 +117,23 @@ void p_status_loop_fill_values(void) {
 	environment.temperatures.adc_board[environment.entries] = v_current_status.temperatures[e_trb_device_temperatures_adc];
 	environment.temperatures.fpga_board_busa[environment.entries] = v_current_status.temperatures[e_trb_device_temperatures_fpga_A];
 	environment.temperatures.fpga_board_busb[environment.entries] = v_current_status.temperatures[e_trb_device_temperatures_fpga_B];
-	if (environment.entries >= (d_status_temperature_data-1)) {
-		for (index = 1; index < d_status_temperature_data; ++index) {
+	environment.currents.current_34[environment.entries] = v_current_status.currents[e_trb_device_currents_34];
+	environment.currents.current_negative_33[environment.entries] = v_current_status.currents[e_trb_device_currents_33];
+	environment.currents.current_57[environment.entries] = v_current_status.currents[e_trb_device_currents_57];
+	environment.currents.current_12[environment.entries] = v_current_status.currents[e_trb_device_currents_12];
+	if (environment.entries >= (d_status_bucket_size-1)) {
+		for (index = 1; index < d_status_bucket_size; ++index) {
+			environment.temperatures.tfh_mean[index-1] = environment.temperatures.tfh_mean[index];
 			environment.temperatures.power_board[index-1] = environment.temperatures.power_board[index];
 			environment.temperatures.adc_board[index-1] = environment.temperatures.adc_board[index];
 			environment.temperatures.fpga_board_busa[index-1] = environment.temperatures.fpga_board_busa[index];
 			environment.temperatures.fpga_board_busb[index-1] = environment.temperatures.fpga_board_busb[index];
+			environment.currents.current_34[index-1] = environment.currents.current_34[index];
+			environment.currents.current_negative_33[index-1] = environment.currents.current_negative_33[index];
+			environment.currents.current_57[index-1] = environment.currents.current_57[index];
+			environment.currents.current_12[index-1] = environment.currents.current_12[index];
 		}
+		environment.entries = (d_status_bucket_size-1);
 	} else
 		environment.entries++;
 }
@@ -128,30 +143,34 @@ int f_status_loop(struct s_interface *interface) {
 	char label_buffer[d_string_buffer_size], time_buffer[d_string_buffer_size];
 	if (f_analyze_next(environment.stream, environment.code, &(environment.timestamp))) {
 		p_status_loop_fill_values();
-		p_status_loop_fill_map(interface);
 		if (environment.timestamp > 0) {
 			strftime(time_buffer, d_string_buffer_size, d_status_timestamp_format, localtime(&(environment.timestamp)));
 			snprintf(label_buffer, d_string_buffer_size, "Last entry: %s", time_buffer);
 			gtk_label_set_text(interface->labels[e_interface_label_update], label_buffer);
 		}
-		usleep(d_status_timeout);
 	}
-	for (index = 0; index < e_interface_chart_NULL; ++index)
-		f_chart_redraw(&(interface->logic_charts[index]));
+	if (v_frames == d_status_skip_frames) {
+		p_status_loop_fill_map(interface);
+		for (index = 0; index < e_interface_chart_NULL; ++index)
+			f_chart_redraw(&(interface->logic_charts[index]));
+		v_frames = 0;
+	} else
+		v_frames++;
+	usleep(d_status_timeout);
 	return result;
 }
 
 int main (int argc, char *argv[]) {
 	char buffer[d_string_buffer_size];
-	struct s_interface main_interface;
+	struct s_interface *main_interface = (struct s_interface *) malloc(sizeof(struct s_interface));
 	f_memory_init();
 	if (argc == 3) {
 		environment.code = (unsigned char)strtol(argv[2], NULL, 16);
 		if ((environment.stream = fopen(argv[1], "r"))) {
 			gtk_init(&argc, &argv);
-			if (f_status_initialize(&main_interface, "UI/UI_main.glade")) {
+			if (f_status_initialize(main_interface, "UI/UI_main.glade")) {
 				snprintf(buffer, d_string_buffer_size, "Magrathea status viewer (TRB %s)", argv[2]);
-				gtk_window_set_title(main_interface.window, buffer);
+				gtk_window_set_title(main_interface->window, buffer);
 				gtk_idle_add((GSourceFunc)f_status_loop, &main_interface);
 				gtk_main();
 			}
