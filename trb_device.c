@@ -163,10 +163,10 @@ int f_trb_device_status(unsigned char code, char **tokens, size_t elements, int 
 		p_trb_device_status_refresh(code);
 		if ((result = f_trb_device_description(code, tokens, elements, output))) {
 			if (output != d_console_descriptor_null) {
-				snprintf(currents, d_string_buffer_size, "%scurrents%s\n\t[+3.4V % 4.02fmA]\n\t[-3.3V % 4.02fmA]\n"
-						"\t[+5.7V % 4.02fmA]\n\t[+12V  % 4.02fmA]\n\t[VSSA1 % 4.02fmA|% 4.02fmA VSSA2]\n"
-						"\t[VSSA3 % 4.02fmA|% 4.02fmA VSSA4]\n\t[VSSA5 % 4.02fmA|% 4.02fmA VSSA6]\n"
-						"\t[VDD1  % 4.02fmA|% 4.02fmA  VDD2]\n",
+				snprintf(currents, d_string_buffer_size, "%scurrents%s\n\t[+3.4V %4.02fmA]\n\t[-3.3V %4.02fmA]\n"
+						"\t[+5.7V %4.02fmA]\n\t[+12V  % 4.02fmA]\n\t[VSSA1 %4.02fmA|%4.02fmA VSSA2]\n"
+						"\t[VSSA3 %4.02fmA|%4.02fmA VSSA4]\n\t[VSSA5 %4.02fmA|%4.02fmA VSSA6]\n"
+						"\t[VDD1  %4.02fmA|%4.02fmA  VDD2]\n",
 						v_console_styles[e_console_style_yellow], v_console_styles[e_console_style_reset],
 						v_trb_device_boards[code].status.currents[e_trb_device_currents_34],
 						v_trb_device_boards[code].status.currents[e_trb_device_currents_33],
@@ -195,7 +195,7 @@ int f_trb_device_status(unsigned char code, char **tokens, size_t elements, int 
 						v_console_styles[e_console_style_reset], v_console_styles[e_console_style_bold],
 						v_trb_device_boards[code].status.voltages[e_trb_device_voltages_HV2], v_console_styles[e_console_style_reset]);
 				write(output, voltages, f_string_strlen(voltages));
-				snprintf(status, d_string_buffer_size, "%sstatus%s\n\t[Trigger: % 5d]\n\t[Hold Delay: %4.01fuS]\n",
+				snprintf(status, d_string_buffer_size, "%sstatus%s\n\t[Trigger   : %5d]\n\t[Hold Delay: %4.01fuS]\n",
 						v_console_styles[e_console_style_yellow], v_console_styles[e_console_style_reset],
 						v_trb_device_boards[code].trigger,
 						((float)((unsigned int)v_trb_device_boards[code].status.status[e_trb_device_status_HD]*50)/1000.0));
