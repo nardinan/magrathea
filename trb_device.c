@@ -88,7 +88,7 @@ void p_trb_device_description_format(unsigned char code, char *destination, size
 			value = v_trb_device_boards[code].stream.written_bytes;
 			for (postfix = 0; (bytes_postfixes[postfix+1]) && (value >= 1024.0); ++postfix)
 				value /= 1024.0;
-			snprintf(stream, d_string_buffer_size, "{%sW%s}[%4.02f %s| %s]", v_console_styles[e_console_style_green],
+			snprintf(stream, d_string_buffer_size, "{%sW%s}[%7.02f %s| %s]", v_console_styles[e_console_style_green],
 					v_console_styles[e_console_style_reset], value, bytes_postfixes[postfix], v_trb_device_boards[code].stream.destination);
 		} else
 			snprintf(stream, d_string_buffer_size, "{%sR%s}", v_console_styles[e_console_style_red],
@@ -154,19 +154,28 @@ int p_trb_device_status_refresh(unsigned char code) {
 }
 
 int f_trb_device_status(unsigned char code, char **tokens, size_t elements, int output) {
-	char currents[d_string_buffer_size], temperatures[d_string_buffer_size], voltages[d_string_buffer_size], status[d_string_buffer_size];
-	int argument, selected = d_true, result = d_true;
+	char buffer[d_string_buffer_size], currents[d_string_buffer_size], temperatures[d_string_buffer_size], voltages[d_string_buffer_size],
+	     status[d_string_buffer_size];
+	int argument, selected = d_true, viewer = d_false, result = d_true;
+	FILE *process;
 	if ((argument = f_console_parameter("-d", tokens, elements, d_false)) != d_console_descriptor_null)
 		if (code != atoi(tokens[argument]))
 			selected = d_false;
+	if ((f_console_parameter("-w", tokens, elements, d_false)) != d_console_descriptor_null)
+		viewer = d_true;
 	if (selected) {
 		p_trb_device_status_refresh(code);
 		if ((result = f_trb_device_description(code, tokens, elements, output))) {
+			if (viewer) {
+				snprintf(buffer, d_string_buffer_size, "%s 0x%02x -l", d_trb_device_status, code);
+				if ((process = popen(buffer, "r")))
+					fclose(process);
+			}
 			if (output != d_console_descriptor_null) {
-				snprintf(currents, d_string_buffer_size, "%scurrents%s\n\t[+3.4V %4.02fmA]\n\t[-3.3V %4.02fmA]\n"
-						"\t[+5.7V %4.02fmA]\n\t[+12V  % 4.02fmA]\n\t[VSSA1 %4.02fmA|%4.02fmA VSSA2]\n"
-						"\t[VSSA3 %4.02fmA|%4.02fmA VSSA4]\n\t[VSSA5 %4.02fmA|%4.02fmA VSSA6]\n"
-						"\t[VDD1  %4.02fmA|%4.02fmA  VDD2]\n",
+				snprintf(currents, d_string_buffer_size, "%scurrents%s\n\t[+3.4V %7.02fmA]\n\t[-3.3V %7.02fmA]\n"
+						"\t[+5.7V %7.02fmA]\n\t[+12V  %7.02fmA]\n\t[VSSA1 %7.02fmA|%7.02fmA VSSA2]\n"
+						"\t[VSSA3 %7.02fmA|%7.02fmA VSSA4]\n\t[VSSA5 %7.02fmA|%7.02fmA VSSA6]\n"
+						"\t[VDD1  %7.02fmA|%7.02fmA  VDD2]\n",
 						v_console_styles[e_console_style_yellow], v_console_styles[e_console_style_reset],
 						v_trb_device_boards[code].status.currents[e_trb_device_currents_34],
 						v_trb_device_boards[code].status.currents[e_trb_device_currents_33],
@@ -181,21 +190,21 @@ int f_trb_device_status(unsigned char code, char **tokens, size_t elements, int 
 						v_trb_device_boards[code].status.currents[e_trb_device_currents_33VDD1],
 						v_trb_device_boards[code].status.currents[e_trb_device_currents_33VDD2]);
 				write(output, currents, f_string_strlen(currents));
-				snprintf(temperatures, d_string_buffer_size, "%stemperatures%s\n\t[ADC    %4.02fC | %4.02fC    PWR]\n"
-						"\t[FPGA A %4.02fC | %4.02fC FPGA B]\n",
+				snprintf(temperatures, d_string_buffer_size, "%stemperatures%s\n\t[ADC    %6.02fC|%6.02fC    PWR]\n"
+						"\t[FPGA A %6.02fC|%6.02fC FPGA B]\n",
 						v_console_styles[e_console_style_yellow], v_console_styles[e_console_style_reset],
 						v_trb_device_boards[code].status.temperatures[e_trb_device_temperatures_adc],
 						v_trb_device_boards[code].status.temperatures[e_trb_device_temperatures_power],
 						v_trb_device_boards[code].status.temperatures[e_trb_device_temperatures_fpga_A],
 						v_trb_device_boards[code].status.temperatures[e_trb_device_temperatures_fpga_B]);
 				write(output, temperatures, f_string_strlen(temperatures));
-				snprintf(voltages, d_string_buffer_size, "%svoltages%s\n\t[HV#1 %s%4.02f%sV]\n\t[HV#2 %s%4.02f%sV]\n",
+				snprintf(voltages, d_string_buffer_size, "%svoltages%s\n\t[HV#1 %s%6.02f%sV]\n\t[HV#2 %s%6.02f%sV]\n",
 						v_console_styles[e_console_style_yellow], v_console_styles[e_console_style_reset],
 						v_console_styles[e_console_style_bold], v_trb_device_boards[code].status.voltages[e_trb_device_voltages_HV1],
 						v_console_styles[e_console_style_reset], v_console_styles[e_console_style_bold],
 						v_trb_device_boards[code].status.voltages[e_trb_device_voltages_HV2], v_console_styles[e_console_style_reset]);
 				write(output, voltages, f_string_strlen(voltages));
-				snprintf(status, d_string_buffer_size, "%sstatus%s\n\t[Trigger   : %5d]\n\t[Hold Delay: %4.01fuS]\n",
+				snprintf(status, d_string_buffer_size, "%sstatus%s\n\t[Trigger   :   %5d]\n\t[Hold Delay: %5.01fuS]\n",
 						v_console_styles[e_console_style_yellow], v_console_styles[e_console_style_reset],
 						v_trb_device_boards[code].trigger,
 						((float)((unsigned int)v_trb_device_boards[code].status.status[e_trb_device_status_HD]*50)/1000.0));
@@ -251,7 +260,7 @@ int f_trb_device_write(unsigned char code, char **tokens, size_t elements, int o
 		p_trb_device_write_packet(raw_command, v_trb_device_boards[code].code, packet[0], packet[1], packet[2]);
 		if (!(result = (f_rs232_write(v_trb_device_boards[code].descriptor, raw_command,
 							d_trb_device_raw_command_size) == d_trb_device_raw_command_size)))
-			f_trb_device_destroy(code);
+			p_trb_device_destroy_descriptor(code);
 		if (output != d_console_descriptor_null) {
 			if (v_trb_device_boards[code].descriptor != d_rs232_null)
 				snprintf(buffer, d_string_buffer_size, "#%d TRB: %d bytes sent (hexadecimal output): 0x%02x 0x%02x 0x%02x 0x%02x\n",
@@ -323,9 +332,6 @@ int f_trb_device_view(unsigned char code, char **tokens, size_t elements, int ou
 		if ((process = popen(buffer, "r")))
 			fclose(process);
 	}
-	snprintf(buffer, d_string_buffer_size, "%s 0x%02x -l", d_trb_device_status, d_trb_device_log, v_trb_device_boards[code].code);
-	if ((process = popen(buffer, "r")))
-		fclose(process);
 	return result;
 }
 
@@ -371,7 +377,7 @@ int f_trb_device_initialize(unsigned char code) {
 				v_trb_device_boards[code].wrong = d_true;
 			result = d_true;
 		} else
-			f_trb_device_destroy(code);
+			p_trb_device_destroy_descriptor(code);
 	}
 	return result;
 }
@@ -514,9 +520,8 @@ int p_trb_device_refresh_status(unsigned char code) {
 						d_trb_device_timeout, v_trb_device_raw_head, v_trb_device_raw_tail, d_trb_device_sentinel_size)) > 0)
 			p_trb_device_refresh_analyze(code, raw_answer, readed);
 		else if (readed < 0) {
-			f_trb_device_destroy(code);
+			p_trb_device_destroy_descriptor(code);
 			result = d_false;
-			return result;
 		}
 	return result;
 }
