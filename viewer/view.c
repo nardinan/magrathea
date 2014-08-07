@@ -17,8 +17,8 @@
  */
 #include "view.h"
 struct s_view_environment environment;
-int v_view_ladder, v_view_calibration_steps = d_view_calibration_steps, v_view_skip = 1, v_view_pause = d_false, v_view_label_refresh = d_true;
-long long v_view_index = 0, v_starting_time = 0;
+int v_view_ladder, v_view_calibration_steps = d_view_calibration_steps, v_view_skip_frames = 1, v_view_pause = d_false, v_view_label_refresh = d_true, v_frames ;
+long long v_starting_time;
 void f_view_action_dump(GtkWidget *widget, struct s_interface *interface) {
 	int index;
 	if (environment.calibrated >= d_view_ladders)
@@ -240,7 +240,7 @@ int f_view_loop(struct s_interface *interface) {
 			v_view_label_refresh = d_false;
 		}
 	}
-	if ((charts_swap) || (v_view_index >= v_view_skip)) {
+	if ((charts_swap) || (v_frames >= v_view_skip_frames)) {
 		switch (gtk_notebook_get_current_page(interface->notebook)) {
 			case 0: /* ADC */
 				f_chart_redraw(&(interface->logic_charts[e_interface_chart_adc]));
@@ -265,9 +265,9 @@ int f_view_loop(struct s_interface *interface) {
 							f_chart_redraw(&(interface->logic_charts[index]));
 				}
 		}
-		v_view_index = 0;
+		v_frames = 0;
 	} else
-		v_view_index++;
+		v_frames++;
 	usleep(d_view_timeout);
 	return result;
 }
@@ -289,8 +289,8 @@ int main (int argc, char *argv[]) {
 				gtk_init(&argc, &argv);
 				if (f_view_initialize(main_interface, "UI/UI_main.glade")) {
 					if (argc >= 4)
-						if ((v_view_skip = atoi(argv[3])) < 1)
-							v_view_skip = 1;
+						if ((v_view_skip_frames = atoi(argv[3])) < 1)
+							v_view_skip_frames = 1;
 					snprintf(buffer, d_string_buffer_size, "Magrathea event viewer (file %s)", argv[1]);
 					gtk_window_set_title(main_interface->window, buffer);
 					gtk_idle_add((GSourceFunc)f_view_loop, main_interface);
