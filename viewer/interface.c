@@ -214,6 +214,8 @@ struct s_interface *f_interface_initialize(struct s_interface *supplied, const c
 				d_assert(result->spins[index] = GTK_SPIN_BUTTON(gtk_builder_get_object(result->interface, v_interface_spins[index])));
 			for (index = 0; index < e_interface_button_NULL; ++index)
 				d_assert(result->buttons[index] = GTK_BUTTON(gtk_builder_get_object(result->interface, v_interface_buttons[index])));
+			d_assert(result->notebook = GTK_NOTEBOOK(gtk_builder_get_object(result->interface, "v_tabs")));
+			d_assert(result->quick_notebook = GTK_NOTEBOOK(gtk_builder_get_object(result->interface, "v_quick_view_tabs")));
 		}
 	}
 	return result;

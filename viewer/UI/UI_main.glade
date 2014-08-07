@@ -335,7 +335,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkNotebook" id="v_quick_view_tab">
+              <object class="GtkNotebook" id="v_quick_view_tabs">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <child>

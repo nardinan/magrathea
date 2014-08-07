@@ -50,7 +50,7 @@ typedef struct s_view_environment {
 	} data[d_view_ladders];
 } s_view_environment;
 extern struct s_view_environment environment;
-extern int v_view_ladder, v_view_calibration_steps, v_view_calibrated, v_view_skip, v_view_pause, v_view_pause_refresh;
+extern int v_view_ladder, v_view_calibration_steps, v_view_calibrated, v_view_skip, v_view_pause, v_view_label_refresh;
 extern long long v_view_index, v_starting_time;
 extern void f_view_action_dump(GtkWidget *widget, struct s_interface *supplied);
 extern void f_view_action_redo(GtkWidget *widget, struct s_interface *supplied);

@@ -97,6 +97,7 @@ typedef struct s_interface {
 	GtkLabel *labels[e_interface_label_NULL];
 	GtkSpinButton *spins[e_interface_spin_NULL];
 	GtkButton *buttons[e_interface_button_NULL];
+	GtkNotebook *notebook, *quick_notebook;
 	struct s_chart logic_charts[e_interface_chart_NULL];
 	int destroy;
 } s_interface;

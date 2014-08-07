@@ -17,7 +17,7 @@
  */
 #include "view.h"
 struct s_view_environment environment;
-int v_view_ladder, v_view_calibration_steps = d_view_calibration_steps, v_view_skip = 1, v_view_pause = d_false, v_view_pause_refresh = d_false;
+int v_view_ladder, v_view_calibration_steps = d_view_calibration_steps, v_view_skip = 1, v_view_pause = d_false, v_view_label_refresh = d_true;
 long long v_view_index = 0, v_starting_time = 0;
 void f_view_action_dump(GtkWidget *widget, struct s_interface *interface) {
 	int index;
@@ -50,7 +50,7 @@ int f_view_action_press(GtkWidget *widget, GdkEventKey *event, struct s_interfac
 	switch (event->keyval) {
 		case 32:
 			v_view_pause = !v_view_pause;
-			v_view_pause_refresh = d_true;
+			v_view_label_refresh = d_true;
 			break;
 	}
 	return d_false;
@@ -209,6 +209,8 @@ void p_view_loop_read(struct s_interface *interface, int delay) {
 						p_view_loop_analyze(interface, package.data.values.raw.ladder[ladder],
 								package.data.values.raw.values[ladder]);
 						p_view_loop_append_signals(interface, package.data.values.raw.ladder[ladder]);
+						if (package.data.values.raw.ladder[ladder] == v_view_ladder)
+							v_view_label_refresh = d_true;
 					}
 		}
 
@@ -222,21 +224,47 @@ int f_view_loop(struct s_interface *interface) {
 		selected_delay = gtk_spin_button_get_value_as_int(interface->spins[e_interface_spin_delay]);
 		if ((selected_ladder != v_view_ladder) && (selected_ladder >= 0) && (selected_ladder < d_view_ladders)) { /* change visible ladder */
 			charts_swap = d_true;
+			v_view_label_refresh = d_true;
 			v_view_ladder = selected_ladder;
 			for (index = 0; index <= e_interface_chart_adc_pedestal_cn; index++)
 				f_chart_flush(&(interface->logic_charts[index]));
 			environment.calibration[v_view_ladder].drawed = d_false;
 		}
 		p_view_loop_read(interface, selected_delay);
-		if (v_view_pause)
-			strncpy(buffer, "[events]: pause", d_string_buffer_size);
-		else
-			snprintf(buffer, d_string_buffer_size, "[events]: %zu", environment.data[v_view_ladder].events);
-		gtk_label_set_text(interface->labels[e_interface_label_events], buffer);
+		if (v_view_label_refresh) {
+			if (v_view_pause)
+				strncpy(buffer, "[events]: pause", d_string_buffer_size);
+			else
+				snprintf(buffer, d_string_buffer_size, "[events]: %zu", environment.data[v_view_ladder].events);
+			gtk_label_set_text(interface->labels[e_interface_label_events], buffer);
+			v_view_label_refresh = d_false;
+		}
 	}
 	if ((charts_swap) || (v_view_index >= v_view_skip)) {
-		for (index = 0; index < e_interface_chart_NULL; ++index)
-			f_chart_redraw(&(interface->logic_charts[index]));
+		switch (gtk_notebook_get_current_page(interface->notebook)) {
+			case 0: /* ADC */
+				f_chart_redraw(&(interface->logic_charts[e_interface_chart_adc]));
+				break;
+			case 1: /* calibration */
+				f_chart_redraw(&(interface->logic_charts[e_interface_chart_pedestal]));
+				f_chart_redraw(&(interface->logic_charts[e_interface_chart_sigma_raw]));
+				f_chart_redraw(&(interface->logic_charts[e_interface_chart_sigma]));
+				break;
+			case 2: /* signal */
+				f_chart_redraw(&(interface->logic_charts[e_interface_chart_adc_pedestal]));
+				f_chart_redraw(&(interface->logic_charts[e_interface_chart_adc_pedestal_cn]));
+				break;
+			case 3:
+				switch(gtk_notebook_get_current_page(interface->quick_notebook)) {
+					case 0: /* ADCs */
+						for (index = e_interface_chart_adc_0; index <= e_interface_chart_adc_23; ++index)
+							f_chart_redraw(&(interface->logic_charts[index]));
+						break;
+					case 1: /* signals */
+						for (index = e_interface_chart_signal_0; index <= e_interface_chart_signal_23; ++index)
+							f_chart_redraw(&(interface->logic_charts[index]));
+				}
+		}
 		v_view_index = 0;
 	} else
 		v_view_index++;
