@@ -17,7 +17,7 @@
  */
 #include "view.h"
 struct s_view_environment environment;
-int v_view_ladder, v_view_calibration_steps = d_view_calibration_steps, v_view_skip = 1, v_view_pause = d_false;
+int v_view_ladder, v_view_calibration_steps = d_view_calibration_steps, v_view_skip = 1, v_view_pause = d_false, v_view_pause_refresh = d_false;
 long long v_view_index = 0, v_starting_time = 0;
 void f_view_action_dump(GtkWidget *widget, struct s_interface *interface) {
 	int index;
@@ -50,6 +50,7 @@ int f_view_action_press(GtkWidget *widget, GdkEventKey *event, struct s_interfac
 	switch (event->keyval) {
 		case 32:
 			v_view_pause = !v_view_pause;
+			v_view_pause_refresh = d_true;
 			break;
 	}
 	return d_false;
@@ -112,10 +113,12 @@ void p_view_loop_analyze(struct s_interface *interface, unsigned short int ladde
 	int index;
 	for (index = 0; index < d_package_channels; ++index)
 		environment.data[ladder].bucket[index] = values[index];
+	environment.data[ladder].new_bucket = d_true;
 	if (environment.calibration[ladder].package < environment.calibration[ladder].steps) {
 		for (index = 0; index < d_package_channels; ++index)
 			environment.calibration[ladder].bucket[environment.calibration[ladder].package][index] = values[index];
 		environment.calibration[ladder].package++;
+		environment.calibration[ladder].new_bucket = d_true;
 	} else if (!environment.calibration[ladder].computed)  {
 		if (++(environment.calibrated) >= d_view_ladders)
 			gtk_widget_set_sensitive(GTK_WIDGET(interface->buttons[e_interface_button_dump]), TRUE);
@@ -132,7 +135,7 @@ void p_view_loop_analyze(struct s_interface *interface, unsigned short int ladde
 	}
 }
 
-void p_view_loop_refresh(struct s_interface *interface, unsigned short int ladder) {
+void p_view_loop_append_signals(struct s_interface *interface, unsigned short int ladder) {
 	int index, current_ladder;
 	if (ladder == v_view_ladder) {
 		if (environment.calibration[v_view_ladder].computed) {
@@ -166,69 +169,77 @@ void p_view_loop_refresh(struct s_interface *interface, unsigned short int ladde
 		f_chart_flush(&(interface->logic_charts[e_interface_chart_adc]));
 		for (index = 0; index < d_package_channels; ++index)
 			f_chart_append_signal(&(interface->logic_charts[e_interface_chart_adc]), 0, index, environment.data[v_view_ladder].bucket[index]);
-		for (current_ladder = 0; current_ladder < d_view_ladders; ++current_ladder) {
-			f_chart_flush(&(interface->logic_charts[e_interface_chart_adc_0+current_ladder]));
-			f_chart_flush(&(interface->logic_charts[e_interface_chart_signal_0+current_ladder]));
-			for (index = 0; index < d_package_channels; ++index) {
-				f_chart_append_signal(&(interface->logic_charts[e_interface_chart_adc_0+current_ladder]), 0, index,
-						environment.data[current_ladder].bucket[index]);
-				f_chart_append_signal(&(interface->logic_charts[e_interface_chart_signal_0+current_ladder]), 0, index,
-						environment.data[current_ladder].adc_pedestal_cn[index]);
+		for (current_ladder = 0; current_ladder < d_view_ladders; ++current_ladder)
+			if (environment.data[current_ladder].new_bucket) {
+				f_chart_flush(&(interface->logic_charts[e_interface_chart_adc_0+current_ladder]));
+				f_chart_flush(&(interface->logic_charts[e_interface_chart_signal_0+current_ladder]));
+				for (index = 0; index < d_package_channels; ++index) {
+					f_chart_append_signal(&(interface->logic_charts[e_interface_chart_adc_0+current_ladder]), 0, index,
+							environment.data[current_ladder].bucket[index]);
+					f_chart_append_signal(&(interface->logic_charts[e_interface_chart_signal_0+current_ladder]), 0, index,
+							environment.data[current_ladder].adc_pedestal_cn[index]);
+				}
+				environment.data[current_ladder].new_bucket = d_false;
 			}
-		}
 	}
 }
 
-int f_view_loop(struct s_interface *interface) {
-	int result = d_true, index, ladder, selected, refresh = d_false;
-	char buffer[d_string_buffer_size];
-	unsigned char *backup;
+void p_view_loop_read(struct s_interface *interface, int delay) {
 	struct s_package package;
-	ssize_t readed;
 	struct timeval current_timeval;
-	long long current_time, delay;
-	v_view_index++;
+	unsigned char *backup;
+	long long current_time;
+	size_t readed;
+	int ladder;
+	gettimeofday(&current_timeval, NULL);
+	current_time = ((1000000l*((long long)current_timeval.tv_sec))+current_timeval.tv_usec);
+	if (((current_time-v_starting_time) > delay) && (!v_view_pause)) {
+		v_starting_time = current_time;
+		if ((readed = fread(environment.buffer+environment.bytes, 1, d_package_buffer_size-environment.bytes, environment.stream)) > 0)
+			environment.bytes += readed;
+	}
+	if ((backup = f_package_analyze(&package, environment.buffer, environment.bytes)))
+		if (backup > environment.buffer) {
+			environment.bytes -= (backup-environment.buffer);
+			memmove(environment.buffer, backup, environment.bytes);
+			if (package.complete)
+				for (ladder = 0; ladder < d_package_ladders; ++ladder)
+					if ((package.data.values.raw.ladder[ladder] >= 0) && (package.data.values.raw.ladder[ladder] < d_view_ladders)) {
+						environment.data[package.data.values.raw.ladder[ladder]].events++;
+						p_view_loop_analyze(interface, package.data.values.raw.ladder[ladder],
+								package.data.values.raw.values[ladder]);
+						p_view_loop_append_signals(interface, package.data.values.raw.ladder[ladder]);
+					}
+		}
+
+}
+
+int f_view_loop(struct s_interface *interface) {
+	int result = d_true, index, selected_ladder, selected_delay, charts_swap = d_false;
+	char buffer[d_string_buffer_size];
 	if (environment.stream) {
-		selected = gtk_spin_button_get_value_as_int(interface->spins[e_interface_spin_ladder]);
-		delay = gtk_spin_button_get_value_as_int(interface->spins[e_interface_spin_delay]);
-		if ((selected != v_view_ladder) && (selected >= 0) && (selected < d_view_ladders)) {
-			refresh = d_true;
-			v_view_ladder = selected;
-			for (index = 0; index < e_interface_chart_NULL; index++)
+		selected_ladder = gtk_spin_button_get_value_as_int(interface->spins[e_interface_spin_ladder]);
+		selected_delay = gtk_spin_button_get_value_as_int(interface->spins[e_interface_spin_delay]);
+		if ((selected_ladder != v_view_ladder) && (selected_ladder >= 0) && (selected_ladder < d_view_ladders)) { /* change visible ladder */
+			charts_swap = d_true;
+			v_view_ladder = selected_ladder;
+			for (index = 0; index <= e_interface_chart_adc_pedestal_cn; index++)
 				f_chart_flush(&(interface->logic_charts[index]));
 			environment.calibration[v_view_ladder].drawed = d_false;
 		}
-		gettimeofday(&current_timeval, NULL);
-		current_time = ((1000000l*((long long)current_timeval.tv_sec))+current_timeval.tv_usec);
-		if (((current_time-v_starting_time) > delay) && (!v_view_pause)) {
-			v_starting_time = current_time;
-			if ((readed = fread(environment.buffer+environment.bytes, 1, d_package_buffer_size-environment.bytes, environment.stream)) > 0)
-				environment.bytes += readed;
-		}
-		if ((backup = f_package_analyze(&package, environment.buffer, environment.bytes)))
-			if (backup > environment.buffer) {
-				environment.bytes -= (backup-environment.buffer);
-				memmove(environment.buffer, backup, environment.bytes);
-				if (package.complete)
-					for (ladder = 0; ladder < d_package_ladders; ++ladder) {
-						if ((package.data.values.raw.ladder[ladder] >= 0) &&
-								(package.data.values.raw.ladder[ladder] < d_view_ladders)) {
-							environment.data[package.data.values.raw.ladder[ladder]].events++;
-							p_view_loop_analyze(interface, package.data.values.raw.ladder[ladder],
-									package.data.values.raw.values[ladder]);
-							p_view_loop_refresh(interface, package.data.values.raw.ladder[ladder]);
-						}
-					}
-			}
+		p_view_loop_read(interface, selected_delay);
+		if (v_view_pause)
+			strncpy(buffer, "[events]: pause", d_string_buffer_size);
+		else
+			snprintf(buffer, d_string_buffer_size, "[events]: %zu", environment.data[v_view_ladder].events);
+		gtk_label_set_text(interface->labels[e_interface_label_events], buffer);
 	}
-	if (v_view_pause)
-		strncpy(buffer, "[events]: pause", d_string_buffer_size);
-	else
-		snprintf(buffer, d_string_buffer_size, "[events]: %zu", environment.data[v_view_ladder].events);
-	gtk_label_set_text(interface->labels[e_interface_label_events], buffer);
-	if (((v_view_index%v_view_skip) == 0) || (refresh))
+	if ((charts_swap) || (v_view_index >= v_view_skip)) {
 		for (index = 0; index < e_interface_chart_NULL; ++index)
 			f_chart_redraw(&(interface->logic_charts[index]));
+		v_view_index = 0;
+	} else
+		v_view_index++;
 	usleep(d_view_timeout);
 	return result;
 }
