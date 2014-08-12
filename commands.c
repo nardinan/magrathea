@@ -34,7 +34,7 @@ struct s_console_command v_commands[] = {
 	},
 	{"status", "(usage: status | status -d 2) shows details about all or a specific devices (large output!)",
 		(struct s_console_parameter[]){
-			{"-w", "(flag) use an external graphical viewer", d_false, d_false, d_true},
+			{"-w", "(flag) use an external graphical viewer", d_false, d_true, d_true},
 			{"-d", "(integer) selects and shows details about a specific device", d_false, d_false, d_true},
 			{.initialized = d_false}
 		},
