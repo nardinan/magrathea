@@ -218,13 +218,21 @@ int f_trb_device_status(unsigned char code, char **tokens, size_t elements, int 
 }
 
 int f_trb_device_stream(unsigned char code, char **tokens, size_t elements, int output) {
-	char buffer[d_string_buffer_size];
+	char buffer[d_string_buffer_size], status[d_string_buffer_size];
 	int result = d_true;
 	if (v_trb_device_boards[code].descriptor != d_rs232_null) {
 		p_trb_device_destroy_stream(code);
 		snprintf(buffer, d_string_buffer_size, "%s_TRB%d.bin", tokens[f_console_parameter("-o", tokens, elements, d_false)], code);
-		if ((v_trb_device_boards[code].stream.stream = fopen(buffer, "w")))
+		if ((v_trb_device_boards[code].stream.stream = fopen(buffer, "w"))) {
 			strcpy(v_trb_device_boards[code].stream.destination, buffer); /* same length */
+			snprintf(status, d_string_buffer_size, "#%d TRB: stream has been redirected to %s", code, buffer);
+		} else
+			snprintf(status, d_string_buffer_size, "#%d TRB: %sunaccessible%s location %s", code, v_console_styles[e_console_style_red],
+					v_console_styles[e_console_style_reset], buffer);
+		if (output != d_console_descriptor_null) {
+			write(output, status, f_string_strlen(status));
+			fsync(output);
+		}
 	}
 	return result;
 }
