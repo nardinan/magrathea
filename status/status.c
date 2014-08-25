@@ -139,6 +139,7 @@ void p_status_loop_fill_values(void) {
 }
 
 int f_status_loop(struct s_interface *interface) {
+	time_t timeout = d_status_timeout;
 	int result = d_true, index;
 	char label_buffer[d_string_buffer_size], time_buffer[d_string_buffer_size];
 	if (f_analyze_next(environment.stream, environment.code, &(environment.timestamp))) {
@@ -148,6 +149,7 @@ int f_status_loop(struct s_interface *interface) {
 			snprintf(label_buffer, d_string_buffer_size, "Last entry: %s", time_buffer);
 			gtk_label_set_text(interface->labels[e_interface_label_update], label_buffer);
 		}
+		timeout = d_status_timeout_online;
 	}
 	if (v_frames == d_status_skip_frames) {
 		p_status_loop_fill_map(interface);
@@ -156,7 +158,7 @@ int f_status_loop(struct s_interface *interface) {
 		v_frames = 0;
 	} else
 		v_frames++;
-	usleep(d_status_timeout);
+	usleep(timeout);
 	return result;
 }
 

@@ -28,7 +28,8 @@
 #define d_status_window_height 600
 #define d_status_bucket_size 1445
 #define d_status_timestamp_format "%d %b %Y %H:%M:%S"
-#define d_status_timeout 50000
+#define d_status_timeout 100000
+#define d_status_timeout_online 20000
 #define d_status_skip_frames 15
 typedef struct s_status_environment {
 	FILE *stream;

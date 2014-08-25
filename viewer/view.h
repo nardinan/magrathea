@@ -31,7 +31,8 @@
 #define d_view_window_title "Magrathea event viewer"
 #define d_view_calibration_folder "cals"
 #define d_view_calibration_extension "cal"
-#define d_view_timeout 3000
+#define d_view_timeout 100000
+#define d_view_timeout_online 3000
 typedef struct s_view_environment {
 	FILE *stream;
 	unsigned char buffer[d_package_buffer_size];
@@ -61,6 +62,6 @@ extern void f_view_destroy(GtkWidget *widget, struct s_interface *supplied);
 extern void p_view_loop_dump(struct s_interface *interface, unsigned short int ladder);
 extern void p_view_loop_analyze(struct s_interface *interface, unsigned short int ladder, unsigned short int *values);
 extern void p_view_loop_append_signals(struct s_interface *interface, unsigned short int ladder);
-extern void p_view_loop_read(struct s_interface *interface, int delay);
+extern int p_view_loop_read(struct s_interface *interface, int delay);
 extern int f_view_loop(struct s_interface *interface);
 #endif

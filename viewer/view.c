@@ -184,13 +184,13 @@ void p_view_loop_append_signals(struct s_interface *interface, unsigned short in
 	}
 }
 
-void p_view_loop_read(struct s_interface *interface, int delay) {
+int p_view_loop_read(struct s_interface *interface, int delay) {
 	struct s_package package;
 	struct timeval current_timeval;
 	unsigned char *backup;
 	long long current_time;
 	size_t readed;
-	int ladder;
+	int ladder, result = d_false;
 	gettimeofday(&current_timeval, NULL);
 	current_time = ((1000000l*((long long)current_timeval.tv_sec))+current_timeval.tv_usec);
 	if (((current_time-v_starting_time) > delay) && (!v_view_pause)) {
@@ -198,7 +198,8 @@ void p_view_loop_read(struct s_interface *interface, int delay) {
 		if ((readed = fread(environment.buffer+environment.bytes, 1, d_package_buffer_size-environment.bytes, environment.stream)) > 0)
 			environment.bytes += readed;
 	}
-	if ((backup = f_package_analyze(&package, environment.buffer, environment.bytes)))
+	if ((backup = f_package_analyze(&package, environment.buffer, environment.bytes))) {
+		result = d_true;
 		if (backup > environment.buffer) {
 			environment.bytes -= (backup-environment.buffer);
 			memmove(environment.buffer, backup, environment.bytes);
@@ -213,12 +214,14 @@ void p_view_loop_read(struct s_interface *interface, int delay) {
 							v_view_label_refresh = d_true;
 					}
 		}
-
+	}
+	return result;
 }
 
 int f_view_loop(struct s_interface *interface) {
 	int result = d_true, index, selected_ladder, selected_delay, charts_swap = d_false;
 	char buffer[d_string_buffer_size];
+	time_t timeout = d_view_timeout;
 	if (environment.stream) {
 		selected_ladder = gtk_spin_button_get_value_as_int(interface->spins[e_interface_spin_ladder]);
 		selected_delay = gtk_spin_button_get_value_as_int(interface->spins[e_interface_spin_delay]);
@@ -230,7 +233,8 @@ int f_view_loop(struct s_interface *interface) {
 				f_chart_flush(&(interface->logic_charts[index]));
 			environment.calibration[v_view_ladder].drawed = d_false;
 		}
-		p_view_loop_read(interface, selected_delay);
+		if (p_view_loop_read(interface, selected_delay))
+			timeout = d_view_timeout_online;
 		if (v_view_label_refresh) {
 			if (v_view_pause)
 				strncpy(buffer, "[events]: pause", d_string_buffer_size);
@@ -268,7 +272,7 @@ int f_view_loop(struct s_interface *interface) {
 		v_frames = 0;
 	} else
 		v_frames++;
-	usleep(d_view_timeout);
+	usleep(timeout);
 	return result;
 }
 
