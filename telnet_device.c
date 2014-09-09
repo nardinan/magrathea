@@ -97,7 +97,6 @@ void p_telnet_device_refresh_readout(int client, struct s_console *console) {
 		if (select(v_telnet_device.clients[client].socket.socket+1, &sockets, NULL, NULL, &timeout) > 0)
 			while (read(v_telnet_device.clients[client].socket.socket, &character, 1) > 0) {
 				if (character == '\n') {
-					printf("[remote]%s\n", v_telnet_device.clients[client].buffer);
 					if (f_string_strlen(v_telnet_device.clients[client].buffer) > 0) {
 						if (f_string_strcmp(v_telnet_device.clients[client].buffer, d_magrathea_exit_command) != 0) {
 							p_console_execute(console, v_telnet_device.clients[client].buffer,
