@@ -17,7 +17,8 @@
  */
 #include "view.h"
 struct s_view_environment environment;
-int v_view_ladder, v_view_calibration_steps = d_view_calibration_steps, v_view_skip_frames = 1, v_view_pause = d_false, v_view_label_refresh = d_true, v_frames ;
+int v_view_ladder, v_view_trb, v_view_calibration_steps = d_view_calibration_steps, v_view_skip_frames = 1, v_view_pause = d_false,
+    v_view_label_refresh = d_true, v_frames;
 long long v_starting_time;
 void f_view_action_dump(GtkWidget *widget, struct s_interface *interface) {
 	int index;
@@ -48,10 +49,14 @@ void f_view_action_last(GtkWidget *widget, struct s_interface *supplied) {
 
 int f_view_action_press(GtkWidget *widget, GdkEventKey *event, struct s_interface *supplied) {
 	switch (event->keyval) {
-		case 32:
+		case 32:	/* space button */
 			v_view_pause = !v_view_pause;
 			v_view_label_refresh = d_true;
 			break;
+		case 82:	/* r button */
+		case 114:	/* R button */
+			v_frames = v_view_skip_frames;
+
 	}
 	return d_false;
 }
@@ -93,8 +98,8 @@ void p_view_loop_dump(struct s_interface *interface, unsigned short int ladder) 
 	FILE *stream;
 	int index, va, channel_on_va;
 	if (environment.calibration[ladder].computed) {
-		snprintf(directory, PATH_MAX, "%s_%s", environment.filename, d_view_calibration_folder);
-		snprintf(filename, PATH_MAX, "%s/ladder_%02d.%s", directory, ladder, d_view_calibration_extension);
+		snprintf(directory, PATH_MAX, "%s_TRB%02x%s", environment.filename, v_view_trb, d_view_calibration_folder);
+		snprintf(filename, PATH_MAX, "%s/TRB%02d_ladder_%02d.%s", directory, v_view_trb, ladder, d_view_calibration_extension);
 		if ((mkdir(directory, 0777) == 0) || (errno == EEXIST))
 			if ((stream = fopen(filename, "w"))) {
 				for (index = 0; index < d_package_channels; ++index) {
@@ -203,18 +208,18 @@ int p_view_loop_read(struct s_interface *interface, int delay) {
 		if (backup > environment.buffer) {
 			environment.bytes -= (backup-environment.buffer);
 			memmove(environment.buffer, backup, environment.bytes);
-			if (package.complete)
+			if ((package.complete) && (package.trb == v_package_trbs[v_view_trb].code))
 				for (ladder = 0; ladder < d_package_ladders; ++ladder)
 					if ((package.data.values.raw.ladder[ladder] >= 0) && (package.data.values.raw.ladder[ladder] < d_view_ladders)) {
 						environment.data[package.data.values.raw.ladder[ladder]].events++;
 						p_view_loop_analyze(interface, package.data.values.raw.ladder[ladder],
 								package.data.values.raw.values[ladder]);
-						p_view_loop_append_signals(interface, package.data.values.raw.ladder[ladder]);
 						if (package.data.values.raw.ladder[ladder] == v_view_ladder)
 							v_view_label_refresh = d_true;
 					}
 		}
 	}
+	p_view_loop_append_signals(interface, v_view_ladder);
 	return result;
 }
 
@@ -281,31 +286,35 @@ int main (int argc, char *argv[]) {
 	struct s_interface *main_interface = (struct s_interface *) malloc(sizeof(struct s_interface));
 	int index;
 	f_memory_init();
-	if (argc >= 3) {
-		v_view_ladder = atoi(argv[2]);
+	if (argc >= 4) {
+		v_view_ladder = atoi(argv[3]);
+		v_view_trb = atoi(argv[2]);
 		if ((v_view_ladder >= 0) && (v_view_ladder < d_view_ladders)) {
-			for (index = 0; index < d_view_ladders; ++index)
-				environment.calibration[index].steps = v_view_calibration_steps;
-			strncpy(environment.filename, argv[1], PATH_MAX);
-			if ((environment.stream = fopen(environment.filename, "rb"))) {
-				if ((argc >= 5) && (f_string_strcmp(argv[4], "-l") == 0))
-					fseek(environment.stream, 0, SEEK_END);
-				gtk_init(&argc, &argv);
-				if (f_view_initialize(main_interface, "UI/UI_main.glade")) {
-					if (argc >= 4)
-						if ((v_view_skip_frames = atoi(argv[3])) < 1)
-							v_view_skip_frames = 1;
-					snprintf(buffer, d_string_buffer_size, "Magrathea event viewer (file %s)", argv[1]);
-					gtk_window_set_title(main_interface->window, buffer);
-					gtk_idle_add((GSourceFunc)f_view_loop, main_interface);
-					gtk_main();
-				}
+			if ((v_view_trb >= 0) && (v_view_trb < d_trb_device_boards)) {
+				for (index = 0; index < d_view_ladders; ++index)
+					environment.calibration[index].steps = v_view_calibration_steps;
+				strncpy(environment.filename, argv[1], PATH_MAX);
+				if ((environment.stream = fopen(environment.filename, "rb"))) {
+					if ((argc >= 6) && (f_string_strcmp(argv[5], "-l") == 0))
+						fseek(environment.stream, 0, SEEK_END);
+					gtk_init(&argc, &argv);
+					if (f_view_initialize(main_interface, "UI/UI_main.glade")) {
+						if (argc >= 5)
+							if ((v_view_skip_frames = atoi(argv[4])) < 1)
+								v_view_skip_frames = 1;
+						snprintf(buffer, d_string_buffer_size, "Magrathea event viewer (TRB %d| stream %s)", v_view_trb, argv[1]);
+						gtk_window_set_title(main_interface->window, buffer);
+						gtk_idle_add((GSourceFunc)f_view_loop, main_interface);
+						gtk_main();
+					}
+				} else
+					fprintf(stderr, "file not found: %s\n", argv[1]);
 			} else
-				fprintf(stderr, "file not found: %s\n", argv[1]);
+				fprintf(stderr, "%s TRB doesn't exists\n", argv[2]);
 		} else
-			fprintf(stderr, "%s ladder doesn't exists\n", argv[1]);
+			fprintf(stderr, "%s ladder doesn't exists\n", argv[3]);
 	} else
-		fprintf(stderr, "usage: %s <path> <laddder#> {frequecy of refresh} {-l: skip to last position}\n", argv[0]);
+		fprintf(stderr, "usage: %s <path> <trb#> <laddder#> {frequecy of refresh} {-l: skip to last position}\n", argv[0]);
 	f_memory_destroy();
 	return 0;
 }

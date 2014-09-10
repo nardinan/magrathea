@@ -32,7 +32,7 @@
 #define d_view_calibration_folder "cals"
 #define d_view_calibration_extension "cal"
 #define d_view_timeout 100000
-#define d_view_timeout_online 3000
+#define d_view_timeout_online 300
 typedef struct s_view_environment {
 	FILE *stream;
 	unsigned char buffer[d_package_buffer_size];
@@ -51,7 +51,7 @@ typedef struct s_view_environment {
 	} data[d_view_ladders];
 } s_view_environment;
 extern struct s_view_environment environment;
-extern int v_view_ladder, v_view_calibration_steps, v_view_calibrated, v_view_skip_frames, v_view_pause, v_view_label_refresh, v_frames;
+extern int v_view_ladder, v_view_trb, v_view_calibration_steps, v_view_calibrated, v_view_skip_frames, v_view_pause, v_view_label_refresh, v_frames;
 extern long long v_starting_time;
 extern void f_view_action_dump(GtkWidget *widget, struct s_interface *supplied);
 extern void f_view_action_redo(GtkWidget *widget, struct s_interface *supplied);

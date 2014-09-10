@@ -16,6 +16,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "package.h"
+struct s_package_trb v_package_trbs[] = {
+	{0, 0x00},
+	{1, 0x01},
+	{2, 0x08},
+	{3, 0x09},
+	{4, 0x04},
+	{5, 0x05},
+	{6, 0x0C},
+	{7, 0x0D}
+};
 unsigned char *p_package_analyze_raw(struct s_package *package, unsigned char *buffer, size_t size) {
 	unsigned char *pointer = buffer, *result = NULL;
 	int index, ladder;

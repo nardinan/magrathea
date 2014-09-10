@@ -24,7 +24,7 @@ chart.o: ../components/chart.c ../components/chart.h ../components/keys.h
 keys.o: ../components/keys.c ../components/keys.h
 	$(cc) $(cflags) ../components/keys.c
 
-package.o: ../package.c ../package.h
+package.o: ../package.c ../package.h ../trb_device.h
 	$(cc) $(cflags) ../package.c
 
 clean:

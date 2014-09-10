@@ -20,6 +20,7 @@
 #include <miranda/ground.h>
 #include <math.h>
 #include "../package.h"
+#include "../trb_device.h"
 #define d_analyze_sigma_k_max 2.0
 typedef enum e_analyze_flags {
 	e_analyze_flag_bad = 0x01,
