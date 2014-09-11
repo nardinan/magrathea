@@ -111,7 +111,8 @@ void p_view_loop_dump(struct s_interface *interface, unsigned short int ladder) 
 				}
 				fclose(stream);
 			}
-	}
+	} else
+		printf("Warning[ladder %d] - calibration still not computed\n", ladder);
 }
 
 void p_view_loop_analyze(struct s_interface *interface, unsigned short int ladder, unsigned short int *values) {
@@ -125,6 +126,12 @@ void p_view_loop_analyze(struct s_interface *interface, unsigned short int ladde
 		environment.calibration[ladder].package++;
 		environment.calibration[ladder].new_bucket = d_true;
 	} else if (!environment.calibration[ladder].computed)  {
+		f_analyze_pedestal(environment.calibration[ladder].bucket, environment.calibration[ladder].package, environment.calibration[ladder].pedestal);
+		f_analyze_sigma_raw(environment.calibration[ladder].bucket, environment.calibration[ladder].package, environment.calibration[ladder].sigma_raw);
+		f_analyze_sigma(environment.calibration[ladder].bucket, environment.calibration[ladder].package, d_view_calibration_sigma_k,
+				environment.calibration[ladder].sigma_raw, environment.calibration[ladder].pedestal, environment.calibration[ladder].sigma,
+				environment.calibration[ladder].flags);
+		environment.calibration[ladder].computed = d_true;
 		if (++(environment.calibrated) >= d_view_ladders) {
 			gtk_widget_set_sensitive(GTK_WIDGET(interface->buttons[e_interface_button_dump]), TRUE);
 			if ((v_flags&e_view_action_exports_calibrations) == e_view_action_exports_calibrations) {
@@ -133,12 +140,6 @@ void p_view_loop_analyze(struct s_interface *interface, unsigned short int ladde
 					f_view_destroy(NULL, interface);
 			}
 		}
-		f_analyze_pedestal(environment.calibration[ladder].bucket, environment.calibration[ladder].package, environment.calibration[ladder].pedestal);
-		f_analyze_sigma_raw(environment.calibration[ladder].bucket, environment.calibration[ladder].package, environment.calibration[ladder].sigma_raw);
-		f_analyze_sigma(environment.calibration[ladder].bucket, environment.calibration[ladder].package, d_view_calibration_sigma_k,
-				environment.calibration[ladder].sigma_raw, environment.calibration[ladder].pedestal, environment.calibration[ladder].sigma,
-				environment.calibration[ladder].flags);
-		environment.calibration[ladder].computed = d_true;
 	} else {
 		f_analyze_adc_pedestal(environment.data[ladder].bucket, environment.calibration[ladder].pedestal, environment.data[ladder].adc_pedestal);
 		f_analyze_adc_pedestal_cn(environment.data[ladder].bucket, d_view_calibration_sigma_k, environment.calibration[ladder].pedestal,
