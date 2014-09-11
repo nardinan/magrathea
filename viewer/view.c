@@ -18,7 +18,7 @@
 #include "view.h"
 struct s_view_environment environment;
 int v_view_ladder, v_view_trb, v_view_calibration_steps = d_view_calibration_steps, v_view_skip_frames = 1, v_view_pause = d_false,
-    v_view_label_refresh = d_true, v_frames;
+    v_view_label_refresh = d_true, v_frames, v_flags = 0;
 long long v_starting_time;
 void f_view_action_dump(GtkWidget *widget, struct s_interface *interface) {
 	int index;
@@ -125,8 +125,14 @@ void p_view_loop_analyze(struct s_interface *interface, unsigned short int ladde
 		environment.calibration[ladder].package++;
 		environment.calibration[ladder].new_bucket = d_true;
 	} else if (!environment.calibration[ladder].computed)  {
-		if (++(environment.calibrated) >= d_view_ladders)
+		if (++(environment.calibrated) >= d_view_ladders) {
 			gtk_widget_set_sensitive(GTK_WIDGET(interface->buttons[e_interface_button_dump]), TRUE);
+			if ((v_flags&e_view_action_exports_calibrations) == e_view_action_exports_calibrations) {
+				f_view_action_dump(NULL, interface);
+				if ((v_flags&e_view_action_close_after_calibrations) == e_view_action_close_after_calibrations)
+					f_view_destroy(NULL, interface);
+			}
+		}
 		f_analyze_pedestal(environment.calibration[ladder].bucket, environment.calibration[ladder].package, environment.calibration[ladder].pedestal);
 		f_analyze_sigma_raw(environment.calibration[ladder].bucket, environment.calibration[ladder].package, environment.calibration[ladder].sigma_raw);
 		f_analyze_sigma(environment.calibration[ladder].bucket, environment.calibration[ladder].package, d_view_calibration_sigma_k,
@@ -286,22 +292,28 @@ int main (int argc, char *argv[]) {
 	struct s_interface *main_interface = (struct s_interface *) malloc(sizeof(struct s_interface));
 	int index;
 	f_memory_init();
-	if (argc >= 4) {
+	if (argc >= 5) {
 		v_view_ladder = atoi(argv[3]);
 		v_view_trb = atoi(argv[2]);
+		if ((v_view_skip_frames = atoi(argv[4])) < 1)
+			v_view_skip_frames = 1;
 		if ((v_view_ladder >= 0) && (v_view_ladder < d_view_ladders)) {
 			if ((v_view_trb >= 0) && (v_view_trb < d_trb_device_boards)) {
 				for (index = 0; index < d_view_ladders; ++index)
 					environment.calibration[index].steps = v_view_calibration_steps;
 				strncpy(environment.filename, argv[1], PATH_MAX);
 				if ((environment.stream = fopen(environment.filename, "rb"))) {
-					if ((argc >= 6) && (f_string_strcmp(argv[5], "-l") == 0))
-						fseek(environment.stream, 0, SEEK_END);
+					if (argc >= 6)
+						for (index = 5; index < argc; ++index) {
+							if (f_string_strcmp(argv[index], "-l") == 0)
+								fseek(environment.stream, 0, SEEK_END);
+							else if (f_string_strcmp(argv[index], "-x") == 0)
+								v_flags |= e_view_action_exports_calibrations;
+							else if (f_string_strcmp(argv[index], "-D") == 0)
+								v_flags |= e_view_action_close_after_calibrations;
+						}
 					gtk_init(&argc, &argv);
 					if (f_view_initialize(main_interface, "UI/UI_main.glade")) {
-						if (argc >= 5)
-							if ((v_view_skip_frames = atoi(argv[4])) < 1)
-								v_view_skip_frames = 1;
 						snprintf(buffer, d_string_buffer_size, "Magrathea event viewer (TRB %d| stream %s)", v_view_trb, argv[1]);
 						gtk_window_set_title(main_interface->window, buffer);
 						gtk_idle_add((GSourceFunc)f_view_loop, main_interface);
@@ -314,7 +326,10 @@ int main (int argc, char *argv[]) {
 		} else
 			fprintf(stderr, "%s ladder doesn't exists\n", argv[3]);
 	} else
-		fprintf(stderr, "usage: %s <path> <trb#> <laddder#> {frequecy of refresh} {-l: skip to last position}\n", argv[0]);
+		fprintf(stderr, "usage: %s <path> <trb#> <laddder#> <frequecy of refresh> {...}\n"
+				"\t{-l: skip to last position}\n"
+				"\t{-x: automatically export calibrations when ready}\n"
+				"\t{-D: exit after calibration}\n", argv[0]);
 	f_memory_destroy();
 	return 0;
 }
