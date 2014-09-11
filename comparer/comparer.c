@@ -65,7 +65,6 @@ int f_comparer_loop(struct s_interface *interface) {
 }
 
 int main (int argc, char *argv[]) {
-	char buffer[d_string_buffer_size];
 	struct s_interface *main_interface = (struct s_interface *) malloc(sizeof(struct s_interface));
 	f_memory_init();
 	if (argc >= 3) {
@@ -74,8 +73,6 @@ int main (int argc, char *argv[]) {
 			f_analyze_values_write(&environment, stdout);
 			gtk_init(&argc, &argv);
 			if (f_comparer_initialize(main_interface, "UI/UI_main.glade")) {
-				snprintf(buffer, d_string_buffer_size, "Magrathea status viewer (TRB %s)", argv[2]);
-				gtk_window_set_title(main_interface->window, buffer);
 				gtk_idle_add((GSourceFunc)f_comparer_loop, main_interface);
 				gtk_main();
 			}
