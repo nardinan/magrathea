@@ -1,0 +1,16 @@
+line_size_0_z=8.0
+line_size_1_z=8.0
+segments_x=10.0
+segments_y=20.0
+range_bottom_x=-40.0
+range_top_x=40.0
+range_bottom_y=0.0
+range_top_y=800.0
+color_R_0_z=1.0
+color_G_0_z=0.0
+color_B_0_z=0.0
+color_R_1_z=0.0
+color_G_1_z=0.0
+color_B_1_z=1.0
+bins_0_z=160
+bins_1_z=160
