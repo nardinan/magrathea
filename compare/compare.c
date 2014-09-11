@@ -15,14 +15,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "comparer.h"
+#include "compare.h"
 struct s_analyze_environment environment;
 int v_selected_ladder = 0;
-int f_comparer_initialize(struct s_interface *supplied, const char *builder_path) {
+int f_compare_initialize(struct s_interface *supplied, const char *builder_path) {
 	int result = d_false;
 	if (f_interface_initialize(supplied, builder_path)) {
-		gtk_window_set_default_size(supplied->window, d_comparer_window_width, d_comparer_window_height);
-		if (g_signal_connect(G_OBJECT(supplied->window), "delete-event", G_CALLBACK(f_comparer_destroy), supplied) > 0) {
+		gtk_window_set_default_size(supplied->window, d_compare_window_width, d_compare_window_height);
+		if (g_signal_connect(G_OBJECT(supplied->window), "delete-event", G_CALLBACK(f_compare_destroy), supplied) > 0) {
 			gtk_spin_button_set_value(supplied->spins[e_interface_spin_ladder], v_selected_ladder);
 			gtk_widget_show_all(GTK_WIDGET(supplied->window));
 			result = d_true;
@@ -31,11 +31,11 @@ int f_comparer_initialize(struct s_interface *supplied, const char *builder_path
 	return result;
 }
 
-void f_comparer_destroy(GtkWidget *widget, struct s_interface *supplied) {
+void f_compare_destroy(GtkWidget *widget, struct s_interface *supplied) {
 	exit(0);
 }
 
-int f_comparer_loop(struct s_interface *interface) {
+int f_compare_loop(struct s_interface *interface) {
 	int result = d_true, index, calibration, ladder, channel;
 	v_selected_ladder = -1;
 	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(interface->radios[e_interface_radio_selected])))
@@ -72,8 +72,8 @@ int main (int argc, char *argv[]) {
 			f_analyze_values(&environment);
 			f_analyze_values_write(&environment, stdout);
 			gtk_init(&argc, &argv);
-			if (f_comparer_initialize(main_interface, "UI/UI_main.glade")) {
-				gtk_idle_add((GSourceFunc)f_comparer_loop, main_interface);
+			if (f_compare_initialize(main_interface, "UI/UI_main.glade")) {
+				gtk_idle_add((GSourceFunc)f_compare_loop, main_interface);
 				gtk_main();
 			}
 		} else

@@ -1,5 +1,5 @@
-objects = comparer.o analyze.o interface.o chart.o keys.o
-name = magrathea_comparer
+objects = compare.o analyze.o interface.o chart.o keys.o
+name = magrathea_compare
 cc = gcc -g
 cflags = -Wall `pkg-config --cflags gtk+-2.0` -I../../ -Wno-variadic-macros -Wno-pointer-arith -c
 lflags = -Wall
@@ -9,8 +9,8 @@ executable = $(name).bin
 all: $(objects)
 	$(cc) $(lflags) $(objects) -o $(executable) $(liblink)
 
-comparer.o: comparer.c comparer.h analyze.h interface.h
-	$(cc) $(cflags) comparer.c
+compare.o: compare.c compare.h analyze.h interface.h
+	$(cc) $(cflags) compare.c
 
 analyze.o: analyze.c analyze.h
 	$(cc) $(cflags) analyze.c

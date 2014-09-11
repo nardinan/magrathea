@@ -15,16 +15,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef magrathea_comparer_h
-#define magrathea_comparer_h
+#ifndef magrathea_compare_h
+#define magrathea_compare_h
 #include "interface.h"
 #include "analyze.h"
-#define d_comparer_window_width 800
-#define d_comparer_window_height 600
-#define d_comparer_timestamp_format "%d %b %Y %H:%M:%S"
+#define d_compare_window_width 800
+#define d_compare_window_height 600
+#define d_compare_timestamp_format "%d %b %Y %H:%M:%S"
 extern struct s_analyze_environment environment;
 extern int v_selected_ladder;
-extern int f_comparer_initialize(struct s_interface *supplied, const char *builder_path);
-extern void f_comparer_destroy(GtkWidget *widget, struct s_interface *supplied);
-extern int f_comparer_loop(struct s_interface *interface);
+extern int f_compare_initialize(struct s_interface *supplied, const char *builder_path);
+extern void f_compare_destroy(GtkWidget *widget, struct s_interface *supplied);
+extern int f_compare_loop(struct s_interface *interface);
 #endif
