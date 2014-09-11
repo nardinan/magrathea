@@ -373,7 +373,7 @@ int p_chart_callback(GtkWidget *widget, GdkEvent *event, void *v_chart) {
 	float full_w = fabs(chart->axis_x.range[1]-chart->axis_x.range[0]), full_h = fabs(chart->axis_y.range[1]-chart->axis_y.range[0]),
 	      arc_size = (2.0*G_PI), min_value[d_chart_max_nested] = {0}, max_value[d_chart_max_nested] = {0}, min_channel[d_chart_max_nested] = {0},
 	      max_channel[d_chart_max_nested] = {0}, rms[d_chart_max_nested], pedestal[d_chart_max_nested], total_square, fraction;
-	int index, code, first, current_position_y;
+	int index, code, first, multiple, current_position_y;
 	char buffer[d_string_buffer_size];
 	if ((chart->cairo_brush = gdk_cairo_create(chart->plane->window))) {
 		gtk_widget_get_allocation(GTK_WIDGET(chart->plane), &dimension);
@@ -386,9 +386,12 @@ int p_chart_callback(GtkWidget *widget, GdkEvent *event, void *v_chart) {
 		}
 		p_chart_normalize(chart, full_h, full_w, dimension.width, dimension.height);
 		cairo_set_dash(chart->cairo_brush, NULL, 0, 0);
-		for (code = 0; code < d_chart_max_nested; code++)
+		multiple = d_false;
+		for (code = 0; code < d_chart_max_nested; code++) {
+			if ((!multiple) && (chart->head[code+1]))
+				multiple = d_true;
 			if (chart->head[code]) {
-				cairo_set_source_rgb(chart->cairo_brush, chart->data.color[code].R, chart->data.color[code].G, chart->data.color[code].B);
+				cairo_set_source_rgba(chart->cairo_brush, chart->data.color[code].R, chart->data.color[code].G, chart->data.color[code].B, 0.7f);
 				cairo_set_line_width(chart->cairo_brush, chart->data.line_size[code]);
 				for (index = 0, first = d_true; index < chart->head[code]; index++) {
 					if (chart->values[code][index].normalized.done) {
@@ -456,6 +459,7 @@ int p_chart_callback(GtkWidget *widget, GdkEvent *event, void *v_chart) {
 					cairo_stroke(chart->cairo_brush);
 				}
 			}
+		}
 		if (chart->show_borders) {
 			cairo_set_source_rgb(chart->cairo_brush, 0.0, 0.0, 0.0);
 			cairo_set_font_size(chart->cairo_brush, d_chart_default_font_size);
