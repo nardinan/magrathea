@@ -61,6 +61,7 @@ int f_compare_loop(struct s_interface *interface) {
 		}
 	for (index = 0; index < e_interface_chart_NULL; ++index)
 		f_chart_redraw(&(interface->logic_charts[index]));
+	usleep(d_compare_timeout);
 	return result;
 }
 
