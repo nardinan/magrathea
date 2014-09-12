@@ -30,7 +30,7 @@ struct s_convert_environment *f_convert_init(struct s_convert_environment *suppl
 			snprintf(postfix, d_string_buffer_size, "ladder_%02d", ladder);
 			snprintf(path, PATH_MAX, "%s/%s.root", directory, postfix);
 			if ((result->stream[ladder] = new TFile(path, "RECREATE"))) {
-				result->structure[ladder] = new TTree("events", "events from TRB");
+				result->structure[ladder] = new TTree("eventTRB", "events from TRB");
 				for (channel = 0; channel < d_package_channels; ++channel) {
 					snprintf(h_name, d_string_buffer_size, "t_Ch%d", channel);
 					snprintf(t_name, d_string_buffer_size, "adc%d/I", channel);
