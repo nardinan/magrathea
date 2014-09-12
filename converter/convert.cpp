@@ -27,7 +27,7 @@ struct s_convert_environment *f_convert_init(struct s_convert_environment *suppl
 	snprintf(directory, PATH_MAX, "%s_%s", prefix, d_convert_directory);
 	if ((mkdir(directory, 0777) == 0) || (errno == EEXIST))
 		for (ladder = 0; ladder < d_package_ladders; ++ladder) {
-			snprintf(postfix, d_string_buffer_size, "ladder_%d", ladder);
+			snprintf(postfix, d_string_buffer_size, "ladder_%02d", ladder);
 			snprintf(path, PATH_MAX, "%s/%s.root", directory, postfix);
 			if ((result->stream[ladder] = new TFile(path, "RECREATE"))) {
 				result->structure[ladder] = new TTree("events", "events from TRB");
@@ -76,7 +76,7 @@ int f_convert_read(const char *prefix, FILE *stream, int trb) {
 				if (backup > buffer) {
 					bytes -= (backup-buffer);
 					memmove(buffer, backup, bytes);
-					if ((packagea.complete) && (package.trb == v_package_trbs[trb].code))
+					if ((package.complete) && (package.trb == v_package_trbs[trb].code))
 						f_convert_insert(&environment, &package);
 				}
 			} else if (!readed)
@@ -94,7 +94,7 @@ int main (int argc, char *argv[]) {
 		trb = atoi(argv[2]);
 		if ((trb >= 0) && (trb < d_trb_device_boards)) {
 			if ((stream = fopen(argv[1], "rb"))) {
-				f_convert_read(argv[1], stream);
+				f_convert_read(argv[1], stream, trb);
 				fclose(stream);
 			} else
 				fprintf(stderr, "unable to find file %s\n", argv[1]);

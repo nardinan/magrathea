@@ -22,11 +22,12 @@
 #include <TTree.h>
 #include <TFile.h>
 extern "C" {
-#include <linux/limits.h>
+#include <limits.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <errno.h>
 #include "../package.h"
+#include "../trb_device.h"
 }
 #define d_convert_directory "ttree"
 extern int tree_adc[d_package_ladders][d_package_channels];
