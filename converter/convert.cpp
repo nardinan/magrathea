@@ -62,7 +62,7 @@ int f_convert_insert(struct s_convert_environment *environment, struct s_package
 	return result;
 }
 
-int f_convert_read(const char *prefix, FILE *stream) {
+int f_convert_read(const char *prefix, FILE *stream, int trb) {
 	unsigned char buffer[d_package_buffer_size], *backup;
 	ssize_t readed, bytes = 0;
 	struct s_package package;
@@ -76,7 +76,7 @@ int f_convert_read(const char *prefix, FILE *stream) {
 				if (backup > buffer) {
 					bytes -= (backup-buffer);
 					memmove(buffer, backup, bytes);
-					if (package.complete)
+					if ((packagea.complete) && (package.trb == v_package_trbs[trb].code))
 						f_convert_insert(&environment, &package);
 				}
 			} else if (!readed)
@@ -89,13 +89,18 @@ int f_convert_read(const char *prefix, FILE *stream) {
 
 int main (int argc, char *argv[]) {
 	FILE *stream;
-	if (argc == 2) {
-		if ((stream = fopen(argv[1], "rb"))) {
-			f_convert_read(argv[1], stream);
-			fclose(stream);
+	int trb;
+	if (argc == 3) {
+		trb = atoi(argv[2]);
+		if ((trb >= 0) && (trb < d_trb_device_boards)) {
+			if ((stream = fopen(argv[1], "rb"))) {
+				f_convert_read(argv[1], stream);
+				fclose(stream);
+			} else
+				fprintf(stderr, "unable to find file %s\n", argv[1]);
 		} else
-			fprintf(stderr, "unable to find file %s\n", argv[1]);
+			fprintf(stderr, "trb %d doesn't exits (0 - %d)\n", trb, (d_trb_device_boards-1));
 	} else
-		fprintf(stderr, "usage: %s <file>\n", argv[0]);
+		fprintf(stderr, "usage: %s <file> <trb#>\n", argv[0]);
 	return 0;
 }
