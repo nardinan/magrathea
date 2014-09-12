@@ -31,10 +31,10 @@ extern "C" {
 }
 #define d_convert_directory "ttree"
 #define d_convert_ladders 24
-extern int tree_adc[d_package_ladders][d_package_channels];
+extern int tree_adc[d_convert_ladders][d_package_channels];
 typedef struct s_convert_environment {
-	TFile *stream[d_package_ladders];
-	TTree *structure[d_package_ladders];
+	TFile *stream[d_convert_ladders];
+	TTree *structure[d_convert_ladders];
 } s_convert_environment;
 extern struct s_convert_environment *f_convert_init(struct s_convert_environment *supplied, const char *prefix, int trb);
 extern void f_convert_destroy(struct s_convert_environment *supplied);

@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "convert.h"
-int tree_adc[d_package_ladders][d_package_channels];
+int tree_adc[d_convert_ladders][d_package_channels];
 struct s_convert_environment *f_convert_init(struct s_convert_environment *supplied, const char *prefix, int trb) {
 	char directory[PATH_MAX], postfix[d_string_buffer_size], path[PATH_MAX], h_name[d_string_buffer_size], t_name[d_string_buffer_size];
 	struct s_convert_environment *result = supplied;
