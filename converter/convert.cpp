@@ -69,19 +69,19 @@ int f_convert_read(const char *prefix, FILE *stream, int trb) {
 	struct s_convert_environment environment;
 	int result = d_true;
 	if (f_convert_init(&environment, prefix)) {
-		while (bytes > 0) {
+		do {
 			if ((readed = fread(buffer+bytes, 1, d_package_buffer_size-bytes, stream)) > 0)
 				bytes += readed;
 			if ((backup = f_package_analyze(&package, buffer, bytes))) {
 				if (backup > buffer) {
 					bytes -= (backup-buffer);
 					memmove(buffer, backup, bytes);
-					if ((package.complete) && (package.trb == v_package_trbs[trb].code))
+					if ((package.complete) && (package.trb == v_package_trbs[trb].code)) 
 						f_convert_insert(&environment, &package);
 				}
-			} else if (!readed)
+			} else if (readed == 0)
 				break;
-		}
+		} while (bytes > 0);
 		f_convert_destroy(&environment);
 	}
 	return result;
