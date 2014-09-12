@@ -21,6 +21,7 @@
 #include <math.h>
 #include "package.h"
 #include "trb_device.h"
+#define d_stk_math_sigma_k 10.0
 #define d_stk_math_sigma_k_max 2.0
 typedef enum e_stk_math_flags {
 	e_stk_math_flag_bad = 0x01,
