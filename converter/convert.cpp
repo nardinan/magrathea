@@ -17,16 +17,16 @@
  */
 #include "convert.h"
 int tree_adc[d_package_ladders][d_package_channels];
-struct s_convert_environment *f_convert_init(struct s_convert_environment *supplied, const char *prefix) {
+struct s_convert_environment *f_convert_init(struct s_convert_environment *supplied, const char *prefix, int trb) {
 	char directory[PATH_MAX], postfix[d_string_buffer_size], path[PATH_MAX], h_name[d_string_buffer_size], t_name[d_string_buffer_size];
 	struct s_convert_environment *result = supplied;
 	int ladder, channel;
 	if (!result)
 		if (!(result = (struct s_convert_environment *) d_malloc(sizeof(struct s_convert_environment))))
 			d_die(d_error_malloc);
-	snprintf(directory, PATH_MAX, "%s_%s", prefix, d_convert_directory);
+	snprintf(directory, PATH_MAX, "%s_%s_TRB%02d", prefix, d_convert_directory, trb);
 	if ((mkdir(directory, 0777) == 0) || (errno == EEXIST))
-		for (ladder = 0; ladder < d_package_ladders; ++ladder) {
+		for (ladder = 0; ladder < d_convert_ladders; ++ladder) {
 			snprintf(postfix, d_string_buffer_size, "ladder_%02d", ladder);
 			snprintf(path, PATH_MAX, "%s/%s.root", directory, postfix);
 			if ((result->stream[ladder] = new TFile(path, "RECREATE"))) {
@@ -44,7 +44,7 @@ struct s_convert_environment *f_convert_init(struct s_convert_environment *suppl
 
 void f_convert_destroy(struct s_convert_environment *supplied) {
 	int ladder;
-	for (ladder = 0; ladder < d_package_ladders; ++ladder) {
+	for (ladder = 0; ladder < d_convert_ladders; ++ladder) {
 		supplied->stream[ladder]->Write();
 		supplied->stream[ladder]->Close();
 		delete(supplied->stream[ladder]);
@@ -54,7 +54,7 @@ void f_convert_destroy(struct s_convert_environment *supplied) {
 int f_convert_insert(struct s_convert_environment *environment, struct s_package *package) {
 	int ladder, selected_ladder, channel, result = d_true;
 	for (ladder = 0; ladder < d_package_ladders; ++ladder)
-		if ((selected_ladder = package->data.values.raw.ladder[ladder]) < d_package_ladders) {
+		if ((selected_ladder = package->data.values.raw.ladder[ladder]) < d_convert_ladders) {
 			for (channel = 0; channel < d_package_channels; ++channel)
 				tree_adc[selected_ladder][channel] = package->data.values.raw.values[ladder][channel];
 			environment->structure[selected_ladder]->Fill();
@@ -68,7 +68,7 @@ int f_convert_read(const char *prefix, FILE *stream, int trb) {
 	struct s_package package;
 	struct s_convert_environment environment;
 	int result = d_true;
-	if (f_convert_init(&environment, prefix)) {
+	if (f_convert_init(&environment, prefix, trb)) {
 		do {
 			if ((readed = fread(buffer+bytes, 1, d_package_buffer_size-bytes, stream)) > 0)
 				bytes += readed;
