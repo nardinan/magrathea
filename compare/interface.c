@@ -26,6 +26,31 @@ const char *v_interface_charts[] = {
 	"v_ladder_selected_check"
 }, *v_interface_spins[] = {
 	"v_ladder_number"
+}, *v_interface_switches[] = {
+	"v_trb_ladder_button_0",
+	"v_trb_ladder_button_1",
+	"v_trb_ladder_button_2",
+	"v_trb_ladder_button_3",
+	"v_trb_ladder_button_4",
+	"v_trb_ladder_button_5",
+	"v_trb_ladder_button_6",
+	"v_trb_ladder_button_7",
+	"v_trb_ladder_button_8",
+	"v_trb_ladder_button_9",
+	"v_trb_ladder_button_10",
+	"v_trb_ladder_button_11",
+	"v_trb_ladder_button_12",
+	"v_trb_ladder_button_13",
+	"v_trb_ladder_button_14",
+	"v_trb_ladder_button_15",
+	"v_trb_ladder_button_16",
+	"v_trb_ladder_button_17",
+	"v_trb_ladder_button_18",
+	"v_trb_ladder_button_19",
+	"v_trb_ladder_button_20",
+	"v_trb_ladder_button_21",
+	"v_trb_ladder_button_22",
+	"v_trb_ladder_button_23"
 }, *v_interface_chart_labels[] = {
 	"pedestal",
 	"sigma_raw",
@@ -58,6 +83,8 @@ struct s_interface *f_interface_initialize(struct s_interface *supplied, const c
 				d_assert(result->radios[index] = GTK_RADIO_BUTTON(gtk_builder_get_object(result->interface, v_interface_radios[index])));
 			for (index = 0; index < e_interface_spin_NULL; ++index)
 				d_assert(result->spins[index] = GTK_SPIN_BUTTON(gtk_builder_get_object(result->interface, v_interface_spins[index])));
+			for (index = 0; index < e_interface_switch_NULL; ++index)
+				d_assert(result->switches[index] = GTK_TOGGLE_BUTTON(gtk_builder_get_object(result->interface, v_interface_switches[index])));
 		}
 	return result;
 }

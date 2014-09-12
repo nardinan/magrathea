@@ -34,15 +34,44 @@ typedef enum e_interface_spins {
 	e_interface_spin_ladder = 0,
 	e_interface_spin_NULL
 } e_interface_spins;
+typedef enum e_interface_switches {
+	e_interface_switch_ladder_0 = 0,
+	e_interface_switch_ladder_1,
+	e_interface_switch_ladder_2,
+	e_interface_switch_ladder_3,
+	e_interface_switch_ladder_4,
+	e_interface_switch_ladder_5,
+	e_interface_switch_ladder_6,
+	e_interface_switch_ladder_7,
+	e_interface_switch_ladder_8,
+	e_interface_switch_ladder_9,
+	e_interface_switch_ladder_10,
+	e_interface_switch_ladder_11,
+	e_interface_switch_ladder_12,
+	e_interface_switch_ladder_13,
+	e_interface_switch_ladder_14,
+	e_interface_switch_ladder_15,
+	e_interface_switch_ladder_16,
+	e_interface_switch_ladder_17,
+	e_interface_switch_ladder_18,
+	e_interface_switch_ladder_19,
+	e_interface_switch_ladder_20,
+	e_interface_switch_ladder_21,
+	e_interface_switch_ladder_22,
+	e_interface_switch_ladder_23,
+	e_interface_switch_NULL
+} e_interface_switches;
 typedef struct s_interface {
 	GtkBuilder *interface;
 	GtkWindow *window;
 	GtkAlignment *charts[e_interface_chart_NULL];
 	GtkRadioButton *radios[e_interface_radio_NULL];
 	GtkSpinButton *spins[e_interface_spin_NULL];
+	GtkToggleButton *switches[e_interface_switch_NULL];
 	struct s_chart logic_charts[e_interface_chart_NULL];
 	int destroy;
 } s_interface;
-extern const char *v_interface_charts[], *v_interface_radios[], *v_interface_spins[], *v_interface_chart_labels[], *v_interface_chart_styles[];
+extern const char *v_interface_charts[], *v_interface_radios[], *v_interface_spins[], *v_interface_switches[], *v_interface_chart_labels[],
+       *v_interface_chart_styles[];
 extern struct s_interface *f_interface_initialize(struct s_interface *supplied, const char *builder_path);
 #endif

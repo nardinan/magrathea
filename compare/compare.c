@@ -35,16 +35,39 @@ void f_compare_destroy(GtkWidget *widget, struct s_interface *supplied) {
 	exit(0);
 }
 
+int p_compare_loop_toggle(struct s_interface *interface, int ladder, int enable) {
+	int result = d_false;
+	if ((ladder >= 0) && (ladder < d_analyze_ladders)) {
+		if (enable)
+			gtk_toggle_button_set_active(interface->switches[ladder], d_true);
+		if (gtk_toggle_button_get_active(interface->switches[ladder])) {
+			gtk_button_set_label(GTK_BUTTON(interface->switches[ladder]), "V");
+			result = d_true;
+		} else
+			gtk_button_set_label(GTK_BUTTON(interface->switches[ladder]), "X");
+	} else
+		fprintf(stderr, "warning, ladder %d is out of range (0 - %d)\n", ladder, (d_analyze_ladders-1));
+	return result;
+}
+
 int f_compare_loop(struct s_interface *interface) {
-	int result = d_true, index, calibration, ladder, channel;
+	int result = d_true, index, calibration, ladder, channel, local_selection[d_analyze_ladders];
 	v_selected_ladder = -1;
 	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(interface->radios[e_interface_radio_selected])))
 		v_selected_ladder = gtk_spin_button_get_value_as_int(interface->spins[e_interface_spin_ladder]);
 	for (index = 0; index < e_interface_chart_NULL; ++index)
 		f_chart_flush(&(interface->logic_charts[index]));
+	for (ladder = 0; ladder < d_analyze_ladders; ++ladder) {
+		local_selection[ladder] = p_compare_loop_toggle(interface, ladder, d_false);
+		if (((v_selected_ladder < 0) && (local_selection[ladder]))|| (v_selected_ladder == ladder)) {
+			for (channel = 0; channel < d_package_channels; ++channel)
+				f_chart_append_histogram(&(interface->logic_charts[e_interface_chart_distance]), 0,
+						environment.pedestal_distance[ladder][channel]);
+		}
+	}
 	for (calibration = 0; calibration < d_analyze_calibrations; ++calibration)
 		for (ladder = 0; ladder < d_analyze_ladders; ++ladder)
-			if ((v_selected_ladder < 0) || (v_selected_ladder == ladder))
+			if (((v_selected_ladder < 0) && (local_selection[ladder])) || (v_selected_ladder == ladder))
 				for (channel = 0; channel < d_package_channels; ++channel) {
 					f_chart_append_histogram(&(interface->logic_charts[e_interface_chart_pedestal]), calibration,
 							environment.calibration[calibration].ladder[ladder].pedestal[channel]);
@@ -53,12 +76,6 @@ int f_compare_loop(struct s_interface *interface) {
 					f_chart_append_histogram(&(interface->logic_charts[e_interface_chart_sigma]), calibration,
 							environment.calibration[calibration].ladder[ladder].sigma[channel]);
 				}
-	for (ladder = 0; ladder < d_analyze_ladders; ++ladder)
-		if ((v_selected_ladder < 0) || (v_selected_ladder == ladder)) {
-			for (channel = 0; channel < d_package_channels; ++channel)
-				f_chart_append_histogram(&(interface->logic_charts[e_interface_chart_distance]), 0,
-						environment.pedestal_distance[ladder][channel]);
-		}
 	for (index = 0; index < e_interface_chart_NULL; ++index)
 		f_chart_redraw(&(interface->logic_charts[index]));
 	usleep(d_compare_timeout);
@@ -67,6 +84,8 @@ int f_compare_loop(struct s_interface *interface) {
 
 int main (int argc, char *argv[]) {
 	struct s_interface *main_interface = (struct s_interface *) malloc(sizeof(struct s_interface));
+	char *current_pointer, *next_pointer;
+	int ladder;
 	f_memory_init();
 	if (argc >= 3) {
 		if (f_analyze_calibration(&environment, argv[1], argv[2])) {
@@ -74,13 +93,27 @@ int main (int argc, char *argv[]) {
 			f_analyze_values_write(&environment, stdout);
 			gtk_init(&argc, &argv);
 			if (f_compare_initialize(main_interface, "UI/UI_main.glade")) {
+				if (argc == 4) {
+					current_pointer = argv[3];
+					while ((next_pointer = strchr(current_pointer, ','))) {
+						ladder = atoi(current_pointer);
+						p_compare_loop_toggle(main_interface, ladder, d_true);
+						current_pointer = (next_pointer+1);
+					}
+					if (f_string_strlen(current_pointer) > 0) {
+						ladder = atoi(current_pointer);
+						p_compare_loop_toggle(main_interface, ladder, d_true);
+					}
+				} else
+					for (ladder = 0; ladder < d_analyze_ladders; ++ladder)
+						p_compare_loop_toggle(main_interface, ladder, d_true);
 				gtk_idle_add((GSourceFunc)f_compare_loop, main_interface);
 				gtk_main();
 			}
 		} else
 			fprintf(stderr, "one of these directories doesn't contains calibration files\n");
 	} else
-		fprintf(stderr, "usage:\n%s <reference calibration> <calibration>\n", argv[0]);
+		fprintf(stderr, "usage:\n%s <reference calibration> <calibration> {list of masked ladders CSV}\n", argv[0]);
 	f_memory_destroy();
 	return 0;
 }
