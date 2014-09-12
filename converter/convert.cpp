@@ -99,7 +99,7 @@ int main (int argc, char *argv[]) {
 			} else
 				fprintf(stderr, "unable to find file %s\n", argv[1]);
 		} else
-			fprintf(stderr, "trb %d doesn't exits (0 - %d)\n", trb, (d_trb_device_boards-1));
+			fprintf(stderr, "%s TRB doesn't exits\n", argv[2]);
 	} else
 		fprintf(stderr, "usage: %s <file> <trb#>\n", argv[0]);
 	return 0;
