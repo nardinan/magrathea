@@ -126,9 +126,9 @@ void p_view_loop_analyze(struct s_interface *interface, unsigned short int ladde
 		environment.calibration[ladder].package++;
 		environment.calibration[ladder].new_bucket = d_true;
 	} else if (!environment.calibration[ladder].computed)  {
-		f_analyze_pedestal(environment.calibration[ladder].bucket, environment.calibration[ladder].package, environment.calibration[ladder].pedestal);
-		f_analyze_sigma_raw(environment.calibration[ladder].bucket, environment.calibration[ladder].package, environment.calibration[ladder].sigma_raw);
-		f_analyze_sigma(environment.calibration[ladder].bucket, environment.calibration[ladder].package, d_view_calibration_sigma_k,
+		f_stk_math_pedestal(environment.calibration[ladder].bucket, environment.calibration[ladder].package, environment.calibration[ladder].pedestal);
+		f_stk_math_sigma_raw(environment.calibration[ladder].bucket, environment.calibration[ladder].package, environment.calibration[ladder].sigma_raw);
+		f_stk_math_sigma(environment.calibration[ladder].bucket, environment.calibration[ladder].package, d_view_calibration_sigma_k,
 				environment.calibration[ladder].sigma_raw, environment.calibration[ladder].pedestal, environment.calibration[ladder].sigma,
 				environment.calibration[ladder].flags);
 		environment.calibration[ladder].computed = d_true;
@@ -141,8 +141,8 @@ void p_view_loop_analyze(struct s_interface *interface, unsigned short int ladde
 			}
 		}
 	} else {
-		f_analyze_adc_pedestal(environment.data[ladder].bucket, environment.calibration[ladder].pedestal, environment.data[ladder].adc_pedestal);
-		f_analyze_adc_pedestal_cn(environment.data[ladder].bucket, d_view_calibration_sigma_k, environment.calibration[ladder].pedestal,
+		f_stk_math_adc_pedestal(environment.data[ladder].bucket, environment.calibration[ladder].pedestal, environment.data[ladder].adc_pedestal);
+		f_stk_math_adc_pedestal_cn(environment.data[ladder].bucket, d_view_calibration_sigma_k, environment.calibration[ladder].pedestal,
 				environment.calibration[ladder].sigma, environment.calibration[ladder].flags, environment.data[ladder].adc_pedestal_cn);
 	}
 }

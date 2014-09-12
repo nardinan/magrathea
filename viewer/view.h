@@ -22,7 +22,7 @@
 #include <sys/time.h>
 #include <errno.h>
 #include "interface.h"
-#include "analyze.h"
+#include "../stk_math.h"
 #define d_view_ladders 24
 #define d_view_calibration_steps 256
 #define d_view_calibration_sigma_k 10.0f
@@ -32,7 +32,7 @@
 #define d_view_calibration_folder "cals"
 #define d_view_calibration_extension "cal"
 #define d_view_timeout 100000
-#define d_view_timeout_online 300
+#define d_view_timeout_online 150
 typedef enum e_view_actions {
 	e_view_action_exports_calibrations = 0x01,
 	e_view_action_close_after_calibrations = 0x02
