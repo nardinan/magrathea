@@ -66,8 +66,10 @@ int f_view_initialize(struct s_interface *supplied, const char *builder_path) {
 	if (f_interface_initialize(supplied, builder_path)) {
 		gtk_widget_set_sensitive(GTK_WIDGET(supplied->buttons[e_interface_button_dump]), FALSE);
 		if ((g_signal_connect(G_OBJECT(supplied->buttons[e_interface_button_dump]), "clicked", G_CALLBACK(f_view_action_dump), supplied) > 0) &&
-				(g_signal_connect(G_OBJECT(supplied->buttons[e_interface_button_redo]), "clicked", G_CALLBACK(f_view_action_redo), supplied) > 0) &&
-				(g_signal_connect(G_OBJECT(supplied->buttons[e_interface_button_last]), "clicked", G_CALLBACK(f_view_action_last), supplied) > 0)) {
+				(g_signal_connect(G_OBJECT(supplied->buttons[e_interface_button_redo]), "clicked",
+						  G_CALLBACK(f_view_action_redo), supplied) > 0) &&
+				(g_signal_connect(G_OBJECT(supplied->buttons[e_interface_button_last]), "clicked",
+						  G_CALLBACK(f_view_action_last), supplied) > 0)) {
 			gtk_spin_button_set_value(supplied->spins[e_interface_spin_ladder], v_view_ladder);
 			gtk_spin_button_set_value(supplied->spins[e_interface_spin_delay], 0);
 			gtk_window_set_default_size(supplied->window, d_view_window_width, d_view_window_height);
@@ -112,7 +114,7 @@ void p_view_loop_dump(struct s_interface *interface, unsigned short int ladder) 
 				fclose(stream);
 			}
 	} else
-		printf("Warning[ladder %d] - calibration still not computed\n", ladder);
+		printf("Warning[ladder %d] - calibration still not ready\n", ladder);
 }
 
 void p_view_loop_analyze(struct s_interface *interface, unsigned short int ladder, unsigned short int *values) {
