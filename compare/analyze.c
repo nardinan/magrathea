@@ -140,3 +140,27 @@ int p_analyze_calibration(struct s_analyze_environment *environment, const char 
 int f_analyze_calibration(struct s_analyze_environment *environment, const char *reference, const char *directory) {
 	return ((p_analyze_calibration(environment, reference, 0)) && (p_analyze_calibration(environment, directory, 1)));
 }
+
+void f_analyze_export(struct s_analyze_environment *environment, const char *file, int *selected) {
+	FILE *stream;
+	int ladder, channel, calibration;
+	if ((stream = fopen(file, "w"))) {
+		fprintf(stream, "ladder%cchannel", d_analyze_csv_divisor);
+		for (calibration = 0; calibration < d_analyze_calibrations; ++calibration)
+			fprintf(stream, "%cpedestal_%02d%csigma_raw_%02d%csigma_%02d", d_analyze_csv_divisor, calibration, d_analyze_csv_divisor, calibration,
+					d_analyze_csv_divisor, calibration);
+		fputc('\n', stream);
+		for (ladder = 0; ladder < d_analyze_ladders; ++ladder)
+			if (selected[ladder])
+				for (channel = 0; channel < d_package_channels; ++channel) {
+					fprintf(stream, "%d%c%d", ladder, d_analyze_csv_divisor, channel);
+					for (calibration = 0; calibration < d_analyze_calibrations; ++calibration)
+						fprintf(stream, "%c%.02f%c%.02f%c%.02f", d_analyze_csv_divisor,
+								environment->calibration[calibration].ladder[ladder].pedestal[channel],
+								d_analyze_csv_divisor, environment->calibration[calibration].ladder[ladder].sigma_raw[channel],
+								d_analyze_csv_divisor, environment->calibration[calibration].ladder[ladder].sigma[channel]);
+					fputc('\n', stream);
+				}
+		fclose(stream);
+	}
+}

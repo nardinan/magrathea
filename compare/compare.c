@@ -84,11 +84,14 @@ int f_compare_loop(struct s_interface *interface) {
 
 int main (int argc, char *argv[]) {
 	struct s_interface *main_interface = (struct s_interface *) malloc(sizeof(struct s_interface));
-	char *current_pointer, *next_pointer;
-	int ladder;
+	char *current_pointer, *next_pointer, csv_file[d_string_buffer_size];
+	int ladder, local_selection[d_analyze_ladders];
 	f_memory_init();
 	if (argc >= 3) {
+		for (ladder = 0; ladder < d_analyze_ladders; ++ladder)
+			local_selection[ladder] = d_false;
 		if (f_analyze_calibration(&environment, argv[1], argv[2])) {
+			snprintf(csv_file, d_string_buffer_size, "%s.csv", argv[2]);
 			f_analyze_values(&environment);
 			f_analyze_values_write(&environment, stdout);
 			gtk_init(&argc, &argv);
@@ -97,16 +100,21 @@ int main (int argc, char *argv[]) {
 					current_pointer = argv[3];
 					while ((next_pointer = strchr(current_pointer, ','))) {
 						ladder = atoi(current_pointer);
+						local_selection[ladder] = d_true;
 						p_compare_loop_toggle(main_interface, ladder, d_true);
 						current_pointer = (next_pointer+1);
 					}
 					if (f_string_strlen(current_pointer) > 0) {
 						ladder = atoi(current_pointer);
+						local_selection[ladder] = d_true;
 						p_compare_loop_toggle(main_interface, ladder, d_true);
 					}
 				} else
-					for (ladder = 0; ladder < d_analyze_ladders; ++ladder)
+					for (ladder = 0; ladder < d_analyze_ladders; ++ladder) {
+						local_selection[ladder] = d_true;
 						p_compare_loop_toggle(main_interface, ladder, d_true);
+					}
+				f_analyze_export(&environment, csv_file, local_selection);
 				gtk_idle_add((GSourceFunc)f_compare_loop, main_interface);
 				gtk_main();
 			}
