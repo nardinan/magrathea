@@ -45,10 +45,14 @@ unsigned char *p_package_analyze_header_data(struct s_package *package, unsigned
 	static unsigned char header_data[] = {0xEE, 0xBB};
 	unsigned char *pointer = buffer, *backup, *result = NULL, workmode, group;
 	int index;
-	while ((size >= d_package_data_header_size) && ((*pointer) != header_data[0])) {
-		pointer++;
-		size--;
-	}
+	if (size >= d_package_alignment_size)
+		for (index = 0; index < d_package_alignment_size; ++index) {
+			if (*pointer != header_data[0]) {
+				pointer++;
+				size--;
+			} else
+				break;
+		}
 	if (size >= d_package_data_header_size) {
 		for (index = 0; index < d_package_data_header_const_size; ++index, ++pointer)
 			if (*pointer != header_data[index])
