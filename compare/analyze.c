@@ -143,7 +143,7 @@ int f_analyze_calibration(struct s_analyze_environment *environment, const char 
 
 void f_analyze_export(struct s_analyze_environment *environment, const char *file, int *selected) {
 	FILE *stream;
-	int ladder, channel, calibration;
+	int ladder, channel, calibration, channels_lower_five = 0, channels_bigger_five = 0;
 	if ((stream = fopen(file, "w"))) {
 		fprintf(stream, "ladder%cchannel", d_analyze_csv_divisor);
 		for (calibration = 0; calibration < d_analyze_calibrations; ++calibration)
@@ -151,8 +151,14 @@ void f_analyze_export(struct s_analyze_environment *environment, const char *fil
 					d_analyze_csv_divisor, calibration);
 		fputc('\n', stream);
 		for (ladder = 0; ladder < d_analyze_ladders; ++ladder)
-			if (selected[ladder])
+			if (selected[ladder]) {
+				printf("ladder %d (channels with sigma > 5): ", ladder);
 				for (channel = 0; channel < d_package_channels; ++channel) {
+					if (environment->calibration[0].ladder[ladder].sigma[channel] > 5) {
+						printf("%d, ", channel);
+						channels_bigger_five++;
+					} else if (environment->calibration[0].ladder[ladder].sigma[channel] >= 2)
+						channels_lower_five++;
 					fprintf(stream, "%d%c%d", ladder, d_analyze_csv_divisor, channel);
 					for (calibration = 0; calibration < d_analyze_calibrations; ++calibration)
 						fprintf(stream, "%c%.02f%c%.02f%c%.02f", d_analyze_csv_divisor,
@@ -161,6 +167,9 @@ void f_analyze_export(struct s_analyze_environment *environment, const char *fil
 								d_analyze_csv_divisor, environment->calibration[calibration].ladder[ladder].sigma[channel]);
 					fputc('\n', stream);
 				}
+				putchar('\n');
+			}
+		printf("[sigma >= 2 && sigma <= 5]: %d\n[sigma > 5]: %d\n", channels_lower_five, channels_bigger_five);
 		fclose(stream);
 	}
 }
