@@ -113,6 +113,7 @@ struct s_interface *f_interface_initialize(struct s_interface *supplied, const c
 			d_assert(result->window = GTK_WINDOW(gtk_builder_get_object(result->interface, "v_window")));
 			for (index = 0; index < e_interface_chart_NULL; ++index) {
 				d_assert(f_chart_new(&(result->logic_charts[index])));
+				d_assert(f_chart_hook_interface(&(result->logic_charts[index]), "../components/UI/UI_scale_config.glade"));
 				f_chart_style(&(result->logic_charts[index]), "styles/base_graph.keys");
 				f_chart_style(&(result->logic_charts[index]), v_interface_chart_styles[index]);
 				d_assert(result->charts[index] = GTK_ALIGNMENT(gtk_builder_get_object(result->interface, v_interface_charts[index])));

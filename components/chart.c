@@ -30,6 +30,21 @@ struct s_chart *f_chart_new(struct s_chart *supplied) {
 	return result;
 }
 
+int f_chart_hook_interface(struct s_chart *supplied, const char *interface) {
+	GtkBuilder *builder = gtk_builder_new();
+	int result = d_false;
+	if ((gtk_builder_add_from_file(builder, interface, NULL))) {
+		f_interface_scale_new(&(supplied->interface), builder);
+		supplied->interface.hooked_chart = supplied;
+		gtk_widget_add_events(GTK_WIDGET(supplied->plane), GDK_BUTTON_PRESS_MASK);
+		g_signal_connect(G_OBJECT(supplied->plane), "button-press-event", G_CALLBACK(p_chart_callback_scale_show), &(supplied->interface));
+		g_signal_connect(G_OBJECT(supplied->interface.action), "clicked", G_CALLBACK(p_chart_callback_scale_action), &(supplied->interface));
+		g_signal_connect(G_OBJECT(supplied->interface.window), "delete-event", G_CALLBACK(p_chart_callback_scale_hide), &(supplied->interface));
+		result = d_true;
+	}
+	return result;
+}
+
 void p_chart_style_axis(struct s_list *dictionary, const char postfix, struct s_chart_axis *axis) {
 	p_keys_int(dictionary, "segments", postfix, (int *)&(axis->segments));
 	p_keys_int(dictionary, "show_negative", postfix, &(axis->show_negative));
@@ -485,5 +500,45 @@ int p_chart_callback(GtkWidget *widget, GdkEvent *event, void *v_chart) {
 		p_chart_redraw_grid_y(chart->cairo_brush, chart, full_h, full_w, dimension.width, dimension.height);
 		cairo_destroy(chart->cairo_brush);
 	}
+	return d_true;
+}
+
+int p_chart_callback_scale_show(GtkWidget *widget, GdkEvent *event, struct s_interface_scale *interface) {
+	gtk_spin_button_set_value(interface->spins[e_interface_scale_spin_y_bottom], interface->hooked_chart->axis_y.range[0]);
+	gtk_spin_button_set_value(interface->spins[e_interface_scale_spin_y_top], interface->hooked_chart->axis_y.range[1]);
+	gtk_spin_button_set_value(interface->spins[e_interface_scale_spin_y_segments], interface->hooked_chart->axis_y.segments);
+	gtk_spin_button_set_value(interface->spins[e_interface_scale_spin_x_bottom], interface->hooked_chart->axis_x.range[0]);
+	gtk_spin_button_set_value(interface->spins[e_interface_scale_spin_x_top], interface->hooked_chart->axis_x.range[1]);
+	gtk_spin_button_set_value(interface->spins[e_interface_scale_spin_x_segments], interface->hooked_chart->axis_x.segments);
+	gtk_toggle_button_set_active(interface->switches[e_interface_scale_switch_informations], interface->hooked_chart->show_borders);
+	gtk_widget_show_all(GTK_WIDGET(interface->window));
+	gtk_window_set_position(interface->window, GTK_WIN_POS_MOUSE);
+	gtk_window_present(interface->window);
+	return d_true;
+}
+
+int p_chart_callback_scale_action(GtkWidget *widget, struct s_interface_scale *interface) {
+	float value_top, value_bottom;
+	if (interface->hooked_chart) {
+		value_top = (float)gtk_spin_button_get_value(interface->spins[e_interface_scale_spin_y_top]);
+		value_bottom = (float)gtk_spin_button_get_value(interface->spins[e_interface_scale_spin_y_bottom]);
+		interface->hooked_chart->axis_y.range[0] = d_min(value_top, value_bottom);
+		interface->hooked_chart->axis_y.range[1] = d_max(value_top, value_bottom);
+		interface->hooked_chart->axis_y.segments = gtk_spin_button_get_value_as_int(interface->spins[e_interface_scale_spin_y_segments]);
+		value_top = (float)gtk_spin_button_get_value(interface->spins[e_interface_scale_spin_x_top]);
+		value_bottom = (float)gtk_spin_button_get_value(interface->spins[e_interface_scale_spin_x_bottom]);
+		interface->hooked_chart->axis_x.range[0] = d_min(value_top, value_bottom);
+		interface->hooked_chart->axis_x.range[1] = d_max(value_top, value_bottom);
+		interface->hooked_chart->axis_x.segments = gtk_spin_button_get_value_as_int(interface->spins[e_interface_scale_spin_x_segments]);
+		interface->hooked_chart->show_borders = gtk_toggle_button_get_active(interface->switches[e_interface_scale_switch_informations]);
+		f_chart_denormalize(interface->hooked_chart);
+		f_chart_integerize(interface->hooked_chart);
+	}
+	p_chart_callback_scale_hide(widget, interface);
+	return d_true;
+}
+
+int p_chart_callback_scale_hide(GtkWidget *widget, struct s_interface_scale *interface) {
+	gtk_widget_hide_all(widget);
 	return d_true;
 }

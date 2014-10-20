@@ -17,14 +17,14 @@
  */
 #ifndef magrathea_chart_h
 #define magrathea_chart_h
-#include <gtk/gtk.h>
 #include <math.h>
 #include "keys.h"
+#include "interface_scale.h"
 #define d_chart_bucket 5120 /* maximum number of entries */
 #define d_chart_max_nested 6
 #define d_chart_font_size 7.0
 #define d_chart_font_height 12.0
-#define d_chart_giant_font_size 20.0
+#define d_chart_giant_font_size 20
 #define d_chart_default_font_size 10.0
 #define d_same_sign(a,b) (((a)>=0)^((b)<0))
 typedef enum e_chart_kinds {
@@ -65,8 +65,10 @@ typedef struct s_chart {
 	} data;
 	struct s_chart_value values[d_chart_max_nested][d_chart_bucket];
 	float total[d_chart_max_nested], total_square[d_chart_max_nested], elements[d_chart_max_nested];
+	struct s_interface_scale interface;
 } s_chart;
 extern struct s_chart *f_chart_new(struct s_chart *supplied);
+extern int f_chart_hook_interface(struct s_chart *supplied, const char *interface);
 extern void p_chart_style_axis(struct s_list *dictionary, const char postfix, struct s_chart_axis *axis);
 extern void f_chart_style(struct s_chart *chart, const char *path);
 extern void p_chart_build_bins(struct s_chart *chart, unsigned int code);
@@ -85,5 +87,8 @@ extern void p_chart_normalize_switch(struct s_chart *chart, unsigned int code, u
 extern void p_chart_normalize_sort(struct s_chart *chart, unsigned int code);
 extern void p_chart_normalize(struct s_chart *chart, float full_h, float full_w, unsigned int width, unsigned int height);
 extern int p_chart_callback(GtkWidget *widget, GdkEvent *event, void *v_chart);
+extern int p_chart_callback_scale_show(GtkWidget *widget, GdkEvent *event, struct s_interface_scale *interface);
+extern int p_chart_callback_scale_action(GtkWidget *widget, struct s_interface_scale *interface);
+extern int p_chart_callback_scale_hide(GtkWidget *widget, struct s_interface_scale *interfae);
 #endif
 

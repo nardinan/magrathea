@@ -70,7 +70,31 @@ const char *v_interface_charts[] = {
 	"v_interface_signal_20",
 	"v_interface_signal_21",
 	"v_interface_signal_22",
-	"v_interface_signal_23"
+	"v_interface_signal_23",
+	"v_interface_occupancy_0",
+	"v_interface_occupancy_1",
+	"v_interface_occupancy_2",
+	"v_interface_occupancy_3",
+	"v_interface_occupancy_4",
+	"v_interface_occupancy_5",
+	"v_interface_occupancy_6",
+	"v_interface_occupancy_7",
+	"v_interface_occupancy_8",
+	"v_interface_occupancy_9",
+	"v_interface_occupancy_10",
+	"v_interface_occupancy_11",
+	"v_interface_occupancy_12",
+	"v_interface_occupancy_13",
+	"v_interface_occupancy_14",
+	"v_interface_occupancy_15",
+	"v_interface_occupancy_16",
+	"v_interface_occupancy_17",
+	"v_interface_occupancy_18",
+	"v_interface_occupancy_19",
+	"v_interface_occupancy_20",
+	"v_interface_occupancy_21",
+	"v_interface_occupancy_22",
+	"v_interface_occupancy_23"
 }, *v_interface_labels[] = {
 	"v_interface_label_events"
 }, *v_interface_spins[] = {
@@ -134,7 +158,31 @@ const char *v_interface_charts[] = {
 	"signal_20",
 	"signal_21",
 	"signal_22",
-	"signal_23"
+	"signal_23",
+	"occupancy_0",
+	"occupancy_1",
+	"occupancy_2",
+	"occupancy_3",
+	"occupancy_4",
+	"occupancy_5",
+	"occupancy_6",
+	"occupancy_7",
+	"occupancy_8",
+	"occupancy_9",
+	"occupancy_10",
+	"occupancy_11",
+	"occupancy_12",
+	"occupancy_13",
+	"occupancy_14",
+	"occupancy_15",
+	"occupancy_16",
+	"occupancy_17",
+	"occupancy_18",
+	"occupancy_19",
+	"occupancy_20",
+	"occupancy_21",
+	"occupancy_22",
+	"occupancy_23"
 }, *v_interface_chart_styles[] = {
 	"styles/adc.keys",
 	"styles/pedestal.keys",
@@ -189,7 +237,31 @@ const char *v_interface_charts[] = {
 	"styles/adc_pedestal_cn_small.keys",
 	"styles/adc_pedestal_cn_small.keys",
 	"styles/adc_pedestal_cn_small.keys",
-	"styles/adc_pedestal_cn_small.keys"
+	"styles/adc_pedestal_cn_small.keys",
+	"styles/occupancy_small.keys",
+	"styles/occupancy_small.keys",
+	"styles/occupancy_small.keys",
+	"styles/occupancy_small.keys",
+	"styles/occupancy_small.keys",
+	"styles/occupancy_small.keys",
+	"styles/occupancy_small.keys",
+	"styles/occupancy_small.keys",
+	"styles/occupancy_small.keys",
+	"styles/occupancy_small.keys",
+	"styles/occupancy_small.keys",
+	"styles/occupancy_small.keys",
+	"styles/occupancy_small.keys",
+	"styles/occupancy_small.keys",
+	"styles/occupancy_small.keys",
+	"styles/occupancy_small.keys",
+	"styles/occupancy_small.keys",
+	"styles/occupancy_small.keys",
+	"styles/occupancy_small.keys",
+	"styles/occupancy_small.keys",
+	"styles/occupancy_small.keys",
+	"styles/occupancy_small.keys",
+	"styles/occupancy_small.keys",
+	"styles/occupancy_small.keys"
 };
 struct s_interface *f_interface_initialize(struct s_interface *supplied, const char *builder_path) {
 	struct s_interface *result = supplied;
@@ -203,6 +275,7 @@ struct s_interface *f_interface_initialize(struct s_interface *supplied, const c
 			d_assert(result->window = GTK_WINDOW(gtk_builder_get_object(result->interface, "v_window")));
 			for (index = 0; index < e_interface_chart_NULL; ++index) {
 				d_assert(f_chart_new(&(result->logic_charts[index])));
+				d_assert(f_chart_hook_interface(&(result->logic_charts[index]), "../components/UI/UI_scale_config.glade"));
 				f_chart_style(&(result->logic_charts[index]), "styles/base_graph.keys");
 				f_chart_style(&(result->logic_charts[index]), v_interface_chart_styles[index]);
 				d_assert(result->charts[index] = GTK_ALIGNMENT(gtk_builder_get_object(result->interface, v_interface_charts[index])));
