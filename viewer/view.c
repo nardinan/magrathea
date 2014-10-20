@@ -89,12 +89,6 @@ void f_view_destroy(GtkWidget *widget, struct s_interface *interface) {
 	exit(0);
 }
 
-void p_view_loop_refresh_quick_view(struct s_interface *interface) {
-	int index;
-	for (index = e_interface_chart_adc_0; index < e_interface_chart_NULL; ++index)
-		f_chart_redraw(&(interface->logic_charts[index]));
-}
-
 void p_view_loop_dump(struct s_interface *interface, unsigned short int ladder) {
 	char directory[PATH_MAX], filename[PATH_MAX];
 	FILE *stream;
@@ -118,7 +112,7 @@ void p_view_loop_dump(struct s_interface *interface, unsigned short int ladder) 
 }
 
 void p_view_loop_analyze(struct s_interface *interface, unsigned short int ladder, unsigned short int *values) {
-	int index;
+	int index, channel;
 	for (index = 0; index < d_package_channels; ++index)
 		environment.data[ladder].bucket[index] = values[index];
 	environment.data[ladder].new_bucket = d_true;
@@ -143,9 +137,13 @@ void p_view_loop_analyze(struct s_interface *interface, unsigned short int ladde
 			}
 		}
 	} else {
+		environment.data[ladder].data_events++;
 		f_stk_math_adc_pedestal(environment.data[ladder].bucket, environment.calibration[ladder].pedestal, environment.data[ladder].adc_pedestal);
 		f_stk_math_adc_pedestal_cn(environment.data[ladder].bucket, d_view_calibration_sigma_k, environment.calibration[ladder].pedestal,
 				environment.calibration[ladder].sigma, environment.calibration[ladder].flags, environment.data[ladder].adc_pedestal_cn);
+		for (channel = 0; channel < d_package_channels; ++channel)
+			if (environment.data[ladder].adc_pedestal_cn[channel] > (d_view_occupancy_sigma_k * environment.calibration[ladder].sigma[channel]))
+				environment.data[ladder].occupancy[channel]++;
 	}
 }
 
@@ -187,11 +185,14 @@ void p_view_loop_append_signals(struct s_interface *interface, unsigned short in
 			if (environment.data[current_ladder].new_bucket) {
 				f_chart_flush(&(interface->logic_charts[e_interface_chart_adc_0+current_ladder]));
 				f_chart_flush(&(interface->logic_charts[e_interface_chart_signal_0+current_ladder]));
+				f_chart_flush(&(interface->logic_charts[e_interface_chart_occupancy_0+current_ladder]));
 				for (index = 0; index < d_package_channels; ++index) {
 					f_chart_append_signal(&(interface->logic_charts[e_interface_chart_adc_0+current_ladder]), 0, index,
 							environment.data[current_ladder].bucket[index]);
 					f_chart_append_signal(&(interface->logic_charts[e_interface_chart_signal_0+current_ladder]), 0, index,
 							environment.data[current_ladder].adc_pedestal_cn[index]);
+					f_chart_append_signal(&(interface->logic_charts[e_interface_chart_occupancy_0+current_ladder]), 0, index,
+							environment.data[current_ladder].occupancy[index]/(float)environment.data[current_ladder].data_events);
 				}
 				environment.data[current_ladder].new_bucket = d_false;
 			}
@@ -280,6 +281,10 @@ int f_view_loop(struct s_interface *interface) {
 						break;
 					case 1: /* signals */
 						for (index = e_interface_chart_signal_0; index <= e_interface_chart_signal_23; ++index)
+							f_chart_redraw(&(interface->logic_charts[index]));
+						break;
+					case 2: /* occupancy */
+						for (index = e_interface_chart_occupancy_0; index <= e_interface_chart_occupancy_23; ++index)
 							f_chart_redraw(&(interface->logic_charts[index]));
 				}
 		}

@@ -26,6 +26,7 @@
 #define d_view_ladders 24
 #define d_view_calibration_steps 256
 #define d_view_calibration_sigma_k 10.0f
+#define d_view_occupancy_sigma_k 3.0
 #define d_view_window_width 640
 #define d_view_window_height 480
 #define d_view_window_title "Magrathea event viewer"
@@ -49,8 +50,8 @@ typedef struct s_view_environment {
 		int new_bucket:1;
 	} calibration[d_view_ladders];
 	struct {
-		size_t events;
-		float bucket[d_package_channels], adc_pedestal[d_package_channels], adc_pedestal_cn[d_package_channels];
+		size_t events, data_events;
+		float bucket[d_package_channels], adc_pedestal[d_package_channels], adc_pedestal_cn[d_package_channels], occupancy[d_package_channels];
 		int new_bucket:1;
 	} data[d_view_ladders];
 } s_view_environment;
