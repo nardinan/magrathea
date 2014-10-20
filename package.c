@@ -98,7 +98,7 @@ unsigned char *p_package_analyze_header(struct s_package *package, unsigned char
 			if ((size-(pointer-buffer)) > d_package_frame_header_info_size) {
 				package->count = pointer[0];
 				pointer++;
-				package->trb = pointer[0];
+				package->trb = (pointer[0]&0x3f);
 				pointer++;
 				package->frame_length = ((unsigned short int)pointer[1])|((unsigned short int)pointer[0])<<8;
 				pointer += 2;
