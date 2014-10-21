@@ -18,28 +18,16 @@
 #ifndef magrathea_analyze_h
 #define magrathea_analyze_h
 #include <dirent.h>
-#include "../package.h"
-#define d_analyze_ladders 24
+#include "../calibrations.h"
 #define d_analyze_calibrations 2
-#define d_analyze_calibration_columns 7
-#define d_analyze_pedestals (d_package_channels*d_analyze_ladders)
 #define d_analyze_pedestal_distance_max 10
 #define d_analyze_csv_divisor ';'
 typedef struct s_analyze_environment {
-	struct {
-		struct {
-			float pedestal[d_package_channels], sigma_raw[d_package_channels], sigma[d_package_channels], pedestal_mean, pedestal_rms,
-				sigma_raw_mean, sigma_raw_rms, sigma_mean, sigma_rms;
-		} ladder[d_analyze_ladders];
-	} calibration[d_analyze_calibrations];
-	float pedestal_distance[d_analyze_ladders][d_package_channels];
+	struct s_calibrations_environment calibration[d_analyze_calibrations];
+	float pedestal_distance[d_calibrations_ladders][d_package_channels];
 } s_analyze_environment;
 extern void f_analyze_values_write(struct s_analyze_environment *environment, FILE *stream);
 extern void f_analyze_values(struct s_analyze_environment *environment);
-extern int p_analyze_calibration_file_read_row(char *string, float *pedestal, float *sigma_raw, float *sigma);
-extern int p_analyze_calibration_file_read(struct s_analyze_environment *environment, FILE *stream, int calibration, int ladder);
-extern int p_analyze_calibration_file(struct s_analyze_environment *environment, const char *file, int calibration);
-extern int p_analyze_calibration(struct s_analyze_environment *environment, const char *directory, int calibration);
 extern int f_analyze_calibration(struct s_analyze_environment *environment, const char *reference, const char *directory);
 extern void f_analyze_export(struct s_analyze_environment *environment, const char *file, int *selected);
 #endif

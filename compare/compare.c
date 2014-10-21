@@ -37,7 +37,7 @@ void f_compare_destroy(GtkWidget *widget, struct s_interface *supplied) {
 
 int p_compare_loop_toggle(struct s_interface *interface, int ladder, int enable) {
 	int result = d_false;
-	if ((ladder >= 0) && (ladder < d_analyze_ladders)) {
+	if ((ladder >= 0) && (ladder < d_calibrations_ladders)) {
 		if (enable)
 			gtk_toggle_button_set_active(interface->switches[ladder], d_true);
 		if (gtk_toggle_button_get_active(interface->switches[ladder])) {
@@ -46,18 +46,18 @@ int p_compare_loop_toggle(struct s_interface *interface, int ladder, int enable)
 		} else
 			gtk_button_set_label(GTK_BUTTON(interface->switches[ladder]), "X");
 	} else
-		fprintf(stderr, "warning, ladder %d is out of range (0 - %d)\n", ladder, (d_analyze_ladders-1));
+		fprintf(stderr, "warning, ladder %d is out of range (0 - %d)\n", ladder, (d_calibrations_ladders-1));
 	return result;
 }
 
 int f_compare_loop(struct s_interface *interface) {
-	int result = d_true, index, calibration, ladder, channel, local_selection[d_analyze_ladders];
+	int result = d_true, index, calibration, ladder, channel, local_selection[d_calibrations_ladders];
 	v_selected_ladder = -1;
 	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(interface->radios[e_interface_radio_selected])))
 		v_selected_ladder = gtk_spin_button_get_value_as_int(interface->spins[e_interface_spin_ladder]);
 	for (index = 0; index < e_interface_chart_NULL; ++index)
 		f_chart_flush(&(interface->logic_charts[index]));
-	for (ladder = 0; ladder < d_analyze_ladders; ++ladder) {
+	for (ladder = 0; ladder < d_calibrations_ladders; ++ladder) {
 		local_selection[ladder] = p_compare_loop_toggle(interface, ladder, d_false);
 		if (((v_selected_ladder < 0) && (local_selection[ladder]))|| (v_selected_ladder == ladder)) {
 			for (channel = 0; channel < d_package_channels; ++channel)
@@ -66,7 +66,7 @@ int f_compare_loop(struct s_interface *interface) {
 		}
 	}
 	for (calibration = 0; calibration < d_analyze_calibrations; ++calibration)
-		for (ladder = 0; ladder < d_analyze_ladders; ++ladder)
+		for (ladder = 0; ladder < d_calibrations_ladders; ++ladder)
 			if (((v_selected_ladder < 0) && (local_selection[ladder])) || (v_selected_ladder == ladder))
 				for (channel = 0; channel < d_package_channels; ++channel) {
 					f_chart_append_histogram(&(interface->logic_charts[e_interface_chart_pedestal]), calibration,
@@ -85,10 +85,10 @@ int f_compare_loop(struct s_interface *interface) {
 int main (int argc, char *argv[]) {
 	struct s_interface *main_interface = (struct s_interface *) malloc(sizeof(struct s_interface));
 	char *current_pointer, *next_pointer, csv_file[d_string_buffer_size];
-	int ladder, local_selection[d_analyze_ladders];
+	int ladder, local_selection[d_calibrations_ladders];
 	f_memory_init();
 	if (argc >= 3) {
-		for (ladder = 0; ladder < d_analyze_ladders; ++ladder)
+		for (ladder = 0; ladder < d_calibrations_ladders; ++ladder)
 			local_selection[ladder] = d_false;
 		if (f_analyze_calibration(&environment, argv[1], argv[2])) {
 			snprintf(csv_file, d_string_buffer_size, "%s.csv", argv[2]);
@@ -110,7 +110,7 @@ int main (int argc, char *argv[]) {
 						p_compare_loop_toggle(main_interface, ladder, d_true);
 					}
 				} else
-					for (ladder = 0; ladder < d_analyze_ladders; ++ladder) {
+					for (ladder = 0; ladder < d_calibrations_ladders; ++ladder) {
 						local_selection[ladder] = d_true;
 						p_compare_loop_toggle(main_interface, ladder, d_true);
 					}
