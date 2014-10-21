@@ -534,7 +534,7 @@ int p_chart_callback_scale_action(GtkWidget *widget, struct s_interface_scale *i
 		f_chart_denormalize(interface->hooked_chart);
 		f_chart_integerize(interface->hooked_chart);
 	}
-	p_chart_callback_scale_hide(widget, interface);
+	p_chart_callback_scale_hide(GTK_WIDGET(interface->window), interface);
 	return d_true;
 }
 
