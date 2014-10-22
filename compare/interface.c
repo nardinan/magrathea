@@ -20,7 +20,10 @@ const char *v_interface_charts[] = {
 	"v_pedestal_chart_alignment",
 	"v_sigma_raw_chart_alignment",
 	"v_sigma_chart_alignment",
-	"v_pedestal_distance_chart_alignment"
+	"v_pedestal_distance_chart_alignment",
+	"v_pedestal_verify_chart_alignment",
+	"v_sigma_raw_verify_chart_alignment",
+	"v_sigma_verify_chart_alignment"
 }, *v_interface_radios[] = {
 	"v_ladder_all_check",
 	"v_ladder_selected_check"
@@ -60,7 +63,10 @@ const char *v_interface_charts[] = {
 	"styles/pedestal.keys",
 	"styles/sigma_raw.keys",
 	"styles/sigma.keys",
-	"styles/pedestal_distance.keys"
+	"styles/pedestal_distance.keys",
+	"styles/pedestal_view.keys",
+	"styles/sigma_raw_view.keys",
+	"styles/sigma_view.keys"
 };
 struct s_interface *f_interface_initialize(struct s_interface *supplied, const char *builder_path) {
 	struct s_interface *result = supplied;

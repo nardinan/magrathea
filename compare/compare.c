@@ -59,13 +59,12 @@ int f_compare_loop(struct s_interface *interface) {
 		f_chart_flush(&(interface->logic_charts[index]));
 	for (ladder = 0; ladder < d_calibrations_ladders; ++ladder) {
 		local_selection[ladder] = p_compare_loop_toggle(interface, ladder, d_false);
-		if (((v_selected_ladder < 0) && (local_selection[ladder]))|| (v_selected_ladder == ladder)) {
+		if (((v_selected_ladder < 0) && (local_selection[ladder]))|| (v_selected_ladder == ladder))
 			for (channel = 0; channel < d_package_channels; ++channel)
 				f_chart_append_histogram(&(interface->logic_charts[e_interface_chart_distance]), 0,
 						environment.pedestal_distance[ladder][channel]);
-		}
 	}
-	for (calibration = 0; calibration < d_analyze_calibrations; ++calibration)
+	for (calibration = 0; calibration < d_analyze_calibrations; ++calibration) {
 		for (ladder = 0; ladder < d_calibrations_ladders; ++ladder)
 			if (((v_selected_ladder < 0) && (local_selection[ladder])) || (v_selected_ladder == ladder))
 				for (channel = 0; channel < d_package_channels; ++channel) {
@@ -76,6 +75,20 @@ int f_compare_loop(struct s_interface *interface) {
 					f_chart_append_histogram(&(interface->logic_charts[e_interface_chart_sigma]), calibration,
 							environment.calibration[calibration].ladder[ladder].sigma[channel]);
 				}
+	}
+	if (v_selected_ladder >= 0)
+		for (channel = 0; channel < d_package_channels; ++channel) {
+			f_chart_append_signal(&(interface->logic_charts[e_interface_chart_sigma_raw_verify]), 0, channel,
+					environment.calibration[0].ladder[v_selected_ladder].sigma_raw[channel]);
+			f_chart_append_signal(&(interface->logic_charts[e_interface_chart_sigma_verify]), 0, channel,
+					environment.calibration[0].ladder[v_selected_ladder].sigma[channel]);
+			f_chart_append_signal(&(interface->logic_charts[e_interface_chart_sigma_raw_verify]), 1, channel,
+					environment.calibration[1].ladder[v_selected_ladder].sigma_raw[channel]*-1.0);
+			f_chart_append_signal(&(interface->logic_charts[e_interface_chart_sigma_verify]), 1, channel,
+					environment.calibration[1].ladder[v_selected_ladder].sigma[channel]*-1.0);
+			f_chart_append_signal(&(interface->logic_charts[e_interface_chart_pedestal_verify]), 0, channel,
+					environment.pedestal_distance[v_selected_ladder][channel]);
+		}
 	for (index = 0; index < e_interface_chart_NULL; ++index)
 		f_chart_redraw(&(interface->logic_charts[index]));
 	usleep(d_compare_timeout);

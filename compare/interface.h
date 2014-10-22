@@ -23,6 +23,9 @@ typedef enum e_interface_charts {
 	e_interface_chart_sigma_raw,
 	e_interface_chart_sigma,
 	e_interface_chart_distance,
+	e_interface_chart_pedestal_verify,
+	e_interface_chart_sigma_raw_verify,
+	e_interface_chart_sigma_verify,
 	e_interface_chart_NULL
 } e_interface_charts;
 typedef enum e_interface_radios {
