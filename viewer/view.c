@@ -89,13 +89,14 @@ void f_view_destroy(GtkWidget *widget, struct s_interface *interface) {
 
 void p_view_loop_analyze(struct s_interface *interface, unsigned short int ladder, unsigned short int *values) {
 	int result = f_analyze_calibration(&(environment.data), ladder, values);
-	if ((result) && (environment.data.calibrated >= d_analyze_ladders)) {
+	if (environment.data.calibrated >= d_analyze_ladders) {
 		gtk_widget_set_sensitive(GTK_WIDGET(interface->buttons[e_interface_button_dump]), TRUE);
-		if ((v_flags&e_view_action_exports_calibrations) == e_view_action_exports_calibrations) {
-			f_view_action_dump(NULL, interface);
-			if ((v_flags&e_view_action_close_after_calibrations) == e_view_action_close_after_calibrations)
-				f_view_destroy(NULL, interface);
-		}
+		if (result)
+			if ((v_flags&e_view_action_exports_calibrations) == e_view_action_exports_calibrations) {
+				f_view_action_dump(NULL, interface);
+				if ((v_flags&e_view_action_close_after_calibrations) == e_view_action_close_after_calibrations)
+					f_view_destroy(NULL, interface);
+			}
 	}
 }
 
@@ -148,6 +149,38 @@ void p_view_loop_append_signals(struct s_interface *interface, unsigned short in
 							 (float)environment.data.counters[current_ladder].data_events));
 				}
 				environment.data.data[current_ladder].new_bucket = d_false;
+			}
+	}
+}
+
+void p_view_loop_show_signals(struct s_interface *interface) {
+	int index;
+	switch (gtk_notebook_get_current_page(interface->notebook)) {
+		case 0: /* ADC */
+			f_chart_redraw(&(interface->logic_charts[e_interface_chart_adc]));
+			break;
+		case 1: /* calibration */
+			f_chart_redraw(&(interface->logic_charts[e_interface_chart_pedestal]));
+			f_chart_redraw(&(interface->logic_charts[e_interface_chart_sigma_raw]));
+			f_chart_redraw(&(interface->logic_charts[e_interface_chart_sigma]));
+			break;
+		case 2: /* signal */
+			f_chart_redraw(&(interface->logic_charts[e_interface_chart_adc_pedestal]));
+			f_chart_redraw(&(interface->logic_charts[e_interface_chart_adc_pedestal_cn]));
+			break;
+		case 3:
+			switch(gtk_notebook_get_current_page(interface->quick_notebook)) {
+				case 0: /* ADCs */
+					for (index = e_interface_chart_adc_0; index <= e_interface_chart_adc_23; ++index)
+						f_chart_redraw(&(interface->logic_charts[index]));
+					break;
+				case 1: /* signals */
+					for (index = e_interface_chart_signal_0; index <= e_interface_chart_signal_23; ++index)
+						f_chart_redraw(&(interface->logic_charts[index]));
+					break;
+				case 2: /* occupancy */
+					for (index = e_interface_chart_occupancy_0; index <= e_interface_chart_occupancy_23; ++index)
+						f_chart_redraw(&(interface->logic_charts[index]));
 			}
 	}
 }
@@ -218,34 +251,7 @@ int f_view_loop(struct s_interface *interface) {
 		v_view_label_refresh = d_false;
 	}
 	if ((charts_swap) || (v_frames >= v_view_skip_frames)) {
-		switch (gtk_notebook_get_current_page(interface->notebook)) {
-			case 0: /* ADC */
-				f_chart_redraw(&(interface->logic_charts[e_interface_chart_adc]));
-				break;
-			case 1: /* calibration */
-				f_chart_redraw(&(interface->logic_charts[e_interface_chart_pedestal]));
-				f_chart_redraw(&(interface->logic_charts[e_interface_chart_sigma_raw]));
-				f_chart_redraw(&(interface->logic_charts[e_interface_chart_sigma]));
-				break;
-			case 2: /* signal */
-				f_chart_redraw(&(interface->logic_charts[e_interface_chart_adc_pedestal]));
-				f_chart_redraw(&(interface->logic_charts[e_interface_chart_adc_pedestal_cn]));
-				break;
-			case 3:
-				switch(gtk_notebook_get_current_page(interface->quick_notebook)) {
-					case 0: /* ADCs */
-						for (index = e_interface_chart_adc_0; index <= e_interface_chart_adc_23; ++index)
-							f_chart_redraw(&(interface->logic_charts[index]));
-						break;
-					case 1: /* signals */
-						for (index = e_interface_chart_signal_0; index <= e_interface_chart_signal_23; ++index)
-							f_chart_redraw(&(interface->logic_charts[index]));
-						break;
-					case 2: /* occupancy */
-						for (index = e_interface_chart_occupancy_0; index <= e_interface_chart_occupancy_23; ++index)
-							f_chart_redraw(&(interface->logic_charts[index]));
-				}
-		}
+		p_view_loop_show_signals(interface);
 		v_frames = 0;
 	} else
 		v_frames++;
@@ -256,7 +262,7 @@ int f_view_loop(struct s_interface *interface) {
 int main (int argc, char *argv[]) {
 	char buffer[d_string_buffer_size];
 	struct s_interface *main_interface = (struct s_interface *) malloc(sizeof(struct s_interface));
-	int index;
+	int index, ladder;
 	f_memory_init();
 	if (argc >= 5) {
 		v_view_ladder = atoi(argv[3]);
@@ -269,13 +275,26 @@ int main (int argc, char *argv[]) {
 					environment.data.calibration[index].steps = v_view_calibration_steps;
 				strncpy(environment.filename, argv[1], PATH_MAX);
 				if ((environment.stream = fopen(environment.filename, "rb"))) {
-					for (index = 5; index < argc; ++index) {
+					for (index = 5; index < argc;) {
 						if (f_string_strcmp(argv[index], "-l") == 0)
 							fseek(environment.stream, 0, SEEK_END);
 						else if (f_string_strcmp(argv[index], "-x") == 0)
 							v_flags |= e_view_action_exports_calibrations;
 						else if (f_string_strcmp(argv[index], "-k") == 0)
 							v_flags |= e_view_action_close_after_calibrations;
+						else if ((f_string_strcmp(argv[index], "-c") == 0) && ((index+1) < argc)) {
+							if (f_calibrations(&(environment.data.computed_calibrations), argv[index+1])) {
+								environment.data.calibrated = d_analyze_ladders;
+								for (ladder = 0; ladder < d_analyze_ladders; ++ladder) {
+									environment.data.calibration[ladder].computed = d_true;
+									environment.data.calibration[ladder].package =
+										environment.data.calibration[ladder].steps;
+								}
+							} else
+								fprintf(stderr, "404 - calibration folder not found %s\n", argv[index+1]);
+							index++;
+						}
+						index++;
 					}
 					gtk_init(&argc, &argv);
 					if (f_view_initialize(main_interface, "UI/UI_main.glade")) {
@@ -294,7 +313,8 @@ int main (int argc, char *argv[]) {
 		fprintf(stderr, "usage: %s <path> <trb#> <laddder#> <frequecy of refresh> {...}\n"
 				"\t{-l: skip to last position}\n"
 				"\t{-x: automatically export calibrations when ready}\n"
-				"\t{-k: exit after calibration}\n", argv[0]);
+				"\t{-k: exit after calibration}\n"
+				"\t{-c <folder>: load an external TRB calibration}\n", argv[0]);
 	f_memory_destroy();
 	return 0;
 }

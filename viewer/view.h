@@ -51,6 +51,7 @@ extern int f_view_initialize(struct s_interface *supplied, const char *builder_p
 extern void f_view_destroy(GtkWidget *widget, struct s_interface *supplied);
 extern void p_view_loop_analyze(struct s_interface *interface, unsigned short int ladder, unsigned short int *values);
 extern void p_view_loop_append_signals(struct s_interface *interface, unsigned short int ladder);
+extern void p_view_loop_show_signals(struct s_interface *interface);
 extern void p_view_loop_read_raw(int delay);
 extern int p_view_loop_read(struct s_interface *interface, int delay);
 extern int f_view_loop(struct s_interface *interface);
