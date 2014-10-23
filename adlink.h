@@ -17,6 +17,7 @@
  */
 #ifndef magrathea_adlink_h
 #define magrathea_adlink_h
+#define _FILE_OFFSET_BITS 64 /* remote 2GB file limitation */
 #include "plx.h"
 #include "trb_device.h"
 #define d_adlink_bucket_size (1024*1024)/4
