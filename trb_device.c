@@ -73,7 +73,7 @@ void p_trb_device_description_format(unsigned char code, char *destination, size
 		"YB",
 		NULL
 	};
-	char status[d_string_buffer_size], stream[d_string_buffer_size];
+	char status[d_string_buffer_size], stream[PATH_MAX];
 	float value;
 	int postfix;
 	snprintf(destination, size, "#%d [%s]%s TRB 0x%02x ", code, v_trb_device_boards[code].location, (v_trb_device_boards[code].selected)?"[*]":"",
@@ -83,19 +83,21 @@ void p_trb_device_description_format(unsigned char code, char *destination, size
 			snprintf(status, d_string_buffer_size, "[%swrong connector%s]", v_console_styles[e_console_style_yellow],
 					v_console_styles[e_console_style_reset]);
 		else
-			snprintf(status, d_string_buffer_size, "[%sready%s]", v_console_styles[e_console_style_green], v_console_styles[e_console_style_reset]);
+			snprintf(status, d_string_buffer_size, "[%sready%s]", v_console_styles[e_console_style_green],
+					v_console_styles[e_console_style_reset]);
 		if (v_trb_device_boards[code].stream.stream) {
 			value = v_trb_device_boards[code].stream.written_bytes;
 			for (postfix = 0; (bytes_postfixes[postfix+1]) && (value >= 1024.0); ++postfix)
 				value /= 1024.0;
-			snprintf(stream, d_string_buffer_size, "{%sW%s}[%7.02f %s| %s]", v_console_styles[e_console_style_green],
+			snprintf(stream, PATH_MAX, "{%sW%s}[%7.02f %s| %s]", v_console_styles[e_console_style_green],
 					v_console_styles[e_console_style_reset], value, bytes_postfixes[postfix], v_trb_device_boards[code].stream.destination);
 		} else
-			snprintf(stream, d_string_buffer_size, "{%sR%s}", v_console_styles[e_console_style_red],
+			snprintf(stream, PATH_MAX, "{%sR%s}", v_console_styles[e_console_style_red],
 					v_console_styles[e_console_style_reset]);
-		strncat(status, stream, (d_string_buffer_size-f_string_strlen(status)));
+		strncat(status, stream, (PATH_MAX-f_string_strlen(status)));
 	} else
-		snprintf(status, d_string_buffer_size, "[%soffline%s]", v_console_styles[e_console_style_red], v_console_styles[e_console_style_reset]);
+		snprintf(status, PATH_MAX, "[%soffline%s]", v_console_styles[e_console_style_red],
+				v_console_styles[e_console_style_reset]);
 	strncat(destination, status, (size-f_string_strlen(destination)));
 }
 
@@ -103,7 +105,7 @@ int f_trb_device_description(unsigned char code, char **tokens, size_t elements,
 	char buffer[d_console_output_size];
 	int result = d_true;
 	if (output != d_console_descriptor_null) {
-		p_trb_device_description_format(code, buffer, d_console_output_size);
+		p_trb_device_description_format(code, buffer, (d_console_output_size-1));
 		write(output, buffer, f_string_strlen(buffer));
 		write(output, "\n", f_string_strlen("\n"));
 		fsync(output);
@@ -218,16 +220,16 @@ int f_trb_device_status(unsigned char code, char **tokens, size_t elements, int 
 }
 
 int f_trb_device_stream(unsigned char code, char **tokens, size_t elements, int output) {
-	char buffer[d_string_buffer_size], status[d_string_buffer_size];
+	char buffer[PATH_MAX], status[PATH_MAX];
 	int result = d_true;
 	if (v_trb_device_boards[code].descriptor != d_rs232_null) {
 		p_trb_device_destroy_stream(code);
-		snprintf(buffer, d_string_buffer_size, "%s_TRB%d.bin", tokens[f_console_parameter("-o", tokens, elements, d_false)], code);
+		snprintf(buffer, PATH_MAX, "%s_TRB%d.bin", tokens[f_console_parameter("-o", tokens, elements, d_false)], code);
 		if ((v_trb_device_boards[code].stream.stream = fopen(buffer, "w"))) {
 			strcpy(v_trb_device_boards[code].stream.destination, buffer); /* same length */
-			snprintf(status, d_string_buffer_size, "#%d TRB: stream has been redirected to %s", code, buffer);
+			snprintf(status, PATH_MAX, "#%d TRB: stream has been redirected to %s\n", code, buffer);
 		} else
-			snprintf(status, d_string_buffer_size, "#%d TRB: %sunaccessible%s location %s", code, v_console_styles[e_console_style_red],
+			snprintf(status, PATH_MAX, "#%d TRB: %sunaccessible%s location %s\n", code, v_console_styles[e_console_style_red],
 					v_console_styles[e_console_style_reset], buffer);
 		if (output != d_console_descriptor_null) {
 			write(output, status, f_string_strlen(status));
@@ -536,7 +538,7 @@ int p_trb_device_refresh_status(unsigned char code) {
 
 int f_trb_device_refresh(unsigned char code, struct s_console *console) {
 	int result = p_trb_device_refresh_status(code);
-	char buffer[d_string_buffer_size];
+	char buffer[d_console_output_size];
 	time_t current_time;
 	if (v_trb_device_boards[code].descriptor != d_rs232_null) {
 		current_time = time(NULL);
@@ -544,8 +546,8 @@ int f_trb_device_refresh(unsigned char code, struct s_console *console) {
 			p_trb_device_status_refresh(code);
 		if (console)
 			if (v_trb_device_boards[code].focused) {
-				p_trb_device_description_format(code, buffer, d_string_buffer_size);
-				snprintf(console->prefix, d_string_buffer_size, "\r[%s]>", buffer);
+				p_trb_device_description_format(code, buffer, d_console_output_size);
+				snprintf(console->prefix, d_console_output_size, "\r[%s]>", buffer);
 			}
 	}
 	return result;

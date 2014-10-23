@@ -125,7 +125,7 @@ typedef struct s_trb_device {
 	struct termios old_configuration;
 	time_t last_refresh;
 	struct s_trb_stream {
-		char destination[d_string_buffer_size];
+		char destination[PATH_MAX];
 		FILE *stream;
 		size_t written_bytes;
 	} stream;
