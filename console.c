@@ -70,13 +70,21 @@ int f_console_destroy(struct s_console **console) {
 }
 
 void f_console_refresh(struct s_console *console, struct s_console_input *input, int output) {
-	char *buffer = NULL;
-	if (input->data_pointer > 0)
-		buffer = input->input;
+	char buffer[d_string_buffer_size] = {'\0'}, before[d_string_buffer_size] = {'\0'}, after[d_string_buffer_size] = {'\0'};
+	if (input->data_length > 0) {
+		if (input->data_length > input->data_pointer) {
+			strncpy(before, input->input, input->data_pointer);
+			strncpy(after, input->input+(input->data_pointer+1), (input->data_length+1)-(input->data_pointer+1));
+			snprintf(buffer, d_string_buffer_size, "%s%s%c%s%s", before, v_console_styles[e_console_style_underline],
+					input->input[input->data_pointer], v_console_styles[e_console_style_reset], after);
+		} else
+			strcpy(buffer, input->input);
+	}
 	f_console_write(console, buffer, output);
 }
 
 void f_console_write(struct s_console *console, const char *buffer, int output) {
+	size_t length;
 	if (output != d_console_descriptor_null) {
 		write(output, d_console_clean_line, f_string_strlen(d_console_clean_line));
 		write(output, console->prefix, f_string_strlen(console->prefix));
@@ -110,12 +118,20 @@ void p_console_write_history(struct s_console *console, struct s_console_input *
 				change = d_true;
 				if (console->history_pointer > 0)
 					console->history_pointer--;
+				break;
+			case 68:
+				if (input->data_pointer > 0)
+					input->data_pointer--;
+				break;
+			case 67:
+				if (input->data_pointer < input->data_length)
+					input->data_pointer++;
 
 		}
 	if ((console->history_pointer <= console->history_last) && (change)) {
 		memset(input->input, 0, d_string_buffer_size);
 		strcpy(input->input, console->history[console->history_pointer]);
-		input->data_pointer = f_string_strlen(console->history[console->history_pointer]);
+		input->data_length = input->data_pointer = f_string_strlen(console->history[console->history_pointer]);
 	}
 }
 
@@ -125,7 +141,7 @@ void p_console_write_suggestion(struct s_console *console, struct s_console_inpu
 	if ((output != d_console_descriptor_null) && (console->commands)) {
 		for (index = 0, match = 0; console->commands[index].initialized; index++)
 			if (console->commands[index].level <= console->level)
-				if (f_string_strncmp(input->input, console->commands[index].command, input->data_pointer) == 0) {
+				if (f_string_strncmp(input->input, console->commands[index].command, input->data_length) == 0) {
 					if (match == 0)
 						strcpy(common_substring, console->commands[index].command);
 					else {
@@ -146,7 +162,7 @@ void p_console_write_suggestion(struct s_console *console, struct s_console_inpu
 				}
 		if (match > 0) {
 			strcpy(input->input, common_substring);
-			input->data_pointer = f_string_strlen(common_substring);
+			input->data_length = input->data_pointer = f_string_strlen(common_substring);
 			if (match == 1) {
 				snprintf(buffer, d_console_output_size, "\n%s%sCOMMAND: %s%s\n%s%sDESCRIPTION: %s%s",
 						v_console_styles[e_console_style_bold], v_console_styles[e_console_style_yellow],
@@ -199,8 +215,14 @@ int f_console_read(struct s_console *console, struct s_console_input *input, int
 						break;
 					case 127:
 						if (input->data_pointer > 0) {
+							if (input->data_length > input->data_pointer)
+								memmove((input->input+input->data_pointer-1), (input->input+input->data_pointer),
+										(d_string_buffer_size-input->data_pointer));
+							else
+								memset((input->input+input->data_pointer-1), '\0',
+										(d_string_buffer_size-input->data_pointer));
 							--(input->data_pointer);
-							memset((input->input+input->data_pointer), 0, (d_string_buffer_size-input->data_pointer));
+							--(input->data_length);
 						}
 						break;
 					case 27:
@@ -208,7 +230,7 @@ int f_console_read(struct s_console *console, struct s_console_input *input, int
 							input->special[input->special_pointer++] = incoming_character;
 						break;
 					case 10:
-						if (input->data_pointer > 0) {
+						if (input->data_length > 0) {
 							input->ready = d_true;
 							if (output != d_console_descriptor_null)
 								write(output, (void *)&incoming_character, sizeof(char)); /* new line */
@@ -216,8 +238,14 @@ int f_console_read(struct s_console *console, struct s_console_input *input, int
 						}
 						break;
 					default:
-						if (input->data_pointer < d_string_buffer_size)
-							input->input[input->data_pointer++] = incoming_character;
+						if (input->data_pointer < d_string_buffer_size) {
+							if (input->data_length > input->data_pointer)
+								memmove((input->input+input->data_pointer+1), (input->input+input->data_pointer),
+										(input->data_length-input->data_pointer));
+							input->input[input->data_pointer] = incoming_character;
+							++(input->data_pointer);
+							++(input->data_length);
+						}
 				}
 			}
 		}

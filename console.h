@@ -19,11 +19,12 @@
 #define magrathea_console_h
 #include <termios.h>
 #include <unistd.h>
+#include <limits.h>
 #include <miranda/ground.h>
 #define d_console_parameter_size 8
-#define d_console_command_size 16
+#define d_console_command_size 26
 #define d_console_command_parameters 10
-#define d_console_output_size 1024
+#define d_console_output_size (d_string_buffer_size+PATH_MAX)
 #define d_console_history_size 256
 #define d_console_special_size 3
 #define d_console_descriptor_null -1
@@ -64,6 +65,7 @@ typedef struct s_console_command {
 typedef struct s_console_input {
 	char input[d_string_buffer_size], special[d_console_parameter_size];
 	int data_pointer, special_pointer, ready:1;
+	size_t data_length;
 } s_console_input;
 typedef struct s_console {
 	enum e_console_level level;
