@@ -101,7 +101,7 @@ void p_view_loop_analyze(struct s_interface *interface, unsigned short int ladde
 }
 
 void p_view_loop_append_signals(struct s_interface *interface, unsigned short int ladder) {
-	int index, current_ladder;
+	int index, current_ladder, maximum;
 	if (ladder == v_view_ladder) {
 		if (environment.data.calibration[v_view_ladder].computed) {
 			if (!environment.data.calibration[v_view_ladder].drawed) {
@@ -139,15 +139,17 @@ void p_view_loop_append_signals(struct s_interface *interface, unsigned short in
 				f_chart_flush(&(interface->logic_charts[e_interface_chart_adc_0+current_ladder]));
 				f_chart_flush(&(interface->logic_charts[e_interface_chart_signal_0+current_ladder]));
 				f_chart_flush(&(interface->logic_charts[e_interface_chart_occupancy_0+current_ladder]));
-				for (index = 0; index < d_package_channels; ++index) {
+				for (index = 0, maximum = 1; index < d_package_channels; ++index) {
 					f_chart_append_signal(&(interface->logic_charts[e_interface_chart_adc_0+current_ladder]), 0, index,
 							environment.data.data[current_ladder].bucket[index]);
 					f_chart_append_signal(&(interface->logic_charts[e_interface_chart_signal_0+current_ladder]), 0, index,
 							environment.data.data[current_ladder].adc_pedestal_cn[index]);
 					f_chart_append_signal(&(interface->logic_charts[e_interface_chart_occupancy_0+current_ladder]), 0, index,
-							(environment.data.data[current_ladder].occupancy[index]/
-							 (float)environment.data.counters[current_ladder].data_events));
+							(environment.data.data[current_ladder].occupancy[index]));
+					if (environment.data.data[current_ladder].occupancy[index] > maximum)
+						maximum = environment.data.data[current_ladder].occupancy[index];
 				}
+				interface->logic_charts[e_interface_chart_occupancy_0+current_ladder].axis_y.range[1] = (maximum+1);
 				environment.data.data[current_ladder].new_bucket = d_false;
 			}
 	}
