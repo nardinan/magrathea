@@ -21,6 +21,7 @@ const char *v_console_styles[] = {
 	"\x1B[1m",
 	"\x1B[4m",
 	"\x1B[5m",
+	"\x1B[7m",
 	"\x1B[31m",
 	"\x1B[32m",
 	"\x1B[33m",
@@ -75,7 +76,7 @@ void f_console_refresh(struct s_console *console, struct s_console_input *input,
 		if (input->data_length > input->data_pointer) {
 			strncpy(before, input->input, input->data_pointer);
 			strncpy(after, input->input+(input->data_pointer+1), (input->data_length+1)-(input->data_pointer+1));
-			snprintf(buffer, d_string_buffer_size, "%s%s%c%s%s", before, v_console_styles[e_console_style_underline],
+			snprintf(buffer, d_string_buffer_size, "%s%s%c%s%s", before, v_console_styles[e_console_style_reverse],
 					input->input[input->data_pointer], v_console_styles[e_console_style_reset], after);
 		} else
 			strcpy(buffer, input->input);

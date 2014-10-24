@@ -38,6 +38,7 @@ typedef enum e_console_style {
 	e_console_style_bold,
 	e_console_style_underline,
 	e_console_style_blink,
+	e_console_style_reverse,
 	e_console_style_red,
 	e_console_style_green,
 	e_console_style_yellow,
