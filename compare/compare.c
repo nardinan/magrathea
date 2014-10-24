@@ -97,14 +97,27 @@ int f_compare_loop(struct s_interface *interface) {
 
 int main (int argc, char *argv[]) {
 	struct s_interface *main_interface = (struct s_interface *) malloc(sizeof(struct s_interface));
-	char *current_pointer, *next_pointer, csv_file[d_string_buffer_size];
-	int ladder, local_selection[d_calibrations_ladders];
+	char *current_pointer, *next_pointer, csv_file[d_string_buffer_size], default_calibration[d_string_buffer_size],  buffer[d_string_buffer_size] = {'\0'};
+	int index = 0, ladder, local_selection[d_calibrations_ladders];
+	size_t length;
 	f_memory_init();
-	if (argc >= 3) {
+	if (argc >= 2) {
+		if ((current_pointer = strstr(argv[1], d_compare_postfix))) {
+			length = f_string_strlen(argv[1]);
+			while ((current_pointer < (length+argv[1])) && (!isdigit(*current_pointer)))
+				current_pointer++;
+			while ((current_pointer < (length+argv[1])) && (isdigit(*current_pointer))) {
+				buffer[index++] = *current_pointer;
+				current_pointer++;
+			}
+		}
+		snprintf(default_calibration, d_string_buffer_size, "%s%02d", d_compare_default, atoi(buffer));
+		if (argc >= 3)
+			strncpy(default_calibration, argv[2], d_string_buffer_size);
 		for (ladder = 0; ladder < d_calibrations_ladders; ++ladder)
 			local_selection[ladder] = d_false;
-		if (f_analyze_calibration(&environment, argv[1], argv[2])) {
-			snprintf(csv_file, d_string_buffer_size, "%s.csv", argv[2]);
+		if (f_analyze_calibration(&environment, argv[1], default_calibration)) {
+			snprintf(csv_file, d_string_buffer_size, "%s.csv", argv[1]);
 			f_analyze_values(&environment);
 			f_analyze_values_write(&environment, stdout);
 			gtk_init(&argc, &argv);
@@ -134,7 +147,7 @@ int main (int argc, char *argv[]) {
 		} else
 			fprintf(stderr, "one of these directories doesn't contains calibration files\n");
 	} else
-		fprintf(stderr, "usage:\n%s <reference calibration> <calibration> {list of masked ladders CSV}\n", argv[0]);
+		fprintf(stderr, "usage:\n%s <calibration> {reference calibration} {list of masked ladders CSV}\n", argv[0]);
 	f_memory_destroy();
 	return 0;
 }
