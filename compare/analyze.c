@@ -44,12 +44,13 @@ void f_analyze_values_write(struct s_analyze_environment *environment, FILE *str
 }
 
 void f_analyze_values(struct s_analyze_environment *environment) {
-	int calibration, channel, ladder, value;
+	int calibration, channel, ladder;
+	float value;
 	for (ladder = 0; ladder < d_calibrations_ladders; ++ladder) {
 		for (channel = 0; channel < d_package_channels; ++channel) {
 			value = environment->calibration[0].ladder[ladder].pedestal[channel];
 			for (calibration = 1; calibration < d_analyze_calibrations; ++calibration)
-				value -= environment->calibration[calibration].ladder[ladder].pedestal[channel];
+				value -= (float)environment->calibration[calibration].ladder[ladder].pedestal[channel];
 			environment->pedestal_distance[ladder][channel] = value;
 		}
 	}
