@@ -104,6 +104,7 @@
                             <property name="primary_icon_sensitive">True</property>
                             <property name="secondary_icon_sensitive">True</property>
                             <property name="adjustment">v_x_top_adjustment</property>
+                            <property name="digits">1</property>
                           </object>
                           <packing>
                             <property name="left_attach">1</property>
@@ -120,6 +121,7 @@
                             <property name="primary_icon_sensitive">True</property>
                             <property name="secondary_icon_sensitive">True</property>
                             <property name="adjustment">v_x_bottom_adjustment</property>
+                            <property name="digits">1</property>
                           </object>
                           <packing>
                             <property name="left_attach">1</property>
@@ -222,6 +224,7 @@
                             <property name="primary_icon_sensitive">True</property>
                             <property name="secondary_icon_sensitive">True</property>
                             <property name="adjustment">v_y_top_adjustment</property>
+                            <property name="digits">1</property>
                           </object>
                           <packing>
                             <property name="left_attach">1</property>
@@ -238,6 +241,7 @@
                             <property name="primary_icon_sensitive">True</property>
                             <property name="secondary_icon_sensitive">True</property>
                             <property name="adjustment">v_y_bottom_adjustment</property>
+                            <property name="digits">1</property>
                           </object>
                           <packing>
                             <property name="left_attach">1</property>
