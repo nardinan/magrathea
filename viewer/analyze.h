@@ -22,7 +22,7 @@
 #include "../stk_math.h"
 #define d_analyze_calibration_steps 256
 #define d_analyze_ladders 24
-#define d_analyze_occupancy_k 3.0
+#define d_analyze_occupancy_k 5.0
 #define d_analyze_sigma_k 10.0
 typedef struct s_analyze_data {
 	float bucket[d_package_channels], adc_pedestal[d_package_channels], adc_pedestal_cn[d_package_channels], occupancy[d_package_channels];
