@@ -269,8 +269,8 @@ int main (int argc, char *argv[]) {
 	if (argc >= 5) {
 		v_view_ladder = atoi(argv[3]);
 		v_view_trb = atoi(argv[2]);
-		if ((v_view_skip_frames = atoi(argv[4])) < 1)
-			v_view_skip_frames = 1;
+		if ((v_view_skip_frames = atoi(argv[4])) < 0)
+			v_view_skip_frames = 0;
 		if ((v_view_ladder >= 0) && (v_view_ladder < d_analyze_ladders)) {
 			if ((v_view_trb >= 0) && (v_view_trb < d_trb_device_boards)) {
 				for (index = 0; index < d_analyze_ladders; ++index)
@@ -295,7 +295,8 @@ int main (int argc, char *argv[]) {
 							} else
 								fprintf(stderr, "404 - calibration folder not found %s\n", argv[index+1]);
 							index++;
-						}
+						} else
+							fprintf(stderr, "wrong parameter '%s'\n", argv[index]);
 						index++;
 					}
 					gtk_init(&argc, &argv);
