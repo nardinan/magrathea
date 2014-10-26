@@ -29,7 +29,7 @@ typedef struct s_analyze_data {
 	int new_bucket:1;
 } s_analyze_data;
 typedef struct s_analyze_calibration {
-	unsigned short int package, steps, flags[d_package_channels];
+	unsigned short int package, steps;
 	float bucket[d_analyze_calibration_steps][d_package_channels];
 	int computed:1, drawed:1, new_bucket:1;
 } s_analyze_calibration;

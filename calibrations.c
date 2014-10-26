@@ -28,7 +28,7 @@ void f_calibrations_values(struct s_calibrations_environment *environment) {
 	}
 }
 
-int p_calibrations_file_read_row(char *string, float *pedestal, float *sigma_raw, float *sigma) {
+int p_calibrations_file_read_row(char *string, float *pedestal, float *sigma_raw, float *sigma, unsigned short *flags) {
 	char *begin_pointer = string, *end_pointer;
 	float content[d_calibrations_columns];
 	int index = 0;
@@ -42,20 +42,23 @@ int p_calibrations_file_read_row(char *string, float *pedestal, float *sigma_raw
 	*pedestal = content[3];
 	*sigma_raw = content[4];
 	*sigma = content[5];
+	*flags = (unsigned short)content[6];
 	return (int)content[0];
 }
 
 int p_calibrations_file_read(struct s_calibrations_environment *environment, FILE *stream, int ladder) {
 	char buffer[d_string_buffer_size];
 	float pedestal = 0.0f, sigma_raw = 0.0f, sigma = 0.0f;
+	unsigned short flag = 0;
 	int channel = 0, result = d_true;
 	while (!feof(stream))
 		if (fgets(buffer, d_string_buffer_size, stream) > 0) {
-			channel = p_calibrations_file_read_row(buffer, &pedestal, &sigma_raw, &sigma);
+			channel = p_calibrations_file_read_row(buffer, &pedestal, &sigma_raw, &sigma, &flag);
 			if ((channel >= 0) && (channel < d_package_channels)) {
 				environment->ladder[ladder].pedestal[channel] = pedestal;
 				environment->ladder[ladder].sigma_raw[channel] = sigma_raw;
 				environment->ladder[ladder].sigma[channel] = sigma;
+				environment->ladder[ladder].flags[channel] = flag;
 			} else
 				fprintf(stderr, "warning, channel %d has been readed (but channels have to be between 0 and %d)\n", channel,
 						d_package_channels);
@@ -107,9 +110,9 @@ void f_calibrations_export(struct s_calibrations_environment *environment, const
 				for (channel = 0; channel < d_package_channels; ++channel) {
 					va = channel/d_package_channels_on_va;
 					channel_on_va = channel%d_package_channels_on_va;
-					fprintf(stream, "%d, %d, %d, %.03f, %.03f, %.03f\n", channel, va, channel_on_va,
+					fprintf(stream, "%d, %d, %d, %.03f, %.03f, %.03f, %d\n", channel, va, channel_on_va,
 							environment->ladder[ladder].pedestal[channel], environment->ladder[ladder].sigma_raw[channel],
-							environment->ladder[ladder].sigma[channel]);
+							environment->ladder[ladder].sigma[channel], environment->ladder[ladder].flags[channel]);
 				}
 				fclose(stream);
 			}

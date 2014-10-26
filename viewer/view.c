@@ -114,7 +114,7 @@ void p_view_loop_append_signals(struct s_interface *interface, unsigned short in
 					f_chart_append_signal(&(interface->logic_charts[e_interface_chart_sigma_raw]), 1, index,
 							environment.data.computed_calibrations.ladder[v_view_ladder].sigma_raw[index]);
 					f_chart_append_signal(&(interface->logic_charts[e_interface_chart_sigma_raw]), 0, index,
-							-((float)environment.data.calibration[v_view_ladder].flags[index]));
+							-(((float)environment.data.computed_calibrations.ladder[v_view_ladder].flags[index])/10.0));
 					f_chart_append_signal(&(interface->logic_charts[e_interface_chart_sigma]), 0, index,
 							environment.data.computed_calibrations.ladder[v_view_ladder].sigma[index]);
 				}

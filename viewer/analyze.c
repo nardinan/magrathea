@@ -30,10 +30,10 @@ int f_analyze_calibration(struct s_analyze_environment *environment, unsigned sh
 		f_stk_math_pedestal(environment->calibration[ladder].bucket, environment->calibration[ladder].package,
 				environment->computed_calibrations.ladder[ladder].pedestal);
 		f_stk_math_sigma_raw(environment->calibration[ladder].bucket, environment->calibration[ladder].package,
-				environment->computed_calibrations.ladder[ladder].sigma_raw);
+				environment->computed_calibrations.ladder[ladder].sigma_raw, environment->computed_calibrations.ladder[ladder].flags);
 		f_stk_math_sigma(environment->calibration[ladder].bucket, environment->calibration[ladder].package, d_analyze_sigma_k,
 				environment->computed_calibrations.ladder[ladder].sigma_raw, environment->computed_calibrations.ladder[ladder].pedestal,
-				environment->computed_calibrations.ladder[ladder].sigma, environment->calibration[ladder].flags);
+				environment->computed_calibrations.ladder[ladder].sigma, environment->computed_calibrations.ladder[ladder].flags);
 		environment->calibration[ladder].computed = d_true;
 		environment->calibrated++;
 		result = d_true;
@@ -43,11 +43,12 @@ int f_analyze_calibration(struct s_analyze_environment *environment, unsigned sh
 				environment->data[ladder].adc_pedestal);
 		f_stk_math_adc_pedestal_cn(environment->data[ladder].bucket, d_analyze_sigma_k,
 				environment->computed_calibrations.ladder[ladder].pedestal, environment->computed_calibrations.ladder[ladder].sigma,
-				environment->calibration[ladder].flags, environment->data[ladder].adc_pedestal_cn);
+				environment->computed_calibrations.ladder[ladder].flags, environment->data[ladder].adc_pedestal_cn);
 		for (channel = 0; channel < d_package_channels; ++channel)
-			if (environment->data[ladder].adc_pedestal_cn[channel] >
-					(d_analyze_occupancy_k*environment->computed_calibrations.ladder[ladder].sigma[channel]))
-				environment->data[ladder].occupancy[channel]++;
+			if (environment->computed_calibrations.ladder[ladder].flags[channel] == 0) /* no bad channel */
+				if (environment->data[ladder].adc_pedestal_cn[channel] >
+						(d_analyze_occupancy_k*environment->computed_calibrations.ladder[ladder].sigma[channel]))
+					environment->data[ladder].occupancy[channel]++;
 	}
 	return result;
 }

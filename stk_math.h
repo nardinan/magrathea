@@ -23,12 +23,18 @@
 #include "trb_device.h"
 #define d_stk_math_sigma_k 10.0
 #define d_stk_math_sigma_k_max 2.0
+#define d_stk_math_sigma_min 1.0
+#define d_stk_math_sigma_max 6.0
+#define d_stk_math_sigma_raw_min 1.0
+#define d_stk_math_sigma_raw_max 15.0
 typedef enum e_stk_math_flags {
-	e_stk_math_flag_bad = 0x01,
-	e_stk_math_flag_bad_sigma = 0x02
+	e_stk_math_flag_bad = 			0x01,
+	e_stk_math_flag_bad_sigma = 		0x02,
+	e_stk_math_flag_bad_sigma_raw_range = 	0x04,
+	e_stk_math_flag_bad_sigma_range = 	0x08
 } e_stk_math_flags;
 extern float *f_stk_math_pedestal(float values[][d_package_channels], size_t size, float *supplied);
-extern float *f_stk_math_sigma_raw(float values[][d_package_channels], size_t size, float *supplied);
+extern float *f_stk_math_sigma_raw(float values[][d_package_channels], size_t size, float *supplied, unsigned short *supplied_flags);
 extern float *f_stk_math_cn_no_pedestal(float *no_pedestal, float sigma_multiplicator, float *sigma, float *supplied);
 extern float *f_stk_math_cn(float *values, float sigma_multiplicator, float *pedestal, float *sigma, float *supplied);
 extern float *f_stk_math_sigma(float values[][d_package_channels], size_t size, float sigma_multiplicator, float *sigma_raw, float *pedestal,

@@ -30,7 +30,7 @@ float *f_stk_math_pedestal(float values[][d_package_channels], size_t size, floa
 	return result;
 }
 
-float *f_stk_math_sigma_raw(float values[][d_package_channels], size_t size, float *supplied) {
+float *f_stk_math_sigma_raw(float values[][d_package_channels], size_t size, float *supplied, unsigned short *supplied_flags) {
 	float *result = supplied, total, total_square;
 	int channel, event;
 	if (!result)
@@ -44,6 +44,13 @@ float *f_stk_math_sigma_raw(float values[][d_package_channels], size_t size, flo
 		total = (total/(float)size);
 		total_square = (total_square/(float)size);;
 		result[channel] = sqrt(fabs(total_square-(total*total)));
+	}
+	if (supplied_flags) {
+		for (channel = 0; channel < d_package_channels; ++channel)
+			if ((result[channel] > d_stk_math_sigma_raw_max) || (result[channel] < d_stk_math_sigma_raw_min))
+				supplied_flags[channel] |= (e_stk_math_flag_bad_sigma_raw_range);
+			else
+				supplied_flags[channel] &= (~e_stk_math_flag_bad_sigma_raw_range);
 	}
 	return result;
 }
@@ -99,11 +106,16 @@ float *f_stk_math_sigma(float values[][d_package_channels], size_t size, float s
 		}
 	if (supplied_flags) {
 		mean /= (float)d_package_channels;
-		for (channel = 0; channel < d_package_channels; ++channel)
+		for (channel = 0; channel < d_package_channels; ++channel) {
 			if (result[channel] > (d_stk_math_sigma_k_max*mean))
-				supplied_flags[channel] |= (e_stk_math_flag_bad_sigma|e_stk_math_flag_bad);
+				supplied_flags[channel] |= (e_stk_math_flag_bad_sigma);
 			else
 				supplied_flags[channel] &= (~e_stk_math_flag_bad_sigma);
+			if ((result[channel] > d_stk_math_sigma_max) || (result[channel] < d_stk_math_sigma_min))
+				supplied_flags[channel] |= (e_stk_math_flag_bad_sigma_range);
+			else
+				supplied_flags[channel] &= (~e_stk_math_flag_bad_sigma_range);
+		}
 	}
 	return result;
 }

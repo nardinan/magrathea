@@ -30,10 +30,11 @@ typedef struct s_calibrations_environment {
 	struct {
 		float pedestal[d_package_channels], sigma_raw[d_package_channels], sigma[d_package_channels], pedestal_mean, pedestal_rms, sigma_raw_mean,
 		      sigma_raw_rms, sigma_mean, sigma_rms;
+		unsigned short flags[d_package_channels];
 	} ladder[d_calibrations_ladders];
 } s_calibrations_environment;
 extern void f_calibrations_values(struct s_calibrations_environment *environment);
-extern int p_calibrations_file_read_row(char *string, float *pedestal, float *sigma_raw, float *sigma);
+extern int p_calibrations_file_read_row(char *string, float *pedestal, float *sigma_raw, float *sigma, unsigned short *flags);
 extern int p_calibrations_file_read(struct s_calibrations_environment *environment, FILE *stream, int ladder);
 extern int p_calibrations_file(struct s_calibrations_environment *environment, const char *file);
 extern int f_calibrations(struct s_calibrations_environment *environment, const char *directory);
