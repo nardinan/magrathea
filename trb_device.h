@@ -20,6 +20,7 @@
 #include "rs232.h"
 #include "console.h"
 #define d_trb_device_boards 8
+#define d_trb_device_ladders 24
 #define d_trb_device_raw_command_size 12
 #define d_trb_device_raw_command_id_byte 4
 #define d_trb_device_raw_answer_size 256
