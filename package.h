@@ -51,9 +51,21 @@ typedef struct s_package_raw {
 typedef struct s_package_dld {
 	unsigned short ladder[d_package_ladders], pedestal[d_package_ladders][d_package_channels], rms[d_package_ladders][d_package_channels];
 } s_package_dld;
+typedef struct s_package_nrm_cluster {
+	unsigned short strips, first, values[d_package_channels];
+} s_package_nrm_cluster;
+typedef struct s_package_nrm_ladder {
+	unsigned short clusters;
+	struct s_package_nrm_cluster *clusters_data;
+} s_package_nrm_ladder;
+typedef struct s_package_nrm {
+	unsigned short ladders;
+	struct s_package_nrm_ladder *ladders_data;
+} s_package_nrm;
 typedef union u_package_data_values {
 	struct s_package_raw raw;
 	struct s_package_dld dld;
+	struct s_package_nrm nrm;
 } u_package_data_values;
 typedef struct s_package_data {
 	unsigned char kind, trb;
