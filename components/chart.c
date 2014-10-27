@@ -123,6 +123,7 @@ void f_chart_append_histogram(struct s_chart *chart, unsigned int code, float va
 		normalized = (value-chart->axis_x.range[0])/(chart->axis_x.range[1]-chart->axis_x.range[0]);
 		bin = (normalized*(float)chart->bins[code]);
 		chart->values[code][bin].y++;
+		chart->values[code][bin].normalized.done = d_false;
 	}
 	chart->total[code] += value;
 	chart->total_square[code] += value*value;
@@ -337,10 +338,9 @@ void p_chart_redraw_grid_y(cairo_t *cr, struct s_chart *chart, float full_h, flo
 }
 
 void p_chart_normalize_switch(struct s_chart *chart, unsigned int code, unsigned int left, unsigned int right) {
-	struct s_chart_value support;
-	memcpy(&(support), &(chart->values[code][left]), sizeof(struct s_chart_value));
-	memcpy(&(chart->values[code][left]), &(chart->values[code][right]), sizeof(struct s_chart_value));
-	memcpy(&(chart->values[code][right]), &(support), sizeof(struct s_chart_value));
+	struct s_chart_value support = chart->values[code][left];
+	chart->values[code][left] = chart->values[code][right];
+	chart->values[code][right] = support;
 }
 
 void p_chart_normalize_sort(struct s_chart *chart, unsigned int code) {
@@ -348,7 +348,7 @@ void p_chart_normalize_sort(struct s_chart *chart, unsigned int code) {
 	while (changed) {
 		changed = d_false;
 		for (index = 0; index < (chart->head[code]-1); index++)
-			if (chart->values[code][index].normalized.x < chart->values[code][index+1].normalized.x) {
+			if (chart->values[code][index].normalized.x > chart->values[code][index+1].normalized.x) {
 				p_chart_normalize_switch(chart, code, index, index+1);
 				changed = d_true;
 			}
@@ -406,7 +406,8 @@ int p_chart_callback(GtkWidget *widget, GdkEvent *event, void *v_chart) {
 			if ((!multiple) && (chart->head[code+1]))
 				multiple = d_true;
 			if (chart->head[code]) {
-				cairo_set_source_rgba(chart->cairo_brush, chart->data.color[code].R, chart->data.color[code].G, chart->data.color[code].B, 0.7f);
+				cairo_set_source_rgba(chart->cairo_brush, chart->data.color[code].R, chart->data.color[code].G,
+						chart->data.color[code].B, 0.7f);
 				cairo_set_line_width(chart->cairo_brush, chart->data.line_size[code]);
 				for (index = 0, first = d_true; index < chart->head[code]; index++) {
 					if (chart->values[code][index].normalized.done) {
