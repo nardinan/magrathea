@@ -26,6 +26,28 @@ struct s_package_trb v_package_trbs[] = {
 	{6, 0x0C},
 	{7, 0x0D}
 };
+unsigned char *p_package_analyze_nrm(struct s_package *package, unsigned char *buffer, size_t size) {
+	unsigned char *pointer = buffer;
+	int ladder = -1, entry_point = -1;
+	memset(&(package->data.values.nrm), 0, sizeof(union u_package_data_values));
+	if (*pointer == d_package_nrm_ladder) {
+		while (size) {
+			if (pointer[0] == d_package_nrm_ladder)
+				ladder = pointer[1];
+			else if ((pointer[0]&d_package_nrm_cluster) == d_package_nrm_cluster)
+				entry_point = ((unsigned short int)pointer[1])|((unsigned short int)(pointer[0]&0x03))<<8;
+			else if (((ladder >= 0) && (ladder < d_trb_device_ladders)) && ((entry_point >= 0) && (entry_point < d_package_channels))) {
+				package->data.values.nrm.ladders_data[ladder].values[entry_point++] =
+					((unsigned short int)pointer[1])|((unsigned short int)pointer[0])<<8;
+			} else
+				break;
+			pointer += 2;
+			size -= 2;
+		}
+	}
+	return pointer;
+}
+
 unsigned char *p_package_analyze_raw(struct s_package *package, unsigned char *buffer, size_t size) {
 	unsigned char *pointer = buffer, *result = NULL;
 	int index, ladder;
@@ -43,7 +65,7 @@ unsigned char *p_package_analyze_raw(struct s_package *package, unsigned char *b
 
 unsigned char *p_package_analyze_header_data(struct s_package *package, unsigned char *buffer, size_t size) {
 	static unsigned char header_data[] = {0xEE, 0xBB};
-	unsigned char *pointer = buffer, *backup, *result = NULL, workmode, group;
+	unsigned char *pointer = buffer, *backup = NULL, *result = NULL, workmode, group;
 	int index;
 	if (size >= d_package_alignment_size)
 		for (index = 0; index < d_package_alignment_size; ++index) {
@@ -59,16 +81,25 @@ unsigned char *p_package_analyze_header_data(struct s_package *package, unsigned
 				break;
 		if (index >= d_package_data_header_const_size) {
 			if ((size-(pointer-buffer)) > d_package_data_header_info_size) {
-				package->data.kind = (pointer[0]&0xff);
-				workmode = (package->data.kind>>4)&0x0f;
-				group = (package->data.kind)&0x0f;
-				if (workmode == d_package_default_workmode) {
+				workmode = (pointer[0]>>4)&0x0f;
+				group = (pointer[0])&0x0f;
+				if ((workmode == d_package_raw_workmode) || (workmode == d_package_nrm_workmode)) {
+					package->data.kind = workmode;
 					pointer++;
 					package->data.trb = (pointer[0]&0x3f);
 					pointer++;
 					package->data.frame_length = ((unsigned short int)pointer[1])|((unsigned short int)pointer[0])<<8;
 					pointer += 2;
-					backup = p_package_analyze_raw(package, pointer, (size-(pointer-buffer)));
+					switch (workmode) {
+						case d_package_raw_workmode:
+							backup = p_package_analyze_raw(package, pointer, (size-(pointer-buffer)));
+							break;
+						case d_package_nrm_workmode:
+							if ((size-(pointer-buffer)) >= package->data.frame_length)
+								backup = p_package_analyze_nrm(package, pointer,
+										(package->data.frame_length-d_package_data_tail_size-
+										 d_package_frame_tail_size));
+					}
 					if ((backup) && ((size-(backup-buffer)) >= d_package_data_tail_size)) {
 						pointer = backup;
 						package->data.trigger_kind = ((unsigned short int)pointer[0])>>5;

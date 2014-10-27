@@ -18,6 +18,7 @@
 #ifndef magrathea_package_h
 #define magrathea_package_h
 #include <miranda/ground.h>
+#include "trb_device.h"
 #define d_package_ladders 2
 #define d_package_channels 384
 #define d_package_channels_half 192
@@ -33,8 +34,11 @@
 #define d_package_data_header_info_size 4	/* number of informations in the header */
 #define d_package_data_tail_size 4		/* total dimension of the tail		*/
 #define d_package_alignment_size 6
-#define d_package_default_workmode 3
+#define d_package_raw_workmode 3
+#define d_package_nrm_workmode 2
 #define d_package_raw_size (d_package_ladders*(2+(2*d_package_channels)))
+#define d_package_nrm_ladder 0xcc
+#define d_package_nrm_cluster 0xfc
 #define d_package_buffer_size 10240
 typedef struct s_package_trb {
 	int id;
@@ -51,16 +55,12 @@ typedef struct s_package_raw {
 typedef struct s_package_dld {
 	unsigned short ladder[d_package_ladders], pedestal[d_package_ladders][d_package_channels], rms[d_package_ladders][d_package_channels];
 } s_package_dld;
-typedef struct s_package_nrm_cluster {
-	unsigned short strips, first, values[d_package_channels];
-} s_package_nrm_cluster;
 typedef struct s_package_nrm_ladder {
-	unsigned short clusters;
-	struct s_package_nrm_cluster *clusters_data;
+	unsigned short values[d_package_channels];
 } s_package_nrm_ladder;
 typedef struct s_package_nrm {
 	unsigned short ladders;
-	struct s_package_nrm_ladder *ladders_data;
+	struct s_package_nrm_ladder ladders_data[d_trb_device_ladders];
 } s_package_nrm;
 typedef union u_package_data_values {
 	struct s_package_raw raw;
@@ -79,6 +79,7 @@ typedef struct s_package {
 	int complete:1, damaged:1, wrong_sumcheck:1;
 } s_package;
 extern struct s_package_trb v_package_trbs[];
+extern unsigned char *p_package_analyze_nrm(struct s_package *package, unsigned char *buffer, size_t size);
 extern unsigned char *p_package_analyze_raw(struct s_package *package, unsigned char *buffer, size_t size);
 extern unsigned char *p_package_analyze_header_data(struct s_package *package, unsigned char *buffer, size_t size);
 extern unsigned char *p_package_analyze_header(struct s_package *package, unsigned char *buffer, size_t size);
