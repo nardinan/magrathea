@@ -132,7 +132,7 @@ float *f_stk_math_adc_pedestal(float values[d_package_channels], float *pedestal
 }
 
 float *f_stk_math_adc_pedestal_cn(float values[d_package_channels], float sigma_multiplicator, float *pedestal, float *sigma, unsigned short *flags,
-		float *supplied) {
+		float *supplied, float *supplied_common_noise) {
 	float *result = supplied, common_noise[d_package_vas];
 	int index;
 	if (!result)
@@ -144,6 +144,8 @@ float *f_stk_math_adc_pedestal_cn(float values[d_package_channels], float sigma_
 			supplied[index] = 0;
 		else
 			supplied[index] = values[index]-pedestal[index]-common_noise[(index/d_package_channels_on_va)];
+	if (supplied_common_noise)
+		memcpy(supplied_common_noise, common_noise, (sizeof(float)*d_package_vas));
 	return result;
 }
 

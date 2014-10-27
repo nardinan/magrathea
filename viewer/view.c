@@ -86,7 +86,6 @@ void f_view_destroy(GtkWidget *widget, struct s_interface *interface) {
 	exit(0);
 }
 
-
 void p_view_loop_analyze(struct s_interface *interface, unsigned short int ladder, unsigned short int *values) {
 	int result = f_analyze_calibration(&(environment.data), ladder, values);
 	if (environment.data.calibrated >= d_analyze_ladders) {
@@ -101,7 +100,8 @@ void p_view_loop_analyze(struct s_interface *interface, unsigned short int ladde
 }
 
 void p_view_loop_append_signals(struct s_interface *interface, unsigned short int ladder) {
-	int index, current_ladder, maximum;
+	int index, current_ladder, current_cluster, maximum;
+	float cluster_signal;
 	if (ladder == v_view_ladder) {
 		if (environment.data.calibration[v_view_ladder].computed) {
 			if (!environment.data.calibration[v_view_ladder].drawed) {
@@ -151,6 +151,13 @@ void p_view_loop_append_signals(struct s_interface *interface, unsigned short in
 				}
 				interface->logic_charts[e_interface_chart_occupancy_0+current_ladder].axis_y.range[1] = (maximum+1);
 				environment.data.data[current_ladder].new_bucket = d_false;
+				for (current_cluster = 0; current_cluster < environment.data.data[current_ladder].compressed_event.clusters;
+						++current_cluster) {
+					for (index = 0, cluster_signal = 0; index <
+							environment.data.data[current_ladder].compressed_event.values[current_cluster].strips; ++index)
+						cluster_signal += environment.data.data[current_ladder].compressed_event.values[current_cluster].values[index];
+					f_chart_append_histogram(&(interface->logic_charts[e_interface_chart_clusters_distribution]), 0, cluster_signal);
+				}
 			}
 	}
 }
@@ -184,6 +191,9 @@ void p_view_loop_show_signals(struct s_interface *interface) {
 					for (index = e_interface_chart_occupancy_0; index <= e_interface_chart_occupancy_23; ++index)
 						f_chart_redraw(&(interface->logic_charts[index]));
 			}
+			break;
+		case 4: /* clusters */
+			f_chart_redraw(&(interface->logic_charts[e_interface_chart_clusters_distribution]));
 	}
 }
 
@@ -200,27 +210,48 @@ void p_view_loop_read_raw(int delay) {
 	}
 }
 
+void p_view_loop_read_process(struct s_interface *interface, struct s_package *package) {
+	int ladder;
+	if ((package->complete) && (package->trb == v_package_trbs[v_view_trb].code))
+		switch (package->data.kind) {
+			case d_package_raw_workmode:
+				for (ladder = 0; ladder < d_package_ladders; ++ladder)
+					if ((package->data.values.raw.ladder[ladder] >= 0) && (package->data.values.raw.ladder[ladder] <
+								d_analyze_ladders)) {
+						environment.data.counters[package->data.values.raw.ladder[ladder]].events++;
+						p_view_loop_analyze(interface, package->data.values.raw.ladder[ladder],
+								package->data.values.raw.values[ladder]);
+						if (package->data.values.raw.ladder[ladder] == v_view_ladder)
+							v_view_label_refresh = d_true;
+					}
+				break;
+			case d_package_nrm_workmode:
+				for (ladder = 0; ladder < d_trb_device_ladders; ++ladder) {
+					/* resetting calibrations */
+					environment.data.calibration[ladder].computed = d_true;
+					environment.data.calibration[ladder].steps = v_view_calibration_steps;
+					/* end */
+					environment.data.counters[ladder].events++;
+					p_view_loop_analyze(interface, ladder, package->data.values.nrm.ladders_data[ladder].values);
+					v_view_label_refresh = d_true;
+				}
+		}
+}
+
 
 int p_view_loop_read(struct s_interface *interface, int delay) {
 	struct s_package package;
 	unsigned char *backup;
-	int ladder, result = d_false;
+	int result = d_false;
 	p_view_loop_read_raw(delay);
 	if ((backup = f_package_analyze(&package, environment.buffer, environment.bytes))) {
 		result = d_true;
 		if (backup > environment.buffer) {
 			environment.bytes -= (backup-environment.buffer);
 			memmove(environment.buffer, backup, environment.bytes);
-			if ((package.complete) && (package.trb == v_package_trbs[v_view_trb].code))
-				for (ladder = 0; ladder < d_package_ladders; ++ladder)
-					if ((package.data.values.raw.ladder[ladder] >= 0) && (package.data.values.raw.ladder[ladder] < d_analyze_ladders)) {
-						environment.data.counters[package.data.values.raw.ladder[ladder]].events++;
-						p_view_loop_analyze(interface, package.data.values.raw.ladder[ladder],
-								package.data.values.raw.values[ladder]);
-						if (package.data.values.raw.ladder[ladder] == v_view_ladder)
-							v_view_label_refresh = d_true;
-					}
+			p_view_loop_read_process(interface, &package);
 		}
+
 	}
 	p_view_loop_append_signals(interface, v_view_ladder);
 	return result;
@@ -261,6 +292,22 @@ int f_view_loop(struct s_interface *interface) {
 	return result;
 }
 
+int f_view_load_channel(const char *filename) {
+	FILE *stream;
+	int trb, ladder, channel, result = d_false;
+	if ((stream = fopen(filename, "r"))) {
+		result = d_true;
+		while ((fscanf(stream, "%d %d %d\n", &trb, &ladder, &channel) == 3)) {
+			if ((trb >= 0) && (trb <= d_trb_device_boards) && (trb == v_view_trb))
+				if ((ladder >= 0) && (ladder <= d_trb_device_ladders))
+					if ((channel >= 0) && (channel <= d_package_channels))
+						environment.data.computed_calibrations.ladder[ladder].flags[channel] = e_stk_math_flag_bad;
+		}
+		fclose(stream);
+	}
+	return result;
+}
+
 int main (int argc, char *argv[]) {
 	char buffer[d_string_buffer_size];
 	struct s_interface *main_interface = (struct s_interface *) malloc(sizeof(struct s_interface));
@@ -295,6 +342,10 @@ int main (int argc, char *argv[]) {
 							} else
 								fprintf(stderr, "404 - calibration folder not found %s\n", argv[index+1]);
 							index++;
+						} else if ((f_string_strcmp(argv[index], "-m") == 0) && ((index+1) < argc)) {
+							if (!f_view_load_channel(argv[index+1]))
+								fprintf(stderr, "%s has a wrong file format\n", argv[index+1]);
+							index++;
 						} else
 							fprintf(stderr, "wrong parameter '%s'\n", argv[index]);
 						index++;
@@ -317,7 +368,8 @@ int main (int argc, char *argv[]) {
 				"\t{-l: skip to last position}\n"
 				"\t{-x: automatically export calibrations when ready}\n"
 				"\t{-k: exit after calibration}\n"
-				"\t{-c <folder>: load an external TRB calibration}\n", argv[0]);
+				"\t{-c <folder>: load an external TRB calibration}\n"
+				"\t{-m <file>: file with bad channels}\n", argv[0]);
 	f_memory_destroy();
 	return 0;
 }

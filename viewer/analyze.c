@@ -18,6 +18,7 @@
 #include "analyze.h"
 int f_analyze_calibration(struct s_analyze_environment *environment, unsigned short int ladder, unsigned short int *values) {
 	int index, channel, result = d_false;
+	float common_noise[d_package_vas];
 	for (index = 0; index < d_package_channels; ++index)
 		environment->data[ladder].bucket[index] = values[index];
 	environment->data[ladder].new_bucket = d_true;
@@ -43,7 +44,11 @@ int f_analyze_calibration(struct s_analyze_environment *environment, unsigned sh
 				environment->data[ladder].adc_pedestal);
 		f_stk_math_adc_pedestal_cn(environment->data[ladder].bucket, d_analyze_sigma_k,
 				environment->computed_calibrations.ladder[ladder].pedestal, environment->computed_calibrations.ladder[ladder].sigma,
-				environment->computed_calibrations.ladder[ladder].flags, environment->data[ladder].adc_pedestal_cn);
+				environment->computed_calibrations.ladder[ladder].flags, environment->data[ladder].adc_pedestal_cn, common_noise);
+		f_clusters_init(&(environment->data[ladder].compressed_event));
+		f_clusters_search(&(environment->data[ladder].compressed_event), environment->data[ladder].adc_pedestal_cn,
+				environment->computed_calibrations.ladder[ladder].sigma, common_noise, environment->computed_calibrations.ladder[ladder].flags,
+				5.0f, 1.8f);
 		for (channel = 0; channel < d_package_channels; ++channel)
 			if (environment->computed_calibrations.ladder[ladder].flags[channel] == 0) /* no bad channel */
 				if (environment->data[ladder].adc_pedestal_cn[channel] >

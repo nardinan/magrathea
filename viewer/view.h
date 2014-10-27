@@ -53,6 +53,8 @@ extern void p_view_loop_analyze(struct s_interface *interface, unsigned short in
 extern void p_view_loop_append_signals(struct s_interface *interface, unsigned short int ladder);
 extern void p_view_loop_show_signals(struct s_interface *interface);
 extern void p_view_loop_read_raw(int delay);
+extern void p_view_loop_read_process(struct s_interface *interface, struct s_package *package);
 extern int p_view_loop_read(struct s_interface *interface, int delay);
 extern int f_view_loop(struct s_interface *interface);
+extern int f_view_load_channel(const char *filename);
 #endif

@@ -41,5 +41,5 @@ extern float *f_stk_math_sigma(float values[][d_package_channels], size_t size, 
 		float *supplied_values, unsigned short *supplied_flags);
 extern float *f_stk_math_adc_pedestal(float values[d_package_channels], float *pedestal, float *supplied);
 extern float *f_stk_math_adc_pedestal_cn(float values[d_package_channels], float sigma_multiplicator, float *pedestal, float *sigma, unsigned short *flags,
-		float *supplied);
+		float *supplied, float *supplied_common_noise);
 #endif

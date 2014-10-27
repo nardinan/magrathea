@@ -39,14 +39,14 @@ void f_export_read(FILE *stream_out, FILE *stream_in, int trb, int ladder) {
 									sizeof(unsigned short), stream_out);
 						}
 						fwrite(packet_tail, 1, sizeof(packet_tail), stream_out);
-						fprintf(stdout, "\r[event 0x%02x]", package_header[2]);
+						fprintf(stdout, "\r[event 0x%02x]", packet_header[2]);
 						fflush(stdout);
 						real_events++;
 					}
 		} else if (readed <= 0)
 			break;
 	}
-	fprintf(stdout, "\n[%d events have been written]\n", events);
+	fprintf(stdout, "\n[%d events have been written]\n", real_events);
 }
 
 int main (int argc, char *argv[]) {

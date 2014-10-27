@@ -1,4 +1,4 @@
-objects = view.o analyze.o interface.o calibrations.o stk_math.o package.o chart.o keys.o interface_scale.o
+objects = view.o analyze.o interface.o calibrations.o clusters.o stk_math.o package.o chart.o keys.o interface_scale.o
 name = magrathea_view
 cc = gcc -g
 cflags = -Wall `pkg-config --cflags gtk+-2.0` -I../../ -Wno-variadic-macros -Wno-pointer-arith -c
@@ -17,6 +17,9 @@ analyze.o: analyze.c analyze.h ../calibrations.h ../stk_math.h
 
 calibrations.o: ../calibrations.c ../calibrations.h ../package.h
 	$(cc) $(cflags) ../calibrations.c
+
+clusters.o: ../clusters.c ../clusters.h ../calibrations.h
+	$(cc) $(cflags) ../clusters.c
 
 interface.o: interface.c interface.h ../components/chart.h
 	$(cc) $(cflags) interface.c
