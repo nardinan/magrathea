@@ -85,7 +85,7 @@ int f_convert_insert(struct s_convert_environment *environment, struct s_package
 }
 
 int f_convert_read(const char *prefix, FILE *stream, int trb) {
-	unsigned char buffer[d_package_buffer_size], *backup;
+	unsigned char buffer[d_package_buffer_size], *backup, mode;
 	ssize_t readed, bytes = 0;
 	struct s_package package;
 	struct s_convert_environment environment;
@@ -98,13 +98,15 @@ int f_convert_read(const char *prefix, FILE *stream, int trb) {
 				bytes -= (backup-buffer);
 				memmove(buffer, backup, bytes);
 				if ((package.complete) && (package.trb == v_package_trbs[trb].code)) {
+					mode = package.data.kind;
 					if ((package.data.kind == d_package_nrm_workmode) || ((package.data.kind == d_package_raw_workmode) && 
 								(package.data.values.raw.ladder[0] == 0) && (package.data.values.raw.ladder[1] == 12)))
 						first = d_false;
 					if (!first)
 						f_convert_insert(&environment, &package);
 					readed_package++;
-					printf("\rreading package: % 7d [%c]", readed_package, (first)?'R':'W');
+					printf("\rreading package: % 7d [%c] [%s]", readed_package, (first)?'R':'W', 
+							(mode==d_package_raw_workmode)?"RAW":"COMPRESSED");
 					if (first)
 						putchar('\n');
 					else
