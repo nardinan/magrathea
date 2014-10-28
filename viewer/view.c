@@ -227,17 +227,14 @@ void p_view_loop_read_process(struct s_interface *interface, struct s_package *p
 				break;
 			case d_package_nrm_workmode:
 				for (ladder = 0; ladder < d_trb_device_ladders; ++ladder) {
-					/* resetting calibrations */
 					environment.data.calibration[ladder].computed = d_true;
 					environment.data.calibration[ladder].steps = v_view_calibration_steps;
-					/* end */
 					environment.data.counters[ladder].events++;
 					p_view_loop_analyze(interface, ladder, package->data.values.nrm.ladders_data[ladder].values);
 					v_view_label_refresh = d_true;
 				}
 		}
 }
-
 
 int p_view_loop_read(struct s_interface *interface, int delay) {
 	struct s_package package;
