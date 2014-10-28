@@ -32,6 +32,7 @@ extern "C" {
 #define d_convert_directory "ttree"
 #define d_convert_ladders 24
 extern int tree_adc[d_convert_ladders][d_package_channels];
+extern unsigned char v_convert_mode;
 typedef struct s_convert_environment {
 	TFile *stream[d_convert_ladders];
 	TTree *structure[d_convert_ladders];

@@ -17,6 +17,7 @@
  */
 #include "convert.h"
 int tree_adc[d_convert_ladders][d_package_channels];
+unsigned char v_convert_mode = d_package_dmg_workmode;
 struct s_convert_environment *f_convert_init(struct s_convert_environment *supplied, const char *prefix, int trb) {
 	char directory[PATH_MAX], postfix[d_string_buffer_size], path[PATH_MAX], h_name[d_string_buffer_size], t_name[d_string_buffer_size];
 	struct s_convert_environment *result = supplied;
@@ -85,11 +86,11 @@ int f_convert_insert(struct s_convert_environment *environment, struct s_package
 }
 
 int f_convert_read(const char *prefix, FILE *stream, int trb) {
-	unsigned char buffer[d_package_buffer_size], *backup, mode;
+	unsigned char buffer[d_package_buffer_size], *backup, current_mode;
 	ssize_t readed, bytes = 0;
 	struct s_package package;
 	struct s_convert_environment environment;
-	int result = d_true, readed_package = 0, first = d_true;
+	int result = d_true, readed_package = 0, first = d_true, same;
 	if (f_convert_init(&environment, prefix, trb)) {
 		while (d_true) {
 			if ((readed = fread(buffer+bytes, 1, d_package_buffer_size-bytes, stream)) > 0)
@@ -98,16 +99,20 @@ int f_convert_read(const char *prefix, FILE *stream, int trb) {
 				bytes -= (backup-buffer);
 				memmove(buffer, backup, bytes);
 				if ((package.complete) && (package.trb == v_package_trbs[trb].code)) {
-					mode = package.data.kind;
-					if ((package.data.kind == d_package_nrm_workmode) || ((package.data.kind == d_package_raw_workmode) && 
+					current_mode = package.data.kind;
+					if ((v_convert_mode == d_package_dmg_workmode) || (v_convert_mode == current_mode))
+						same = d_true;
+					else
+						same = d_false;
+					if ((current_mode == d_package_nrm_workmode) || ((current_mode == d_package_raw_workmode) && 
 								(package.data.values.raw.ladder[0] == 0) && (package.data.values.raw.ladder[1] == 12)))
 						first = d_false;
-					if (!first)
+					if ((same) && (!first))
 						f_convert_insert(&environment, &package);
 					readed_package++;
-					printf("\rreading package: % 7d [%c] [%s]", readed_package, (first)?'R':'W', 
-							(mode==d_package_raw_workmode)?"RAW":"COMPRESSED");
-					if (first)
+					printf("\rreading package: % 7d [%c] [%s]", readed_package, ((!same)||(first))?'R':'W', 
+							(current_mode==d_package_raw_workmode)?"RAW":"COMPRESSED");
+					if ((!same) || (first))
 						putchar('\n');
 					else
 						fflush(stdout);
@@ -123,10 +128,18 @@ int f_convert_read(const char *prefix, FILE *stream, int trb) {
 
 int main (int argc, char *argv[]) {
 	FILE *stream;
-	int trb;
-	if (argc == 3) {
+	int trb, index;
+	if (argc >= 3) {
 		trb = atoi(argv[2]);
 		if ((trb >= 0) && (trb < d_trb_device_boards)) {
+			for (index = 3; index < argc; ++index) {
+				if (f_string_strcmp(argv[index], "-r") == 0)
+					v_convert_mode = d_package_raw_workmode;
+				else if (f_string_strcmp(argv[index], "-n") == 0)
+					v_convert_mode = d_package_nrm_workmode;
+				else
+					fprintf(stderr, "unrecognized option: %s\n", argv[index]);
+			}
 			if ((stream = fopen(argv[1], "rb"))) {
 				f_convert_read(argv[1], stream, trb);
 				fclose(stream);
@@ -135,6 +148,6 @@ int main (int argc, char *argv[]) {
 		} else
 			fprintf(stderr, "%s TRB doesn't exits\n", argv[2]);
 	} else
-		fprintf(stderr, "usage: %s <file> <trb#>\n", argv[0]);
+		fprintf(stderr, "usage: %s <file> <trb#> {-r = only RAW | -n = only NRM}\n", argv[0]);
 	return 0;
 }

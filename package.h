@@ -34,6 +34,7 @@
 #define d_package_data_header_info_size 4	/* number of informations in the header */
 #define d_package_data_tail_size 4		/* total dimension of the tail		*/
 #define d_package_alignment_size 6
+#define d_package_dmg_workmode 0
 #define d_package_raw_workmode 3
 #define d_package_nrm_workmode 2
 #define d_package_raw_size (d_package_ladders*(2+(2*d_package_channels)))
