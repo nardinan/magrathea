@@ -51,7 +51,7 @@ void f_convert_destroy(struct s_convert_environment *supplied) {
 	}
 }
 
-int f_convert_insert(struct s_convert_environment *environment, struct s_package *package) {
+int p_convert_insert_raw(struct s_convert_environment *environment, struct s_package *package) {
 	int ladder, selected_ladder, channel, result = d_true;
 	for (ladder = 0; ladder < d_package_ladders; ++ladder)
 		if ((selected_ladder = package->data.values.raw.ladder[ladder]) < d_convert_ladders) {
@@ -59,6 +59,28 @@ int f_convert_insert(struct s_convert_environment *environment, struct s_package
 				tree_adc[selected_ladder][channel] = package->data.values.raw.values[ladder][channel];
 			environment->structure[selected_ladder]->Fill();
 		}
+	return result;
+}
+
+int p_convert_insert_nrm(struct s_convert_environment *environment, struct s_package *package) {
+	int ladder, channel, result = d_true;
+	for (ladder = 0; ladder < d_trb_device_ladders; ++ladder) {
+		for (channel = 0; channel < d_package_channels; ++channel)
+			tree_adc[ladder][channel] = package->data.values.nrm.ladders_data[ladder].values[channel];
+		environment->structure[ladder]->Fill();
+	}
+	return result;
+}
+
+int f_convert_insert(struct s_convert_environment *environment, struct s_package *package) {
+	int result = d_false;
+	switch (package->data.kind) {
+		case d_package_raw_workmode:
+			result = p_convert_insert_raw(environment, package);
+			break;
+		case d_package_nrm_workmode:
+			result = p_convert_insert_nrm(environment, package);
+	}
 	return result;
 }
 
@@ -76,16 +98,17 @@ int f_convert_read(const char *prefix, FILE *stream, int trb) {
 				bytes -= (backup-buffer);
 				memmove(buffer, backup, bytes);
 				if ((package.complete) && (package.trb == v_package_trbs[trb].code)) {
-					if ((package.data.values.raw.ladder[0] == 0) && (package.data.values.raw.ladder[1] == 12)) /* head */
+					if ((package.data.kind == d_package_nrm_workmode) || ((package.data.kind == d_package_raw_workmode) && 
+								(package.data.values.raw.ladder[0] == 0) && (package.data.values.raw.ladder[1] == 12)))
 						first = d_false;
 					if (!first)
 						f_convert_insert(&environment, &package);
 					readed_package++;
-					printf("\rreading package: % 7d (ladders: %02d && %02d) [%c]", readed_package, package.data.values.raw.ladder[0], 
-						package.data.values.raw.ladder[1], (first)?'R':'W');
+					printf("\rreading package: % 7d [%c]", readed_package, (first)?'R':'W');
 					if (first)
 						putchar('\n');
-					fflush(stdout);
+					else
+						fflush(stdout);
 				}
 			} else if (readed <= 0)
 				break;

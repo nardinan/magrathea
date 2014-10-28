@@ -38,6 +38,8 @@ typedef struct s_convert_environment {
 } s_convert_environment;
 extern struct s_convert_environment *f_convert_init(struct s_convert_environment *supplied, const char *prefix, int trb);
 extern void f_convert_destroy(struct s_convert_environment *supplied);
+extern int p_convert_insert_raw(struct s_convert_environment *environment, struct s_package *package);
+extern int p_convert_insert_nrm(struct s_convert_environment *environment, struct s_package *package);
 extern int f_convert_insert(struct s_convert_environment *environment, struct s_package *package);
 extern int f_convert_read(const char *prefix, FILE *stream, int trb);
 #endif
