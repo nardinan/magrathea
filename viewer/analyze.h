@@ -44,5 +44,6 @@ typedef struct s_analyze_environment {
 	struct s_analyze_data data[d_analyze_ladders];
 	struct s_calibrations_environment computed_calibrations;
 } s_analyze_environment;
+extern int v_analyze_adc_pedestal, v_analyze_adc_pedestal_cn;
 extern int f_analyze_calibration(struct s_analyze_environment *environment, unsigned short int ladder, unsigned short int *values);
 #endif

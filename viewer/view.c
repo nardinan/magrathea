@@ -215,6 +215,8 @@ void p_view_loop_read_process(struct s_interface *interface, struct s_package *p
 	if ((package->complete) && (package->trb == v_package_trbs[v_view_trb].code))
 		switch (package->data.kind) {
 			case d_package_raw_workmode:
+				v_analyze_adc_pedestal = d_true;
+				v_analyze_adc_pedestal_cn = d_true;
 				for (ladder = 0; ladder < d_package_ladders; ++ladder)
 					if ((package->data.values.raw.ladder[ladder] >= 0) && (package->data.values.raw.ladder[ladder] <
 								d_analyze_ladders)) {
@@ -226,9 +228,11 @@ void p_view_loop_read_process(struct s_interface *interface, struct s_package *p
 					}
 				break;
 			case d_package_nrm_workmode:
+				v_analyze_adc_pedestal = d_false;
+				v_analyze_adc_pedestal_cn = d_false;
 				for (ladder = 0; ladder < d_trb_device_ladders; ++ladder) {
 					environment.data.calibration[ladder].computed = d_true;
-					environment.data.calibration[ladder].steps = v_view_calibration_steps;
+					environment.data.calibration[ladder].package = environment.data.calibration[ladder].steps;
 					environment.data.counters[ladder].events++;
 					p_view_loop_analyze(interface, ladder, package->data.values.nrm.ladders_data[ladder].values);
 					v_view_label_refresh = d_true;

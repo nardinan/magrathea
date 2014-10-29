@@ -16,6 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "analyze.h"
+int v_analyze_adc_pedestal = d_true, v_analyze_adc_pedestal_cn = d_true;
 int f_analyze_calibration(struct s_analyze_environment *environment, unsigned short int ladder, unsigned short int *values) {
 	int index, channel, result = d_false;
 	float common_noise[d_package_vas];
@@ -40,11 +41,19 @@ int f_analyze_calibration(struct s_analyze_environment *environment, unsigned sh
 		result = d_true;
 	} else {
 		environment->counters[ladder].data_events++;
-		f_stk_math_adc_pedestal(environment->data[ladder].bucket, environment->computed_calibrations.ladder[ladder].pedestal,
-				environment->data[ladder].adc_pedestal);
-		f_stk_math_adc_pedestal_cn(environment->data[ladder].bucket, d_analyze_sigma_k,
-				environment->computed_calibrations.ladder[ladder].pedestal, environment->computed_calibrations.ladder[ladder].sigma,
-				environment->computed_calibrations.ladder[ladder].flags, environment->data[ladder].adc_pedestal_cn, common_noise);
+		if (v_analyze_adc_pedestal)
+			f_stk_math_adc_pedestal(environment->data[ladder].bucket, environment->computed_calibrations.ladder[ladder].pedestal,
+					environment->data[ladder].adc_pedestal);
+		else
+			memcpy(environment->data[ladder].adc_pedestal, environment->data[ladder].bucket, (sizeof(float)*d_package_channels));
+		if (v_analyze_adc_pedestal_cn)
+			f_stk_math_adc_pedestal_cn(environment->data[ladder].bucket, d_analyze_sigma_k,
+					environment->computed_calibrations.ladder[ladder].pedestal, environment->computed_calibrations.ladder[ladder].sigma,
+					environment->computed_calibrations.ladder[ladder].flags, environment->data[ladder].adc_pedestal_cn, common_noise);
+		else {
+			memcpy(environment->data[ladder].adc_pedestal_cn, environment->data[ladder].adc_pedestal, (sizeof(float)*d_package_channels));
+			memset(common_noise, 0, (sizeof(float)*d_package_vas));
+		}
 		f_clusters_init(&(environment->data[ladder].compressed_event));
 		f_clusters_search(&(environment->data[ladder].compressed_event), environment->data[ladder].adc_pedestal_cn,
 				environment->computed_calibrations.ladder[ladder].sigma, common_noise, environment->computed_calibrations.ladder[ladder].flags,
