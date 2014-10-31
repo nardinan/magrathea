@@ -28,7 +28,7 @@ int f_clusters_save(struct s_event_environment *environment, int event, int ladd
 	int cluster, result = d_true;
 	if ((stream = fopen(path, "a"))) {
 		for (cluster = 0; cluster < environment->clusters; ++cluster)
-			fprintf(stream, "%d %d %.02f\n", event, ladder, environment->values[cluster].center_of_gravity);
+			fprintf(stream, "%d\t%d\t%.02f\n", event, ladder, environment->values[cluster].center_of_gravity);
 		fclose(stream);
 	} else
 		result = d_false;
