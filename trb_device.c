@@ -169,7 +169,7 @@ int f_trb_device_status(unsigned char code, char **tokens, size_t elements, int 
 		p_trb_device_status_refresh(code);
 		if ((result = f_trb_device_description(code, tokens, elements, output))) {
 			if (viewer) {
-				snprintf(buffer, d_string_buffer_size, "%s 0x%02x -l", d_trb_device_status, code);
+				snprintf(buffer, d_string_buffer_size, "%s 0x%02x", d_trb_device_status, code);
 				if ((process = popen(buffer, "r")))
 					fclose(process);
 			}

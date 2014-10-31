@@ -1,3 +1,3 @@
 #!/bin/bash
-cd ../viewer && ./magrathea_view.bin "$@" &
+cd ../viewer && ./magrathea_view.bin "$@" -l &
 
