@@ -17,7 +17,7 @@
  */
 #include "analyze.h"
 int v_analyze_adc_pedestal = d_true, v_analyze_adc_pedestal_cn = d_true;
-int f_analyze_calibration(struct s_analyze_environment *environment, unsigned short int ladder, unsigned short int *values) {
+int f_analyze_data(struct s_analyze_environment *environment, unsigned short int ladder, unsigned short int *values) {
 	int index, channel, result = d_false;
 	float common_noise[d_package_vas];
 	for (index = 0; index < d_package_channels; ++index)

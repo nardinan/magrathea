@@ -23,6 +23,18 @@ void f_clusters_init(struct s_event_environment *environment) {
 	environment->clusters = 0;
 }
 
+int f_clusters_save(struct s_event_environment *environment, int event, int ladder, const char *path) {
+	FILE *stream;
+	int cluster, result = d_true;
+	if ((stream = fopen(path, "a"))) {
+		for (cluster = 0; cluster < environment->clusters; ++cluster)
+			fprintf(stream, "%d %d %.02f\n", event, ladder, environment->values[cluster].center_of_gravity);
+		fclose(stream);
+	} else
+		result = d_false;
+	return result;
+}
+
 void p_clusters_search_append(struct s_event_environment *environment, struct s_cluster *cluster) {
 	struct s_cluster *backup;
 	if ((backup = d_realloc(environment->values, (sizeof(struct s_cluster)*(environment->clusters+1))))) {
@@ -36,7 +48,7 @@ void f_clusters_search(struct s_event_environment *environment, float *signals, 
 		float neighbour_k) {
 	struct s_cluster cluster;
 	int current_strip, local_strip, seed_strip = d_false, entry_point = -1, outro_point = -1;
-	float current_common_noise, seed_threshold, neighbour_threshold;
+	float current_common_noise, seed_threshold, neighbour_threshold, signal_sum;
 	for (current_strip = 0; current_strip < d_package_channels; ++current_strip) {
 		current_common_noise = common_noise[(current_strip/d_package_channels_on_va)];
 		if ((seed_threshold = (sigma[current_strip]*seed_k)) <= 0)
@@ -53,8 +65,13 @@ void f_clusters_search(struct s_event_environment *environment, float *signals, 
 			if ((seed_strip) && (outro_point >= entry_point)) {
 				cluster.first_strip = entry_point;
 				cluster.strips = (outro_point-entry_point)+1;
-				for (local_strip = 0; local_strip < cluster.strips; ++local_strip)
+				cluster.center_of_gravity = 0;
+				for (local_strip = 0, signal_sum = 0; local_strip < cluster.strips; ++local_strip) {
 					cluster.values[local_strip] = signals[local_strip+entry_point];
+					signal_sum += signals[local_strip+entry_point];
+					cluster.center_of_gravity += (signals[local_strip+entry_point]*(cluster.first_strip+local_strip));
+				}
+				cluster.center_of_gravity /= signal_sum;
 				cluster.common_noise = current_common_noise;
 				p_clusters_search_append(environment, &cluster);
 			}
@@ -72,3 +89,4 @@ void f_clusters_search(struct s_event_environment *environment, float *signals, 
 	}
 
 }
+

@@ -31,7 +31,8 @@
 #define d_view_timeout_online 150
 typedef enum e_view_actions {
 	e_view_action_exports_calibrations = 0x01,
-	e_view_action_close_after_calibrations = 0x02
+	e_view_action_exports_clusters = 0x02,
+	e_view_action_close_after_calibrations = 0x04
 } e_view_actions;
 typedef struct s_view_environment {
 	FILE *stream;

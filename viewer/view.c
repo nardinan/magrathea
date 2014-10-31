@@ -87,8 +87,14 @@ void f_view_destroy(GtkWidget *widget, struct s_interface *interface) {
 }
 
 void p_view_loop_analyze(struct s_interface *interface, unsigned short int ladder, unsigned short int *values) {
-	int result = f_analyze_calibration(&(environment.data), ladder, values);
+	int result = f_analyze_data(&(environment.data), ladder, values);
+	char destination[PATH_MAX];
 	if (environment.data.calibrated >= d_analyze_ladders) {
+		if ((v_flags&e_view_action_exports_clusters) == e_view_action_exports_clusters) {
+			snprintf(destination, PATH_MAX, "%s_clusters_TRB%02d.csv", environment.filename, v_view_trb);
+			f_clusters_save(&(environment.data.data[ladder].compressed_event), environment.data.counters[ladder].data_events, ladder,
+					destination);
+		}
 		gtk_widget_set_sensitive(GTK_WIDGET(interface->buttons[e_interface_button_dump]), TRUE);
 		if (result)
 			if ((v_flags&e_view_action_exports_calibrations) == e_view_action_exports_calibrations) {
@@ -332,6 +338,8 @@ int main (int argc, char *argv[]) {
 							v_flags |= e_view_action_exports_calibrations;
 						else if (f_string_strcmp(argv[index], "-k") == 0)
 							v_flags |= e_view_action_close_after_calibrations;
+						else if (f_string_strcmp(argv[index], "-e") == 0)
+							v_flags |= e_view_action_exports_clusters;
 						else if ((f_string_strcmp(argv[index], "-c") == 0) && ((index+1) < argc)) {
 							if (f_calibrations(&(environment.data.computed_calibrations), argv[index+1])) {
 								environment.data.calibrated = d_analyze_ladders;
@@ -368,6 +376,7 @@ int main (int argc, char *argv[]) {
 		fprintf(stderr, "usage: %s <path> <trb#> <laddder#> <frequecy of refresh> {...}\n"
 				"\t{-l: skip to last position}\n"
 				"\t{-x: automatically export calibrations when ready}\n"
+				"\t{-e: automatically export clusters when ready}\n"
 				"\t{-k: exit after calibration}\n"
 				"\t{-c <folder>: load an external TRB calibration}\n"
 				"\t{-m <file>: file with bad channels}\n", argv[0]);

@@ -24,13 +24,14 @@
 #include "calibrations.h"
 typedef struct s_cluster {
 	unsigned short first_strip, strips;
-	float values[d_package_channels], common_noise;
+	float values[d_package_channels], common_noise, center_of_gravity;
 } s_cluster;
 typedef struct s_event_environment {
 	unsigned short clusters;
 	struct s_cluster *values;
 } s_event_environment;
 extern void f_clusters_init(struct s_event_environment *environment);
+extern int f_clusters_save(struct s_event_environment *environment, int event, int ladder, const char *path);
 extern void p_clusters_search_append(struct s_event_environment *environment, struct s_cluster *cluster);
 extern void f_clusters_search(struct s_event_environment *environment, float *signals, float *sigma, float *common_noise, unsigned short *flags, float seed_k,
 		float neighbour_k);
