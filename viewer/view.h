@@ -29,6 +29,7 @@
 #define d_view_window_title "Magrathea event viewer"
 #define d_view_timeout 100000
 #define d_view_timeout_online 150
+#define d_view_dampe_epoch 1356998400
 typedef enum e_view_actions {
 	e_view_action_exports_calibrations = 0x01,
 	e_view_action_exports_clusters = 0x02,
@@ -44,6 +45,8 @@ typedef struct s_view_environment {
 extern struct s_view_environment environment;
 extern int v_view_ladder, v_view_trb, v_view_calibration_steps, v_view_calibrated, v_view_skip_frames, v_view_pause, v_view_label_refresh, v_frames, v_flags;
 extern long long v_starting_time;
+extern time_t v_unix_timestamp;
+extern unsigned short int v_unix_mseconds;
 extern void f_view_action_dump(GtkWidget *widget, struct s_interface *supplied);
 extern void f_view_action_redo(GtkWidget *widget, struct s_interface *supplied);
 extern void f_view_action_last(GtkWidget *widget, struct s_interface *supplied);

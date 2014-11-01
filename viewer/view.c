@@ -20,6 +20,8 @@ struct s_view_environment environment;
 int v_view_ladder, v_view_trb, v_view_calibration_steps = d_view_calibration_steps, v_view_skip_frames = 1, v_view_pause = d_false,
     v_view_label_refresh = d_true, v_frames, v_flags = 0;
 long long v_starting_time;
+time_t v_unix_timestamp = d_view_dampe_epoch;
+unsigned short int v_unix_mseconds = 0;
 void f_view_action_dump(GtkWidget *widget, struct s_interface *interface) {
 	if (environment.data.calibrated >= d_analyze_ladders)
 		f_calibrations_export(&(environment.data.computed_calibrations), environment.filename, v_view_trb);
@@ -93,7 +95,7 @@ void p_view_loop_analyze(struct s_interface *interface, unsigned short int ladde
 		if ((v_flags&e_view_action_exports_clusters) == e_view_action_exports_clusters) {
 			snprintf(destination, PATH_MAX, "%s_clusters_TRB%02d.csv", environment.filename, v_view_trb);
 			f_clusters_save(&(environment.data.data[ladder].compressed_event), environment.data.counters[ladder].data_events, ladder,
-					destination);
+					destination, v_unix_timestamp, v_unix_mseconds);
 		}
 		gtk_widget_set_sensitive(GTK_WIDGET(interface->buttons[e_interface_button_dump]), TRUE);
 		if (result)
@@ -218,32 +220,37 @@ void p_view_loop_read_raw(int delay) {
 
 void p_view_loop_read_process(struct s_interface *interface, struct s_package *package) {
 	int ladder;
-	if ((package->complete) && (package->trb == v_package_trbs[v_view_trb].code))
-		switch (package->data.kind) {
-			case d_package_raw_workmode:
-				v_analyze_adc_pedestal = d_true;
-				v_analyze_adc_pedestal_cn = d_true;
-				for (ladder = 0; ladder < d_package_ladders; ++ladder)
-					if ((package->data.values.raw.ladder[ladder] >= 0) && (package->data.values.raw.ladder[ladder] <
-								d_analyze_ladders)) {
-						environment.data.counters[package->data.values.raw.ladder[ladder]].events++;
-						p_view_loop_analyze(interface, package->data.values.raw.ladder[ladder],
-								package->data.values.raw.values[ladder]);
-						if (package->data.values.raw.ladder[ladder] == v_view_ladder)
-							v_view_label_refresh = d_true;
+	if (package->complete) {
+		if (package->data.kind == d_package_tmp_workmode) {
+			v_unix_timestamp = d_view_dampe_epoch+package->data.values.tmp.seconds;
+			v_unix_mseconds = package->data.values.tmp.mseconds;
+		} else if (package->trb == v_package_trbs[v_view_trb].code)
+			switch (package->data.kind) {
+				case d_package_raw_workmode:
+					v_analyze_adc_pedestal = d_true;
+					v_analyze_adc_pedestal_cn = d_true;
+					for (ladder = 0; ladder < d_package_ladders; ++ladder)
+						if ((package->data.values.raw.ladder[ladder] >= 0) && (package->data.values.raw.ladder[ladder] <
+									d_analyze_ladders)) {
+							environment.data.counters[package->data.values.raw.ladder[ladder]].events++;
+							p_view_loop_analyze(interface, package->data.values.raw.ladder[ladder],
+									package->data.values.raw.values[ladder]);
+							if (package->data.values.raw.ladder[ladder] == v_view_ladder)
+								v_view_label_refresh = d_true;
+						}
+					break;
+				case d_package_nrm_workmode:
+					v_analyze_adc_pedestal = d_false;
+					v_analyze_adc_pedestal_cn = d_false;
+					for (ladder = 0; ladder < d_trb_device_ladders; ++ladder) {
+						environment.data.calibration[ladder].computed = d_true;
+						environment.data.calibration[ladder].package = environment.data.calibration[ladder].steps;
+						environment.data.counters[ladder].events++;
+						p_view_loop_analyze(interface, ladder, package->data.values.nrm.ladders_data[ladder].values);
+						v_view_label_refresh = d_true;
 					}
-				break;
-			case d_package_nrm_workmode:
-				v_analyze_adc_pedestal = d_false;
-				v_analyze_adc_pedestal_cn = d_false;
-				for (ladder = 0; ladder < d_trb_device_ladders; ++ladder) {
-					environment.data.calibration[ladder].computed = d_true;
-					environment.data.calibration[ladder].package = environment.data.calibration[ladder].steps;
-					environment.data.counters[ladder].events++;
-					p_view_loop_analyze(interface, ladder, package->data.values.nrm.ladders_data[ladder].values);
-					v_view_label_refresh = d_true;
-				}
-		}
+			}
+	}
 }
 
 int p_view_loop_read(struct s_interface *interface, int delay) {
