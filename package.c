@@ -147,11 +147,38 @@ unsigned char *p_package_analyze_header(struct s_package *package, unsigned char
 	return result;
 }
 
+unsigned char *p_package_analyze_timestamp(struct s_package *package, unsigned char *buffer, size_t size) {
+	static unsigned char header_frame[] = {0xE2, 0x25, 0x08, 0x13};
+	unsigned char *pointer = buffer, *result = NULL;
+	int index;
+	if (size >= d_package_timestamp_size) {
+		for (index = 0; index < d_package_timestamp_header_const_size; ++index, ++pointer)
+			if (*pointer != header_frame[index])
+				break;
+		if (index >= d_package_timestamp_header_const_size) {
+			package->data.kind = d_package_tmp_workmode;
+			package->data.trigger_counter = ((unsigned short int)pointer[1])|((unsigned short int)pointer[0])<<8;
+			pointer += d_package_timestamp_tail_const_size;
+			package->data.values.tmp.seconds = ((unsigned long long)pointer[5])|(((unsigned long long)pointer[4])<<8)|
+				(((unsigned long long)pointer[3])<<16)|(((unsigned long long)pointer[2])<<24)|
+				(((unsigned long long)pointer[1])<<32)|(((unsigned long long)pointer[0])<<40);
+			pointer += 6;
+			package->data.values.tmp.mseconds = ((unsigned short int)pointer[1])|((unsigned short int)pointer[0])<<8;
+			result = (pointer+2);
+		} else
+			package->damaged = d_true;
+	} else
+		package->damaged = d_true;
+	return result;
+}
+
 unsigned char *p_package_analyze(struct s_package *package, unsigned char *buffer, size_t size) {
 	unsigned char *result = NULL;
 	package->complete = d_false;
-	if ((result = p_package_analyze_header(package, buffer, size)))
+	if (((result = p_package_analyze_header(package, buffer, size))) || ((result = p_package_analyze_timestamp(package, buffer, size)))) {
+		package->damaged = d_false;
 		package->complete = d_true;
+	}
 	return result;
 }
 

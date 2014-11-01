@@ -25,6 +25,9 @@
 #define d_package_channels_on_va 64
 #define d_package_vas 6
 #define d_package_trbs 8
+#define d_package_timestamp_header_const_size 4 /* number of constants in the hader	*/
+#define d_package_timestamp_tail_const_size 4	/* number of constants in the tail	*/
+#define d_package_timestamp_size 16		/* total dimension of the package	*/
 #define d_package_frame_header_size 8	 	/* total dimension of the header 	*/
 #define d_package_frame_header_const_size 2 	/* number of constants in the header 	*/
 #define d_package_frame_header_info_size 4	/* number of informations in the header */
@@ -37,6 +40,7 @@
 #define d_package_dmg_workmode 0
 #define d_package_raw_workmode 3
 #define d_package_nrm_workmode 2
+#define d_package_tmp_workmode 8
 #define d_package_raw_size (d_package_ladders*(2+(2*d_package_channels)))
 #define d_package_nrm_ladder 0xcc
 #define d_package_nrm_cluster 0xfc
@@ -63,10 +67,15 @@ typedef struct s_package_nrm {
 	unsigned short ladders;
 	struct s_package_nrm_ladder ladders_data[d_trb_device_ladders];
 } s_package_nrm;
+typedef struct s_package_tmp {
+	unsigned long long seconds;
+	unsigned short mseconds;
+} s_package_tmp;
 typedef union u_package_data_values {
 	struct s_package_raw raw;
 	struct s_package_dld dld;
 	struct s_package_nrm nrm;
+	struct s_package_tmp tmp;
 } u_package_data_values;
 typedef struct s_package_data {
 	unsigned char kind, trb;
@@ -84,6 +93,7 @@ extern unsigned char *p_package_analyze_nrm(struct s_package *package, unsigned 
 extern unsigned char *p_package_analyze_raw(struct s_package *package, unsigned char *buffer, size_t size);
 extern unsigned char *p_package_analyze_header_data(struct s_package *package, unsigned char *buffer, size_t size);
 extern unsigned char *p_package_analyze_header(struct s_package *package, unsigned char *buffer, size_t size);
+extern unsigned char *p_package_analyze_timestamp(struct s_package *package, unsigned char *buffer, size_t size);
 extern unsigned char *p_package_analyze(struct s_package *package, unsigned char *buffer, size_t size);
 extern unsigned char *f_package_analyze(struct s_package *package, unsigned char *buffer, size_t size);
 #endif
