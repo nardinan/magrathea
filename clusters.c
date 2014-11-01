@@ -23,16 +23,11 @@ void f_clusters_init(struct s_event_environment *environment) {
 	environment->clusters = 0;
 }
 
-int f_clusters_save(struct s_event_environment *environment, int event, int ladder, const char *path, time_t timestamp_seconds, short timestamp_mseconds) {
-	FILE *stream;
+int f_clusters_save(struct s_event_environment *environment, int event, int ladder, time_t timestamp_seconds, short timestamp_mseconds, FILE *stream) {
 	int cluster, result = d_true;
-	if ((stream = fopen(path, "a"))) {
-		for (cluster = 0; cluster < environment->clusters; ++cluster)
-			fprintf(stream, "%ld\t%d\t%d\t%d\t%.02f\n", timestamp_seconds, timestamp_mseconds, event, ladder,
-					environment->values[cluster].center_of_gravity);
-		fclose(stream);
-	} else
-		result = d_false;
+	for (cluster = 0; cluster < environment->clusters; ++cluster)
+		fprintf(stream, "%ld\t%d\t%d\t%d\t%.02f\n", timestamp_seconds, timestamp_mseconds, event, ladder,
+				environment->values[cluster].center_of_gravity);
 	return result;
 }
 

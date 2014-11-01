@@ -36,7 +36,7 @@ typedef enum e_view_actions {
 	e_view_action_close_after_calibrations = 0x04
 } e_view_actions;
 typedef struct s_view_environment {
-	FILE *stream;
+	FILE *stream, *clusters_stream;
 	unsigned char buffer[d_package_buffer_size];
 	char filename[PATH_MAX];
 	size_t bytes;

@@ -85,18 +85,17 @@ int f_view_initialize(struct s_interface *supplied, const char *builder_path) {
 void f_view_destroy(GtkWidget *widget, struct s_interface *interface) {
 	if (environment.stream)
 		fclose(environment.stream);
+	if (environment.clusters_stream)
+		fclose(environment.clusters_stream);
 	exit(0);
 }
 
 void p_view_loop_analyze(struct s_interface *interface, unsigned short int ladder, unsigned short int *values) {
 	int result = f_analyze_data(&(environment.data), ladder, values);
-	char destination[PATH_MAX];
 	if (environment.data.calibrated >= d_analyze_ladders) {
-		if ((v_flags&e_view_action_exports_clusters) == e_view_action_exports_clusters) {
-			snprintf(destination, PATH_MAX, "%s_clusters_TRB%02d.csv", environment.filename, v_view_trb);
+		if ((v_flags&e_view_action_exports_clusters) == e_view_action_exports_clusters)
 			f_clusters_save(&(environment.data.data[ladder].compressed_event), environment.data.counters[ladder].data_events, ladder,
-					destination, v_unix_timestamp, v_unix_mseconds);
-		}
+					v_unix_timestamp, v_unix_mseconds, environment.clusters_stream);
 		gtk_widget_set_sensitive(GTK_WIDGET(interface->buttons[e_interface_button_dump]), TRUE);
 		if (result)
 			if ((v_flags&e_view_action_exports_calibrations) == e_view_action_exports_calibrations) {
@@ -323,7 +322,7 @@ int f_view_load_channel(const char *filename) {
 }
 
 int main (int argc, char *argv[]) {
-	char buffer[d_string_buffer_size];
+	char buffer[d_string_buffer_size], destination[d_string_buffer_size];
 	struct s_interface *main_interface = (struct s_interface *) malloc(sizeof(struct s_interface));
 	int index, ladder;
 	f_memory_init();
@@ -345,9 +344,13 @@ int main (int argc, char *argv[]) {
 							v_flags |= e_view_action_exports_calibrations;
 						else if (f_string_strcmp(argv[index], "-k") == 0)
 							v_flags |= e_view_action_close_after_calibrations;
-						else if (f_string_strcmp(argv[index], "-e") == 0)
+						else if (f_string_strcmp(argv[index], "-e") == 0) {
 							v_flags |= e_view_action_exports_clusters;
-						else if ((f_string_strcmp(argv[index], "-c") == 0) && ((index+1) < argc)) {
+							snprintf(destination, d_string_buffer_size, "%s_clusters_TRB%02d.csv", environment.filename,
+									v_view_trb);
+							if (!(environment.clusters_stream = fopen(destination, "w")))
+								fprintf(stderr, "unable to open file %s\n", destination);
+						} else if ((f_string_strcmp(argv[index], "-c") == 0) && ((index+1) < argc)) {
 							if (f_calibrations(&(environment.data.computed_calibrations), argv[index+1])) {
 								environment.data.calibrated = d_analyze_ladders;
 								for (ladder = 0; ladder < d_analyze_ladders; ++ladder) {

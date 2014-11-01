@@ -31,8 +31,7 @@ typedef struct s_event_environment {
 	struct s_cluster *values;
 } s_event_environment;
 extern void f_clusters_init(struct s_event_environment *environment);
-extern int f_clusters_save(struct s_event_environment *environment, int event, int ladder, const char *path, time_t timestamp_seconds,
-		short timestamp_mseconds);
+extern int f_clusters_save(struct s_event_environment *environment, int event, int ladder, time_t timestamp_seconds, short timestamp_mseconds, FILE *stream);
 extern void p_clusters_search_append(struct s_event_environment *environment, struct s_cluster *cluster);
 extern void f_clusters_search(struct s_event_environment *environment, float *signals, float *sigma, float *common_noise, unsigned short *flags, float seed_k,
 		float neighbour_k);
