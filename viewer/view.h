@@ -29,7 +29,7 @@
 #define d_view_window_title "Magrathea event viewer"
 #define d_view_timeout 100000
 #define d_view_timeout_online 150
-#define d_view_dampe_epoch 1356998400
+#define d_view_dampe_timestamp 1356998400 /* GTM */
 typedef enum e_view_actions {
 	e_view_action_exports_calibrations = 0x01,
 	e_view_action_exports_clusters = 0x02,
