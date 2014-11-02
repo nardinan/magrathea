@@ -22,8 +22,10 @@
 #include "../stk_math.h"
 #define d_analyze_calibration_steps 256
 #define d_analyze_ladders 24
-#define d_analyze_occupancy_k 5.0
-#define d_analyze_sigma_k 10.0
+#define d_analyze_occupancy_k 5.0f
+#define d_analyze_sigma_k 10.0f
+#define d_analyze_clusters_max 5.0f
+#define d_analyze_clusters_min 1.8f
 typedef struct s_analyze_data {
 	struct s_event_environment compressed_event;
 	float bucket[d_package_channels], adc_pedestal[d_package_channels], adc_pedestal_cn[d_package_channels], occupancy[d_package_channels];
@@ -36,9 +38,11 @@ typedef struct s_analyze_calibration {
 } s_analyze_calibration;
 typedef struct s_analyze_counters {
 	size_t events, data_events;
+	unsigned short trigger_counter;
 } s_analyze_counters;
 typedef struct s_analyze_environment {
 	size_t calibrated;
+	time_t seconds, mseconds;
 	struct s_analyze_counters counters[d_analyze_ladders];
 	struct s_analyze_calibration calibration[d_analyze_ladders];
 	struct s_analyze_data data[d_analyze_ladders];

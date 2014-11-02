@@ -57,7 +57,7 @@ int f_analyze_data(struct s_analyze_environment *environment, unsigned short int
 		f_clusters_init(&(environment->data[ladder].compressed_event));
 		f_clusters_search(&(environment->data[ladder].compressed_event), environment->data[ladder].adc_pedestal_cn,
 				environment->computed_calibrations.ladder[ladder].sigma, common_noise, environment->computed_calibrations.ladder[ladder].flags,
-				5.0f, 1.8f);
+				d_analyze_clusters_max, d_analyze_clusters_min);
 		for (channel = 0; channel < d_package_channels; ++channel)
 			if (environment->computed_calibrations.ladder[ladder].flags[channel] == 0) /* no bad channel */
 				if (environment->data[ladder].adc_pedestal_cn[channel] >

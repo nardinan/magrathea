@@ -103,8 +103,7 @@ unsigned char *p_package_analyze_header_data(struct s_package *package, unsigned
 					if ((backup) && ((size-(backup-buffer)) >= d_package_data_tail_size)) {
 						pointer = backup;
 						package->data.trigger_kind = ((unsigned short int)pointer[0])>>5;
-						package->data.trigger_counter = ((unsigned short int)pointer[1])|
-							((unsigned short int)(pointer[0]&0x1f))<<8;
+						package->data.trigger_counter = ((unsigned short int)pointer[1])|((unsigned short int)(pointer[0]&0xf))<<8;
 						pointer += 2;
 						package->data.sumcheck = ((unsigned short int)pointer[1])|((unsigned short int)pointer[0])<<8;
 						result = (pointer+2);
