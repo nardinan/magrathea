@@ -30,10 +30,13 @@
 #define d_view_timeout 100000
 #define d_view_timeout_online 150
 #define d_view_dampe_epoch 1356998400 /* GTM */
+#define d_view_clusters_title "# timestamp seconds, mseconds, dampe_event_ID, viewer_event_ID, ladder, CoG\n"
 typedef enum e_view_actions {
-	e_view_action_exports_calibrations = 0x01,
-	e_view_action_exports_clusters = 0x02,
-	e_view_action_close_after_calibrations = 0x04
+	e_view_action_exports_calibrations = 		0x01,
+	e_view_action_exports_clusters = 		0x02,
+	e_view_action_close_after_calibrations = 	0x04,
+	e_view_action_filter_raw = 			0x08,
+	e_view_action_filter_compressed = 		0x10
 } e_view_actions;
 typedef struct s_view_environment {
 	FILE *stream, *clusters_stream;

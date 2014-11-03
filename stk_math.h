@@ -28,6 +28,7 @@
 #define d_stk_math_sigma_raw_min 1.0
 #define d_stk_math_sigma_raw_max 15.0
 typedef enum e_stk_math_flags {
+	e_stk_math_flag_ok =			0x00,
 	e_stk_math_flag_bad = 			0x01,
 	e_stk_math_flag_bad_sigma = 		0x02,
 	e_stk_math_flag_bad_sigma_raw_range = 	0x04,

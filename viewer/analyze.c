@@ -51,7 +51,11 @@ int f_analyze_data(struct s_analyze_environment *environment, unsigned short int
 					environment->computed_calibrations.ladder[ladder].pedestal, environment->computed_calibrations.ladder[ladder].sigma,
 					environment->computed_calibrations.ladder[ladder].flags, environment->data[ladder].adc_pedestal_cn, common_noise);
 		else {
-			memcpy(environment->data[ladder].adc_pedestal_cn, environment->data[ladder].adc_pedestal, (sizeof(float)*d_package_channels));
+			for (channel = 0; channel < d_package_channels; ++channel)
+				if (environment->computed_calibrations.ladder[ladder].flags[channel] == e_stk_math_flag_ok)
+					environment->data[ladder].adc_pedestal_cn[channel] = environment->data[ladder].adc_pedestal[channel];
+				else
+					environment->data[ladder].adc_pedestal_cn[channel] = 0;
 			memset(common_noise, 0, (sizeof(float)*d_package_vas));
 		}
 		f_clusters_init(&(environment->data[ladder].compressed_event));
@@ -59,7 +63,7 @@ int f_analyze_data(struct s_analyze_environment *environment, unsigned short int
 				environment->computed_calibrations.ladder[ladder].sigma, common_noise, environment->computed_calibrations.ladder[ladder].flags,
 				d_analyze_clusters_max, d_analyze_clusters_min);
 		for (channel = 0; channel < d_package_channels; ++channel)
-			if (environment->computed_calibrations.ladder[ladder].flags[channel] == 0) /* no bad channel */
+			if (environment->computed_calibrations.ladder[ladder].flags[channel] == e_stk_math_flag_ok) /* no bad channel */
 				if (environment->data[ladder].adc_pedestal_cn[channel] >
 						(d_analyze_occupancy_k*environment->computed_calibrations.ladder[ladder].sigma[channel]))
 					environment->data[ladder].occupancy[channel]++;

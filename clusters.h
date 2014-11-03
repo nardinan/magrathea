@@ -22,6 +22,7 @@
 #include <errno.h>
 #include <sys/stat.h>
 #include "calibrations.h"
+#include "stk_math.h"
 typedef struct s_cluster {
 	unsigned short first_strip, strips;
 	float values[d_package_channels], common_noise, center_of_gravity;

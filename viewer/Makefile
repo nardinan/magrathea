@@ -12,13 +12,13 @@ all: $(objects)
 view.o: view.c view.h analyze.h interface.h
 	$(cc) $(cflags) view.c
 
-analyze.o: analyze.c analyze.h ../calibrations.h ../stk_math.h
+analyze.o: analyze.c analyze.h ../calibrations.h
 	$(cc) $(cflags) analyze.c
 
 calibrations.o: ../calibrations.c ../calibrations.h ../package.h
 	$(cc) $(cflags) ../calibrations.c
 
-clusters.o: ../clusters.c ../clusters.h ../calibrations.h
+clusters.o: ../clusters.c ../clusters.h ../calibrations.h ../stk_math.h
 	$(cc) $(cflags) ../clusters.c
 
 interface.o: interface.c interface.h ../components/chart.h

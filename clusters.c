@@ -55,7 +55,7 @@ void f_clusters_search(struct s_event_environment *environment, float *signals, 
 			seed_threshold = 1.0;
 		if ((neighbour_threshold = (sigma[current_strip]*neighbour_k)) <= 0)
 			neighbour_threshold = 1.0;
-		if ((signals[current_strip] >= neighbour_threshold) && (flags[current_strip] == 0)) {
+		if ((signals[current_strip] >= neighbour_threshold) && (flags[current_strip] == e_stk_math_flag_ok)) {
 			if (signals[current_strip] >= seed_threshold)
 				seed_strip = d_true;
 			if (entry_point < 0)

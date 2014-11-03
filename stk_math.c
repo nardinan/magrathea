@@ -45,13 +45,10 @@ float *f_stk_math_sigma_raw(float values[][d_package_channels], size_t size, flo
 		total_square = (total_square/(float)size);;
 		result[channel] = sqrt(fabs(total_square-(total*total)));
 	}
-	if (supplied_flags) {
+	if (supplied_flags)
 		for (channel = 0; channel < d_package_channels; ++channel)
 			if ((result[channel] > d_stk_math_sigma_raw_max) || (result[channel] < d_stk_math_sigma_raw_min))
-				supplied_flags[channel] |= (e_stk_math_flag_bad_sigma_raw_range);
-			else
-				supplied_flags[channel] &= (~e_stk_math_flag_bad_sigma_raw_range);
-	}
+				supplied_flags[channel] |= e_stk_math_flag_bad_sigma_raw_range;
 	return result;
 }
 
@@ -108,13 +105,9 @@ float *f_stk_math_sigma(float values[][d_package_channels], size_t size, float s
 		mean /= (float)d_package_channels;
 		for (channel = 0; channel < d_package_channels; ++channel) {
 			if (result[channel] > (d_stk_math_sigma_k_max*mean))
-				supplied_flags[channel] |= (e_stk_math_flag_bad_sigma);
-			else
-				supplied_flags[channel] &= (~e_stk_math_flag_bad_sigma);
+				supplied_flags[channel] |= e_stk_math_flag_bad_sigma;
 			if ((result[channel] > d_stk_math_sigma_max) || (result[channel] < d_stk_math_sigma_min))
-				supplied_flags[channel] |= (e_stk_math_flag_bad_sigma_range);
-			else
-				supplied_flags[channel] &= (~e_stk_math_flag_bad_sigma_range);
+				supplied_flags[channel] |= e_stk_math_flag_bad_sigma_range;
 		}
 	}
 	return result;
@@ -140,7 +133,7 @@ float *f_stk_math_adc_pedestal_cn(float values[d_package_channels], float sigma_
 			d_die(d_error_malloc);
 	f_stk_math_cn(values, sigma_multiplicator, pedestal, sigma, common_noise);
 	for (index = 0; index < d_package_channels; ++index)
-		if ((flags) && ((flags[index]&e_stk_math_flag_bad) == e_stk_math_flag_bad))
+		if ((flags) && (flags[index] != e_stk_math_flag_ok))
 			supplied[index] = 0;
 		else
 			supplied[index] = values[index]-pedestal[index]-common_noise[(index/d_package_channels_on_va)];

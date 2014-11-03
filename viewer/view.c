@@ -17,7 +17,7 @@
  */
 #include "view.h"
 struct s_view_environment environment;
-int v_view_ladder, v_view_trb, v_view_calibration_steps = d_view_calibration_steps, v_view_skip_frames = 1, v_view_pause = d_false,
+int v_view_ladder, v_view_trb, v_view_calibration_steps = d_view_calibration_steps, v_view_skip_frames = 0, v_view_pause = d_false,
     v_view_label_refresh = d_true, v_frames, v_flags = 0;
 long long v_starting_time;
 void f_view_action_dump(GtkWidget *widget, struct s_interface *interface) {
@@ -120,7 +120,7 @@ void p_view_loop_append_signals(struct s_interface *interface, unsigned short in
 					f_chart_append_signal(&(interface->logic_charts[e_interface_chart_sigma_raw]), 1, index,
 							environment.data.computed_calibrations.ladder[v_view_ladder].sigma_raw[index]);
 					f_chart_append_signal(&(interface->logic_charts[e_interface_chart_sigma_raw]), 0, index,
-							-(((float)environment.data.computed_calibrations.ladder[v_view_ladder].flags[index])/10.0));
+							-((float)environment.data.computed_calibrations.ladder[v_view_ladder].flags[index]));
 					f_chart_append_signal(&(interface->logic_charts[e_interface_chart_sigma]), 0, index,
 							environment.data.computed_calibrations.ladder[v_view_ladder].sigma[index]);
 				}
@@ -226,40 +226,44 @@ void p_view_loop_read_process(struct s_interface *interface, struct s_package *p
 		} else if (package->trb == v_package_trbs[v_view_trb].code)
 			switch (package->data.kind) {
 				case d_package_raw_workmode:
-					v_analyze_adc_pedestal = d_true;
-					v_analyze_adc_pedestal_cn = d_true;
-					for (ladder = 0; ladder < d_package_ladders; ++ladder)
-						if ((package->data.values.raw.ladder[ladder] >= 0) && (package->data.values.raw.ladder[ladder] <
-									d_analyze_ladders)) {
-							environment.data.counters[package->data.values.raw.ladder[ladder]].events++;
-							environment.data.counters[package->data.values.raw.ladder[ladder]].trigger_counter =
-								package->data.trigger_counter;
-							p_view_loop_analyze(interface, package->data.values.raw.ladder[ladder],
-									package->data.values.raw.values[ladder]);
-							if (package->data.values.raw.ladder[ladder] == v_view_ladder)
-								v_view_label_refresh = d_true;
-						}
+					if ((v_flags&e_view_action_filter_raw) == e_view_action_filter_raw) {
+						v_analyze_adc_pedestal = d_true;
+						v_analyze_adc_pedestal_cn = d_true;
+						for (ladder = 0; ladder < d_package_ladders; ++ladder)
+							if ((package->data.values.raw.ladder[ladder] >= 0) && (package->data.values.raw.ladder[ladder] <
+										d_analyze_ladders)) {
+								environment.data.counters[package->data.values.raw.ladder[ladder]].events++;
+								environment.data.counters[package->data.values.raw.ladder[ladder]].trigger_counter =
+									package->data.trigger_counter;
+								p_view_loop_analyze(interface, package->data.values.raw.ladder[ladder],
+										package->data.values.raw.values[ladder]);
+								if (package->data.values.raw.ladder[ladder] == v_view_ladder)
+									v_view_label_refresh = d_true;
+							}
+					}
 					break;
 				case d_package_nrm_workmode:
-					v_analyze_adc_pedestal = d_false;
-					v_analyze_adc_pedestal_cn = d_false;
-					for (ladder = 0, clusters = 0; ladder < d_trb_device_ladders; ++ladder) {
-						environment.data.calibration[ladder].computed = d_true;
-						environment.data.calibration[ladder].package = environment.data.calibration[ladder].steps;
-						environment.data.counters[ladder].events++;
-						environment.data.counters[ladder].trigger_counter = package->data.trigger_counter;
-						p_view_loop_analyze(interface, ladder, package->data.values.nrm.ladders_data[ladder].values);
-						if (!environment.data.data[ladder].compressed_event.clusters) {
-							last_counter = environment.data.counters[ladder].data_events;
-							last_trigger = environment.data.counters[ladder].trigger_counter;
-						} else
-							clusters += environment.data.data[ladder].compressed_event.clusters;
+					if ((v_flags&e_view_action_filter_compressed) == e_view_action_filter_compressed) {
+						v_analyze_adc_pedestal = d_false;
+						v_analyze_adc_pedestal_cn = d_false;
+						for (ladder = 0, clusters = 0; ladder < d_trb_device_ladders; ++ladder) {
+							environment.data.calibration[ladder].computed = d_true;
+							environment.data.calibration[ladder].package = environment.data.calibration[ladder].steps;
+							environment.data.counters[ladder].events++;
+							environment.data.counters[ladder].trigger_counter = package->data.trigger_counter;
+							p_view_loop_analyze(interface, ladder, package->data.values.nrm.ladders_data[ladder].values);
+							if (!environment.data.data[ladder].compressed_event.clusters) {
+								last_counter = environment.data.counters[ladder].data_events;
+								last_trigger = environment.data.counters[ladder].trigger_counter;
+							} else
+								clusters += environment.data.data[ladder].compressed_event.clusters;
+						}
+						if (!clusters)
+							if ((v_flags&e_view_action_exports_clusters) == e_view_action_exports_clusters)
+								f_clusters_save(NULL, (last_counter-1), last_trigger, -1, environment.data.seconds,
+										environment.data.mseconds, environment.clusters_stream);
+						v_view_label_refresh = d_true;
 					}
-					if (!clusters)
-						if ((v_flags&e_view_action_exports_clusters) == e_view_action_exports_clusters)
-							f_clusters_save(NULL, (last_counter-1), last_trigger, -1, environment.data.seconds,
-									environment.data.mseconds, environment.clusters_stream);
-					v_view_label_refresh = d_true;
 			}
 	}
 }
@@ -341,6 +345,7 @@ int main (int argc, char *argv[]) {
 	if (argc >= 5) {
 		v_view_ladder = atoi(argv[3]);
 		v_view_trb = atoi(argv[2]);
+		v_flags = (e_view_action_filter_raw|e_view_action_filter_compressed);
 		if ((v_view_skip_frames = atoi(argv[4])) < 0)
 			v_view_skip_frames = 0;
 		if ((v_view_ladder >= 0) && (v_view_ladder < d_analyze_ladders)) {
@@ -356,11 +361,17 @@ int main (int argc, char *argv[]) {
 							v_flags |= e_view_action_exports_calibrations;
 						else if (f_string_strcmp(argv[index], "-k") == 0)
 							v_flags |= e_view_action_close_after_calibrations;
+						else if (f_string_strcmp(argv[index], "-r") == 0)
+							v_flags &= ~e_view_action_filter_compressed;
+						else if (f_string_strcmp(argv[index], "-n") == 0)
+							v_flags &= ~e_view_action_filter_raw;
 						else if (f_string_strcmp(argv[index], "-e") == 0) {
 							v_flags |= e_view_action_exports_clusters;
 							snprintf(destination, d_string_buffer_size, "%s_clusters_TRB%02d.csv", environment.filename,
 									v_view_trb);
-							if (!(environment.clusters_stream = fopen(destination, "w")))
+							if ((environment.clusters_stream = fopen(destination, "w")))
+								fprintf(environment.clusters_stream, d_view_clusters_title);
+							else
 								fprintf(stderr, "unable to open file %s\n", destination);
 						} else if ((f_string_strcmp(argv[index], "-c") == 0) && ((index+1) < argc)) {
 							if (f_calibrations(&(environment.data.computed_calibrations), argv[index+1])) {
@@ -401,7 +412,9 @@ int main (int argc, char *argv[]) {
 				"\t{-e: automatically export clusters when ready}\n"
 				"\t{-k: exit after calibration}\n"
 				"\t{-c <folder>: load an external TRB calibration}\n"
-				"\t{-m <file>: file with bad channels}\n", argv[0]);
+				"\t{-m <file>: file with bad channels}\n"
+				"\t{-r: only raw data}\n"
+				"\t{-n: only compressed data}\n", argv[0]);
 	f_memory_destroy();
 	return 0;
 }
