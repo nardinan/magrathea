@@ -36,10 +36,10 @@ unsigned char *p_package_analyze_nrm(struct s_package *package, unsigned char *b
 				ladder = pointer[1];
 			else if ((pointer[0]&d_package_nrm_cluster) == d_package_nrm_cluster)
 				entry_point = ((unsigned short int)pointer[1])|((unsigned short int)(pointer[0]&0x03))<<8;
-			else if (((ladder >= 0) && (ladder < d_trb_device_ladders)) && ((entry_point >= 0) && (entry_point < d_package_channels))) {
+			else if (((ladder >= 0) && (ladder < d_trb_device_ladders)) && ((entry_point >= 0) && (entry_point < d_package_channels)))
 				package->data.values.nrm.ladders_data[ladder].values[entry_point++] =
 					((unsigned short int)pointer[1])|((unsigned short int)pointer[0])<<8;
-			} else
+			else
 				break;
 			pointer += 2;
 			size -= 2;
