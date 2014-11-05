@@ -1,7 +1,7 @@
 show_negative_x=1
 show_positive_x=1
 show_grid_x=1
-minimum_distance_x=30.0
+minimum_distance_x=20.0
 offset_x=4.0
 size_x=1.0
 color_R_x=0.0
