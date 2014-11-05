@@ -1,12 +1,12 @@
 segments_x=20.0
 segments_y=10.0
 range_bottom_x=0.0
-range_top_x=500.0
+range_top_x=2500.0
 range_bottom_y=0.0
-range_top_y=2000.0
+range_top_y=100.0
 color_R_0_z=0.0
 color_G_0_z=0.8
 color_B_0_z=0.0
-bins_0_z=1000
+bins_0_z=2500
 show_grid_x=0
 

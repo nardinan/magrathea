@@ -98,6 +98,7 @@ typedef enum e_interface_charts {
 	e_interface_chart_occupancy_22,
 	e_interface_chart_occupancy_23,
 	e_interface_chart_clusters_distribution,
+	e_interface_chart_packets_size_distribution,
 	e_interface_chart_NULL
 } e_interface_charts;
 typedef enum e_interface_labels {

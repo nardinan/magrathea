@@ -95,7 +95,8 @@ const char *v_interface_charts[] = {
 	"v_interface_occupancy_21",
 	"v_interface_occupancy_22",
 	"v_interface_occupancy_23",
-	"v_interface_chart_clusters_distribution"
+	"v_interface_chart_clusters_distribution",
+	"v_interface_chart_packets_size_distribution",
 }, *v_interface_labels[] = {
 	"v_interface_label_events"
 }, *v_interface_spins[] = {
@@ -184,7 +185,8 @@ const char *v_interface_charts[] = {
 	"occupancy_21",
 	"occupancy_22",
 	"occupancy_23",
-	"signal_distribution"
+	"signal_distribution",
+	"packets_size_distribution"
 }, *v_interface_chart_styles[] = {
 	"styles/adc.keys",
 	"styles/pedestal.keys",
@@ -264,7 +266,8 @@ const char *v_interface_charts[] = {
 	"styles/occupancy_small.keys",
 	"styles/occupancy_small.keys",
 	"styles/occupancy_small.keys",
-	"styles/signal_histogram.keys"
+	"styles/signal_histogram.keys",
+	"styles/packets_size_histogram.keys"
 };
 struct s_interface *f_interface_initialize(struct s_interface *supplied, const char *builder_path) {
 	struct s_interface *result = supplied;

@@ -200,6 +200,9 @@ void p_view_loop_show_signals(struct s_interface *interface) {
 			break;
 		case 4: /* clusters */
 			f_chart_redraw(&(interface->logic_charts[e_interface_chart_clusters_distribution]));
+			break;
+		case 5: /* packets */
+			f_chart_redraw(&(interface->logic_charts[e_interface_chart_packets_size_distribution]));
 	}
 }
 
@@ -240,6 +243,8 @@ void p_view_loop_read_process(struct s_interface *interface, struct s_package *p
 								if (package->data.values.raw.ladder[ladder] == v_view_ladder)
 									v_view_label_refresh = d_true;
 							}
+						f_chart_append_histogram(&(interface->logic_charts[e_interface_chart_packets_size_distribution]), 0,
+								package->data.frame_length);
 					}
 					break;
 				case d_package_nrm_workmode:
@@ -258,10 +263,11 @@ void p_view_loop_read_process(struct s_interface *interface, struct s_package *p
 							} else
 								clusters += environment.data.data[ladder].compressed_event.clusters;
 						}
-						if (!clusters)
-							if ((v_flags&e_view_action_exports_clusters) == e_view_action_exports_clusters)
-								f_clusters_save(NULL, (last_counter-1), last_trigger, -1, environment.data.seconds,
-										environment.data.mseconds, environment.clusters_stream);
+						if ((clusters == 0) && ((v_flags&e_view_action_exports_clusters) == e_view_action_exports_clusters))
+							f_clusters_save(NULL, (last_counter-1), last_trigger, -1, environment.data.seconds,
+									environment.data.mseconds, environment.clusters_stream);
+						f_chart_append_histogram(&(interface->logic_charts[e_interface_chart_packets_size_distribution]), 0,
+								package->data.frame_length);
 						v_view_label_refresh = d_true;
 					}
 			}
