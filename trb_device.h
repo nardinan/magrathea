@@ -124,7 +124,7 @@ typedef struct s_trb_device {
 	/* ok, now you can add your values */
 	unsigned int trigger;
 	struct termios old_configuration;
-	time_t last_refresh;
+	time_t last_refresh, last_online;
 	struct s_trb_stream {
 		char destination[PATH_MAX];
 		FILE *stream;

@@ -386,9 +386,9 @@ int f_trb_device_initialize(unsigned char code) {
 			if (v_trb_device_boards[code].code != loopback_answer[4])
 				v_trb_device_boards[code].wrong = d_true;
 			result = d_true;
+			v_trb_device_boards[code].last_online = time(NULL);
 		} else
 			p_trb_device_destroy_descriptor(code);
-	}
 	return result;
 }
 
@@ -527,9 +527,10 @@ int p_trb_device_refresh_status(unsigned char code) {
 	int readed = d_true, result = d_true;
 	while ((readed > 0) && (v_trb_device_boards[code].descriptor != d_rs232_null))
 		if ((readed = f_rs232_read_packet(v_trb_device_boards[code].descriptor, raw_answer, d_trb_device_raw_answer_size,
-						d_trb_device_timeout, v_trb_device_raw_head, v_trb_device_raw_tail, d_trb_device_sentinel_size)) > 0)
+						d_trb_device_timeout, v_trb_device_raw_head, v_trb_device_raw_tail, d_trb_device_sentinel_size)) > 0) {
 			p_trb_device_refresh_analyze(code, raw_answer, readed);
-		else if (readed < 0) {
+			v_trb_device_boards[code].last_online = time(NULL);
+		} else if (readed < 0) {
 			p_trb_device_destroy_descriptor(code);
 			result = d_false;
 		}
