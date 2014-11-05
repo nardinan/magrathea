@@ -156,6 +156,8 @@ void p_view_loop_append_signals(struct s_interface *interface, unsigned short in
 						maximum = environment.data.data[current_ladder].occupancy[index];
 				}
 				interface->logic_charts[e_interface_chart_occupancy_0+current_ladder].axis_y.range[1] = (maximum+1);
+				if (((int)interface->logic_charts[e_interface_chart_occupancy_0+current_ladder].axis_y.range[1]%2) > 0)
+					interface->logic_charts[e_interface_chart_occupancy_0+current_ladder].axis_y.range[1]++;
 				environment.data.data[current_ladder].new_bucket = d_false;
 				for (current_cluster = 0; current_cluster < environment.data.data[current_ladder].compressed_event.clusters;
 						++current_cluster) {
