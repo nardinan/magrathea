@@ -48,6 +48,23 @@ unsigned char *p_package_analyze_nrm(struct s_package *package, unsigned char *b
 	return pointer;
 }
 
+unsigned char *p_package_analyze_dld(struct s_package *package, unsigned char *buffer, size_t size) {
+	unsigned char *pointer = buffer, *result = NULL;
+	int index, ladder;
+	if (size >= d_package_raw_size) {
+		for (ladder = 0; ladder < d_package_ladders; ++ladder) {
+			package->data.values.dld.ladder[ladder] = ((unsigned short int)pointer[1])|((unsigned short int)pointer[0])<<8;
+			pointer += 2;
+			for (index = 0; index < d_package_channels; ++index, pointer += 2) {
+				package->data.values.dld.pedestal[ladder][index] = pointer[0];
+				package->data.values.dld.rms[ladder][index] = pointer[1];
+			}
+		}
+		result = pointer;
+	}
+	return result;
+}
+
 unsigned char *p_package_analyze_raw(struct s_package *package, unsigned char *buffer, size_t size) {
 	unsigned char *pointer = buffer, *result = NULL;
 	int index, ladder;
@@ -83,7 +100,7 @@ unsigned char *p_package_analyze_header_data(struct s_package *package, unsigned
 			if ((size-(pointer-buffer)) > d_package_data_header_info_size) {
 				workmode = (pointer[0]>>4)&0x0f;
 				group = (pointer[0])&0x0f;
-				if ((workmode == d_package_raw_workmode) || (workmode == d_package_nrm_workmode)) {
+				if ((workmode == d_package_raw_workmode) || (workmode == d_package_nrm_workmode) || (workmode == d_package_dld_workmode)) {
 					package->data.kind = workmode;
 					pointer++;
 					package->data.trb = (pointer[0]&0x3f);
@@ -93,6 +110,9 @@ unsigned char *p_package_analyze_header_data(struct s_package *package, unsigned
 					switch (workmode) {
 						case d_package_raw_workmode:
 							backup = p_package_analyze_raw(package, pointer, (size-(pointer-buffer)));
+							break;
+						case d_package_dld_workmode:
+							backup = p_package_analyze_dld(package, pointer, (size-(pointer-buffer)));
 							break;
 						case d_package_nrm_workmode:
 							if ((size-(pointer-buffer)) >= package->data.frame_length)

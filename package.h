@@ -40,6 +40,7 @@
 #define d_package_dmg_workmode 0
 #define d_package_raw_workmode 3
 #define d_package_nrm_workmode 2
+#define d_package_dld_workmode 6
 #define d_package_tmp_workmode 8
 #define d_package_raw_size (d_package_ladders*(2+(2*d_package_channels)))
 #define d_package_nrm_ladder 0xcc
@@ -58,7 +59,8 @@ typedef struct s_package_raw {
 	unsigned short ladder[d_package_ladders], values[d_package_ladders][d_package_channels];
 } s_package_raw;
 typedef struct s_package_dld {
-	unsigned short ladder[d_package_ladders], pedestal[d_package_ladders][d_package_channels], rms[d_package_ladders][d_package_channels];
+	unsigned short ladder[d_package_ladders];
+       	unsigned char pedestal[d_package_ladders][d_package_channels], rms[d_package_ladders][d_package_channels];
 } s_package_dld;
 typedef struct s_package_nrm_ladder {
 	unsigned short values[d_package_channels];
@@ -90,6 +92,7 @@ typedef struct s_package {
 } s_package;
 extern struct s_package_trb v_package_trbs[];
 extern unsigned char *p_package_analyze_nrm(struct s_package *package, unsigned char *buffer, size_t size);
+extern unsigned char *p_package_analyze_dld(struct s_package *package, unsigned char *buffer, size_t size);
 extern unsigned char *p_package_analyze_raw(struct s_package *package, unsigned char *buffer, size_t size);
 extern unsigned char *p_package_analyze_header_data(struct s_package *package, unsigned char *buffer, size_t size);
 extern unsigned char *p_package_analyze_header(struct s_package *package, unsigned char *buffer, size_t size);

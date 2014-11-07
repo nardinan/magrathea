@@ -223,7 +223,7 @@ void p_view_loop_read_raw(int delay) {
 
 void p_view_loop_read_process(struct s_interface *interface, struct s_package *package) {
 	unsigned short last_counter, last_trigger;
-	int ladder, clusters;
+	int ladder, clusters, channel;
 	if (package->complete) {
 		if (package->data.kind == d_package_tmp_workmode) {
 			environment.data.seconds = d_view_dampe_epoch+package->data.values.tmp.seconds;
@@ -245,9 +245,38 @@ void p_view_loop_read_process(struct s_interface *interface, struct s_package *p
 								if (package->data.values.raw.ladder[ladder] == v_view_ladder)
 									v_view_label_refresh = d_true;
 							}
-						f_chart_append_histogram(&(interface->logic_charts[e_interface_chart_packets_size_distribution]), 0,
-								package->data.frame_length);
 					}
+					break;
+				case d_package_dld_workmode:
+					if ((v_flags&e_view_action_filter_download) == e_view_action_filter_download)
+						for (ladder = 0; ladder < d_package_ladders; ++ladder)
+							if ((package->data.values.dld.ladder[ladder] >= 0) && (package->data.values.dld.ladder[ladder] <
+										d_analyze_ladders)) {
+								if (!environment.data.calibration[package->data.values.dld.ladder[ladder]].computed)
+									if (++environment.data.calibrated >= d_analyze_ladders)
+										gtk_widget_set_sensitive(GTK_WIDGET(
+													interface->buttons[e_interface_button_dump]), TRUE);
+								environment.data.calibration[package->data.values.dld.ladder[ladder]].computed = d_true;
+								environment.data.calibration[package->data.values.dld.ladder[ladder]].package =
+									environment.data.calibration[package->data.values.dld.ladder[ladder]].steps;
+								environment.data.calibration[package->data.values.dld.ladder[ladder]].drawed = d_false;
+								for (channel = 0; channel < d_package_channels; ++channel) {
+									environment.data.computed_calibrations.ladder[package->data.values.dld.ladder[ladder]].
+										pedestal[channel] = (package->data.values.dld.pedestal[ladder][channel]*
+												d_view_pedestal_k);
+									if (package->data.values.dld.rms[ladder][channel] == 0xff) { /* bad strip */
+										environment.data.computed_calibrations.
+											ladder[package->data.values.dld.ladder[ladder]].
+											flags[channel] = e_stk_math_flag_bad_sigma;
+										environment.data.computed_calibrations.
+											ladder[package->data.values.dld.ladder[ladder]].sigma[channel] = 0;
+									} else
+										environment.data.computed_calibrations.
+											ladder[package->data.values.dld.ladder[ladder]].
+											sigma[channel] = ((float)package->data.values.dld.rms[ladder][channel]/
+													d_view_rms_k);
+								}
+							}
 					break;
 				case d_package_nrm_workmode:
 					if ((v_flags&e_view_action_filter_compressed) == e_view_action_filter_compressed) {
@@ -373,6 +402,8 @@ int main (int argc, char *argv[]) {
 							v_flags &= ~e_view_action_filter_compressed;
 						else if (f_string_strcmp(argv[index], "-n") == 0)
 							v_flags &= ~e_view_action_filter_raw;
+						else if (f_string_strcmp(argv[index], "-d") == 0)
+							v_flags |= e_view_action_filter_download;
 						else if (f_string_strcmp(argv[index], "-e") == 0) {
 							v_flags |= e_view_action_exports_clusters;
 							snprintf(destination, d_string_buffer_size, "%s_clusters_TRB%02d.csv", environment.filename,
@@ -422,7 +453,8 @@ int main (int argc, char *argv[]) {
 				"\t{-c <folder>: load an external TRB calibration}\n"
 				"\t{-m <file>: file with bad channels}\n"
 				"\t{-r: only raw data}\n"
-				"\t{-n: only compressed data}\n", argv[0]);
+				"\t{-n: only compressed data}\n"
+				"\t{-d: load download data as calibrations}\n", argv[0]);
 	f_memory_destroy();
 	return 0;
 }
