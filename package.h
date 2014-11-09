@@ -37,11 +37,11 @@
 #define d_package_data_header_info_size 4	/* number of informations in the header */
 #define d_package_data_tail_size 4		/* total dimension of the tail		*/
 #define d_package_alignment_size 6
-#define d_package_dmg_workmode 0
-#define d_package_raw_workmode 3
-#define d_package_nrm_workmode 2
-#define d_package_dld_workmode 6
-#define d_package_tmp_workmode 8
+#define d_package_dmg_workmode 0 /* damaged workmode 		*/
+#define d_package_raw_workmode 3 /* raw workmode 		*/
+#define d_package_nrm_workmode 2 /* compressed workmode 	*/
+#define d_package_dld_workmode 6 /* download workmode		*/
+#define d_package_tmp_workmode 8 /* timestamp workmode		*/
 #define d_package_raw_size (d_package_ladders*(2+(2*d_package_channels)))
 #define d_package_nrm_ladder 0xcc
 #define d_package_nrm_cluster 0xfc
