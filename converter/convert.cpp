@@ -90,7 +90,8 @@ int f_convert_read(const char *prefix, FILE *stream, int trb) {
 	ssize_t readed, bytes = 0;
 	struct s_package package;
 	struct s_convert_environment environment;
-	int result = d_true, readed_package = 0, first = d_true, same;
+	int result = d_true, readed_package = 0, write_event = d_false;
+	char package_kind[d_string_buffer_size];
 	if (f_convert_init(&environment, prefix, trb)) {
 		while (d_true) {
 			if ((readed = fread(buffer+bytes, 1, d_package_buffer_size-bytes, stream)) > 0)
@@ -100,22 +101,39 @@ int f_convert_read(const char *prefix, FILE *stream, int trb) {
 				memmove(buffer, backup, bytes);
 				if ((package.complete) && (package.trb == v_package_trbs[trb].code)) {
 					current_mode = package.data.kind;
-					if ((v_convert_mode == d_package_dmg_workmode) || (v_convert_mode == current_mode))
-						same = d_true;
-					else
-						same = d_false;
-					if ((current_mode == d_package_nrm_workmode) || ((current_mode == d_package_raw_workmode) && 
-								(package.data.values.raw.ladder[0] == 0) && (package.data.values.raw.ladder[1] == 12)))
-						first = d_false;
-					if ((same) && (!first))
-						f_convert_insert(&environment, &package);
-					readed_package++;
-					printf("\rreading package: % 7d [%c] [%s]", readed_package, ((!same)||(first))?'R':'W', 
-							(current_mode==d_package_raw_workmode)?"RAW":"COMPRESSED");
-					if ((!same) || (first))
-						putchar('\n');
-					else
-						fflush(stdout);
+					if ((current_mode == d_package_nrm_workmode) || (current_mode == d_package_raw_workmode)) {
+						switch (current_mode) {
+							case d_package_raw_workmode:
+								strcpy(package_kind, "RAW            ");
+								break;
+							case d_package_nrm_workmode:
+								strcpy(package_kind, "COMPRESSED     ");
+								break;
+							case d_package_dld_workmode:
+								strcpy(package_kind, "DOWNLOAD       ");
+								break;
+							case d_package_dmg_workmode:
+								strcpy(package_kind, "DAMAGED (empty)");
+								break;
+							case d_package_tmp_workmode:
+								strcpy(package_kind, "TIMESTAMP      ");
+						}
+						if ((v_convert_mode == d_package_dmg_workmode) || (v_convert_mode == current_mode)) {
+							if ((current_mode != d_package_raw_workmode) || ((current_mode == d_package_raw_workmode) && 
+										(package.data.values.raw.ladder[0]) && 
+										(package.data.values.raw.ladder[1] == 12)))
+								write_event = d_true;
+						} else
+							write_event = d_false;
+						if (write_event)
+							f_convert_insert(&environment, &package);
+						readed_package++;
+						printf("\rreading package: % 7d [%c] [%s]", readed_package, (!write_event)?'R':'W', package_kind);
+						if (!write_event)
+							putchar('\n');
+						else
+							fflush(stdout);
+					}
 				}
 			} else if (readed <= 0)
 				break;
