@@ -4,7 +4,7 @@ do
 	cd ~/Projects/magrathea/viewer
 	for trb in 1 2; # add here all TRBs that you need
 	do
-		./magrathea_view.bin $parameter $trb 0 512 -x -k -m bad_channels.csv &
+		./magrathea_view.bin $parameter $trb 0 512 -x -k -r -m bad_channels.csv &
 	done
 	# this piece of code has been used during EQM tests in Shanghai (9-18 Sept 2014)
 	# cd ~/Projects/magrathea/compare
