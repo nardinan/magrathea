@@ -389,6 +389,7 @@ int f_trb_device_initialize(unsigned char code) {
 			v_trb_device_boards[code].last_online = time(NULL);
 		} else
 			p_trb_device_destroy_descriptor(code);
+	}
 	return result;
 }
 

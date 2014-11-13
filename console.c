@@ -85,7 +85,6 @@ void f_console_refresh(struct s_console *console, struct s_console_input *input,
 }
 
 void f_console_write(struct s_console *console, const char *buffer, int output) {
-	size_t length;
 	if (output != d_console_descriptor_null) {
 		write(output, d_console_clean_line, f_string_strlen(d_console_clean_line));
 		write(output, console->prefix, f_string_strlen(console->prefix));
