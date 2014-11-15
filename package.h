@@ -46,6 +46,8 @@
 #define d_package_nrm_ladder 0xcc
 #define d_package_nrm_cluster 0xfc
 #define d_package_buffer_size 10240
+#define d_package_crc_register 16
+#define d_package_bits_byte 8
 typedef struct s_package_trb {
 	int id;
 	unsigned char code;
@@ -91,6 +93,8 @@ typedef struct s_package {
 	int complete:1, damaged:1, wrong_sumcheck:1;
 } s_package;
 extern struct s_package_trb v_package_trbs[];
+extern unsigned short int p_package_crc_result(unsigned char *buffer);
+extern unsigned short int f_package_crc(unsigned char *buffer, size_t size);
 extern unsigned char *p_package_analyze_nrm(struct s_package *package, unsigned char *buffer, size_t size);
 extern unsigned char *p_package_analyze_dld(struct s_package *package, unsigned char *buffer, size_t size);
 extern unsigned char *p_package_analyze_raw(struct s_package *package, unsigned char *buffer, size_t size);

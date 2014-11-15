@@ -99,7 +99,7 @@ int f_convert_read(const char *prefix, FILE *stream, int trb) {
 			if (((backup = f_package_analyze(&package, buffer, bytes))) && (backup > buffer)) {
 				bytes -= (backup-buffer);
 				memmove(buffer, backup, bytes);
-				if ((package.complete) && (package.trb == v_package_trbs[trb].code)) {
+				if ((package.complete) && (package.trb == v_package_trbs[trb].code) && (!package.wrong_sumcheck)) {
 					current_mode = package.data.kind;
 					if ((current_mode == d_package_nrm_workmode) || (current_mode == d_package_raw_workmode)) {
 						switch (current_mode) {

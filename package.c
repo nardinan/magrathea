@@ -26,6 +26,41 @@ struct s_package_trb v_package_trbs[] = {
 	{6, 0x0C},
 	{7, 0x0D}
 };
+unsigned short int p_package_crc_result(unsigned char *buffer) {
+	int index;
+	unsigned short int result = 0;
+	for (index = 0; index < d_package_crc_register; ++index)
+		result |= (buffer[index]<<index);
+	return result;
+}
+
+unsigned short int f_package_crc(unsigned char *buffer, size_t size) {
+	int index, local_bit;
+	unsigned char crc_register[d_package_crc_register], exponent;
+	memset(crc_register, 1, d_package_crc_register);
+	for (index = 0; index < size; ++index)
+		for (local_bit = 0; local_bit < d_package_bits_byte; ++local_bit) {
+			exponent = crc_register[15]^((buffer[index]>>(7-local_bit))&0x1);
+			crc_register[15] = crc_register[14];
+			crc_register[14] = crc_register[13];
+			crc_register[13] = crc_register[12];
+			crc_register[12] = crc_register[11]^exponent;
+			crc_register[11] = crc_register[10];
+			crc_register[10] = crc_register[9];
+			crc_register[9] = crc_register[8];
+			crc_register[8] = crc_register[7];
+			crc_register[7] = crc_register[6];
+			crc_register[6] = crc_register[5];
+			crc_register[5] = crc_register[4]^exponent;
+			crc_register[4] = crc_register[3];
+			crc_register[3] = crc_register[2];
+			crc_register[2] = crc_register[1];
+			crc_register[1] = crc_register[0];
+			crc_register[0] = exponent;
+		}
+	return p_package_crc_result(crc_register);
+}
+
 unsigned char *p_package_analyze_nrm(struct s_package *package, unsigned char *buffer, size_t size) {
 	unsigned char *pointer = buffer;
 	int ladder = -1, entry_point = -1;
@@ -126,6 +161,7 @@ unsigned char *p_package_analyze_header_data(struct s_package *package, unsigned
 						package->data.trigger_counter = ((unsigned short int)pointer[1])|((unsigned short int)(pointer[0]&0xf))<<8;
 						pointer += 2;
 						package->data.sumcheck = ((unsigned short int)pointer[1])|((unsigned short int)pointer[0])<<8;
+						/* here we have to check the sumcheck */
 						result = (pointer+2);
 					}
 				} else
@@ -139,7 +175,7 @@ unsigned char *p_package_analyze_header_data(struct s_package *package, unsigned
 
 unsigned char *p_package_analyze_header(struct s_package *package, unsigned char *buffer, size_t size) {
 	static unsigned char header_frame[] = {0xEB, 0x90};
-	unsigned char *pointer = buffer, *backup, *result = NULL;
+	unsigned char *pointer = buffer, *backup, *result = NULL, *crc_started;
 	int index;
 	if (size >= d_package_frame_header_size) {
 		for (index = 0; index < d_package_frame_header_const_size; ++index, ++pointer)
@@ -147,6 +183,7 @@ unsigned char *p_package_analyze_header(struct s_package *package, unsigned char
 				break;
 		if (index >= d_package_frame_header_const_size) {
 			if ((size-(pointer-buffer)) > d_package_frame_header_info_size) {
+				crc_started = pointer;
 				package->count = pointer[0];
 				pointer++;
 				package->trb = (pointer[0]&0x3f);
@@ -157,6 +194,9 @@ unsigned char *p_package_analyze_header(struct s_package *package, unsigned char
 				if ((backup) && ((size-(backup-buffer)) >= d_package_frame_tail_size)) {
 					pointer = backup;
 					package->sumcheck = ((unsigned short int)pointer[1])|((unsigned short int)pointer[0])<<8;
+					if ((package->sumcheck != f_package_crc(crc_started, pointer-crc_started)))
+						package->wrong_sumcheck = d_true;
+					/* check CRC */
 					result = (pointer+2);
 				}
 			}
@@ -205,6 +245,7 @@ unsigned char *f_package_analyze(struct s_package *package, unsigned char *buffe
 	unsigned char *pointer = buffer, *backup;
 	while (size > 0) {
 		package->damaged = d_false;
+		package->wrong_sumcheck = d_false;
 		if (!(backup = p_package_analyze(package, pointer, size))) {
 			if (package->damaged) {
 				pointer++;

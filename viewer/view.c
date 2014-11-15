@@ -315,7 +315,10 @@ int p_view_loop_read(struct s_interface *interface, int delay) {
 		if (backup > environment.buffer) {
 			environment.bytes -= (backup-environment.buffer);
 			memmove(environment.buffer, backup, environment.bytes);
-			p_view_loop_read_process(interface, &package);
+			if (package.wrong_sumcheck)
+				fprintf(stderr, "[WARNING] the package has a wrong CRC code\n");
+			else
+				p_view_loop_read_process(interface, &package);
 		}
 
 	}
