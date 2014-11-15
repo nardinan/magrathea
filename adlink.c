@@ -71,7 +71,7 @@ int f_adlink_trigger_setup(enum e_adlink_trigger trigger) {
 		.default_level = 1,
 		.type = 2,
 		.repeat_counter = (1<<12),
-		.width = 5 /* 5 * 0.1uS */
+		.width = 5 /* 0.5uS */
 	};
 	unsigned int value;
 	int speed = e_adlink_trigger_50, result = d_false;
