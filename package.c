@@ -161,7 +161,6 @@ unsigned char *p_package_analyze_header_data(struct s_package *package, unsigned
 						package->data.trigger_counter = ((unsigned short int)pointer[1])|((unsigned short int)(pointer[0]&0xf))<<8;
 						pointer += 2;
 						package->data.sumcheck = ((unsigned short int)pointer[1])|((unsigned short int)pointer[0])<<8;
-						/* here we have to check the sumcheck */
 						result = (pointer+2);
 					}
 				} else
@@ -196,7 +195,6 @@ unsigned char *p_package_analyze_header(struct s_package *package, unsigned char
 					package->sumcheck = ((unsigned short int)pointer[1])|((unsigned short int)pointer[0])<<8;
 					if ((package->sumcheck != f_package_crc(crc_started, pointer-crc_started)))
 						package->wrong_sumcheck = d_true;
-					/* check CRC */
 					result = (pointer+2);
 				}
 			}
