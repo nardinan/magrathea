@@ -205,10 +205,7 @@ unsigned char *p_package_analyze_header(struct s_package *package, unsigned char
 					pointer = backup;
 					package->sumcheck = ((unsigned short int)pointer[1])|((unsigned short int)pointer[0])<<8;
 					package->real_sumcheck = f_package_crc(crc_started, pointer-crc_started);
-					if (package->real_sumcheck != package->sumcheck)
-						package->wrong_sumcheck = d_true;
-					else
-						package->wrong_sumcheck = d_false;
+					package->wrong_sumcheck = (package->real_sumcheck != package->sumcheck);
 					result = (pointer+2);
 				}
 			}
