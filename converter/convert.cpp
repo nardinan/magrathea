@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "convert.h"
-int tree_adc[d_convert_ladders][d_package_channels], tree_trigger[d_convert_ladders], tree_wrong_crc[d_convert_ladders];
+unsigned int tree_adc[d_convert_ladders][d_package_channels], tree_trigger[d_convert_ladders], tree_wrong_crc[d_convert_ladders];
 unsigned char v_convert_mode = d_package_dmg_workmode;
 struct s_convert_environment *f_convert_init(struct s_convert_environment *supplied, const char *prefix, int trb) {
 	char directory[PATH_MAX], postfix[d_string_buffer_size], path[PATH_MAX], h_name[d_string_buffer_size], t_name[d_string_buffer_size];
@@ -34,11 +34,11 @@ struct s_convert_environment *f_convert_init(struct s_convert_environment *suppl
 				result->structure[ladder] = new TTree("eventTRB", "events from TRB");
 				for (channel = 0; channel < d_package_channels; ++channel) {
 					snprintf(h_name, d_string_buffer_size, "t_Ch%d", channel);
-					snprintf(t_name, d_string_buffer_size, "adc%d/I", channel);
+					snprintf(t_name, d_string_buffer_size, "adc%d/i", channel);
 					result->structure[ladder]->Branch(h_name, &(tree_adc[ladder][channel]), t_name);
 				}
-				result->structure[ladder]->Branch("t_Trigger", &(tree_trigger[ladder]), "trigger_id/I");
-				result->structure[ladder]->Branch("t_WrongCRC", &(tree_wrong_crc[ladder]), "wrong_crc/I");
+				result->structure[ladder]->Branch("t_Trigger", &(tree_trigger[ladder]), "trigger_id/i");
+				result->structure[ladder]->Branch("t_WrongCRC", &(tree_wrong_crc[ladder]), "wrong_crc/i");
 			} else
 				d_die(d_error_malloc);
 		}

@@ -90,7 +90,7 @@ typedef struct s_package {
 	unsigned char count, trb;
 	unsigned short frame_length, sumcheck, real_sumcheck;
 	struct s_package_data data;
-	int complete:1, damaged:1, wrong_sumcheck:1;
+	unsigned int complete:1, damaged:1, wrong_sumcheck:1;
 } s_package;
 extern struct s_package_trb v_package_trbs[];
 extern char *v_package_kind[];

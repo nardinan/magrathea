@@ -207,6 +207,8 @@ unsigned char *p_package_analyze_header(struct s_package *package, unsigned char
 					package->real_sumcheck = f_package_crc(crc_started, pointer-crc_started);
 					if (package->real_sumcheck != package->sumcheck)
 						package->wrong_sumcheck = d_true;
+					else
+						package->wrong_sumcheck = d_false;
 					result = (pointer+2);
 				}
 			}

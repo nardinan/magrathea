@@ -28,12 +28,12 @@
 typedef struct s_analyze_data {
 	struct s_event_environment compressed_event;
 	float bucket[d_package_channels], adc_pedestal[d_package_channels], adc_pedestal_cn[d_package_channels], occupancy[d_package_channels];
-	int new_bucket:1;
+	unsigned int new_bucket:1;
 } s_analyze_data;
 typedef struct s_analyze_calibration {
 	unsigned short int package, steps;
 	float bucket[d_analyze_calibration_steps][d_package_channels];
-	int computed:1, drawed:1, new_bucket:1;
+	unsigned int computed:1, drawed:1, new_bucket:1;
 } s_analyze_calibration;
 typedef struct s_analyze_counters {
 	size_t events, data_events;
