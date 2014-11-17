@@ -17,6 +17,7 @@
  */
 #include "convert.h"
 int tree_adc[d_convert_ladders][d_package_channels];
+unsigned short tree_trigger[d_convert_ladders];
 unsigned char v_convert_mode = d_package_dmg_workmode;
 struct s_convert_environment *f_convert_init(struct s_convert_environment *supplied, const char *prefix, int trb) {
 	char directory[PATH_MAX], postfix[d_string_buffer_size], path[PATH_MAX], h_name[d_string_buffer_size], t_name[d_string_buffer_size];
@@ -37,6 +38,9 @@ struct s_convert_environment *f_convert_init(struct s_convert_environment *suppl
 					snprintf(t_name, d_string_buffer_size, "adc%d/I", channel);
 					result->structure[ladder]->Branch(h_name, &(tree_adc[ladder][channel]), t_name);
 				}
+				snprintf(h_name, d_string_buffer_size, "t_Trigger");
+				snprintf(t_name, d_string_buffer_size, "trigger_id/I");
+				result->structure[ladder]->Branch(h_name, &(tree_trigger[ladder]), t_name);
 			} else
 				d_die(d_error_malloc);
 		}
@@ -58,6 +62,7 @@ int p_convert_insert_raw(struct s_convert_environment *environment, struct s_pac
 		if ((selected_ladder = package->data.values.raw.ladder[ladder]) < d_convert_ladders) {
 			for (channel = 0; channel < d_package_channels; ++channel)
 				tree_adc[selected_ladder][channel] = package->data.values.raw.values[ladder][channel];
+			tree_trigger[selected_ladder] = package->data.trigger_counter;
 			environment->structure[selected_ladder]->Fill();
 		}
 	return result;
