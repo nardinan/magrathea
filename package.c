@@ -26,15 +26,26 @@ struct s_package_trb v_package_trbs[] = {
 	{6, 0x0C},
 	{7, 0x0D}
 };
-unsigned short int p_package_crc_result(unsigned char *buffer) {
+char *v_package_kind[] = {
+	"damaged workmode", 	/* 0 */
+	"unused workmode",	/* 1 */
+	"compressed workmode",	/* 2 */
+	"raw workmode",		/* 3 */
+	"unused workmode",	/* 4 */
+	"unused workmode",	/* 5 */
+	"download workmode",	/* 6 */
+	"unused wormkode",	/* 7 */
+	"timestamp workmode"	/* 8 */
+};
+unsigned short p_package_crc_result(unsigned char *buffer) {
 	int index;
-	unsigned short int result = 0;
+	unsigned short result = 0;
 	for (index = 0; index < d_package_crc_register; ++index)
 		result |= (buffer[index]<<index);
 	return result;
 }
 
-unsigned short int f_package_crc(unsigned char *buffer, size_t size) {
+unsigned short f_package_crc(unsigned char *buffer, size_t size) {
 	int index, local_bit;
 	unsigned char crc_register[d_package_crc_register], exponent;
 	memset(crc_register, 1, d_package_crc_register);
@@ -193,7 +204,8 @@ unsigned char *p_package_analyze_header(struct s_package *package, unsigned char
 				if ((backup) && ((size-(backup-buffer)) >= d_package_frame_tail_size)) {
 					pointer = backup;
 					package->sumcheck = ((unsigned short int)pointer[1])|((unsigned short int)pointer[0])<<8;
-					if ((package->sumcheck != f_package_crc(crc_started, pointer-crc_started)))
+					package->real_sumcheck = f_package_crc(crc_started, pointer-crc_started);
+					if (package->real_sumcheck != package->sumcheck)
 						package->wrong_sumcheck = d_true;
 					result = (pointer+2);
 				}

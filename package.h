@@ -88,13 +88,14 @@ typedef struct s_package_data {
 } s_package_data;
 typedef struct s_package {
 	unsigned char count, trb;
-	unsigned short frame_length, sumcheck;
+	unsigned short frame_length, sumcheck, real_sumcheck;
 	struct s_package_data data;
 	int complete:1, damaged:1, wrong_sumcheck:1;
 } s_package;
 extern struct s_package_trb v_package_trbs[];
-extern unsigned short int p_package_crc_result(unsigned char *buffer);
-extern unsigned short int f_package_crc(unsigned char *buffer, size_t size);
+extern char *v_package_kind[];
+extern unsigned short p_package_crc_result(unsigned char *buffer);
+extern unsigned short f_package_crc(unsigned char *buffer, size_t size);
 extern unsigned char *p_package_analyze_nrm(struct s_package *package, unsigned char *buffer, size_t size);
 extern unsigned char *p_package_analyze_dld(struct s_package *package, unsigned char *buffer, size_t size);
 extern unsigned char *p_package_analyze_raw(struct s_package *package, unsigned char *buffer, size_t size);
