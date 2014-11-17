@@ -17,8 +17,8 @@
  */
 #include "view.h"
 struct s_view_environment environment;
-int v_view_ladder, v_view_trb, v_view_calibration_steps = d_view_calibration_steps, v_view_skip_frames = 0, v_view_pause = d_false,
-    v_view_label_refresh = d_true, v_frames, v_flags = 0;
+int v_view_ladder, v_view_trb, v_view_calibration_steps = d_view_calibration_steps, v_view_skip_frames, v_view_pause, v_view_label_refresh = d_true, v_frames,
+    v_flags;
 long long v_starting_time;
 void f_view_action_dump(GtkWidget *widget, struct s_interface *interface) {
 	if (environment.data.calibrated >= d_analyze_ladders)
@@ -224,85 +224,81 @@ void p_view_loop_read_raw(int delay) {
 void p_view_loop_read_process(struct s_interface *interface, struct s_package *package) {
 	unsigned short last_counter, last_trigger;
 	int ladder, clusters, channel;
-	if (package->complete) {
-		if (package->data.kind == d_package_tmp_workmode) {
-			environment.data.seconds = d_view_dampe_epoch+package->data.values.tmp.seconds;
-			environment.data.mseconds = package->data.values.tmp.mseconds;
-		} else if (package->trb == v_package_trbs[v_view_trb].code)
-			switch (package->data.kind) {
-				case d_package_raw_workmode:
-					if ((v_flags&e_view_action_filter_raw) == e_view_action_filter_raw) {
-						v_analyze_adc_pedestal = d_true;
-						v_analyze_adc_pedestal_cn = d_true;
-						for (ladder = 0; ladder < d_package_ladders; ++ladder)
-							if ((package->data.values.raw.ladder[ladder] >= 0) && (package->data.values.raw.ladder[ladder] <
-										d_analyze_ladders)) {
-								environment.data.counters[package->data.values.raw.ladder[ladder]].events++;
-								environment.data.counters[package->data.values.raw.ladder[ladder]].trigger_counter =
-									package->data.trigger_counter;
-								p_view_loop_analyze(interface, package->data.values.raw.ladder[ladder],
-										package->data.values.raw.values[ladder]);
-								if (package->data.values.raw.ladder[ladder] == v_view_ladder)
-									v_view_label_refresh = d_true;
-							}
-					}
-					break;
-				case d_package_dld_workmode:
-					if ((v_flags&e_view_action_filter_download) == e_view_action_filter_download)
-						for (ladder = 0; ladder < d_package_ladders; ++ladder)
-							if ((package->data.values.dld.ladder[ladder] >= 0) && (package->data.values.dld.ladder[ladder] <
-										d_analyze_ladders)) {
-								if (!environment.data.calibration[package->data.values.dld.ladder[ladder]].computed)
-									if (++environment.data.calibrated >= d_analyze_ladders)
-										gtk_widget_set_sensitive(GTK_WIDGET(
-													interface->buttons[e_interface_button_dump]), TRUE);
-								environment.data.calibration[package->data.values.dld.ladder[ladder]].computed = d_true;
-								environment.data.calibration[package->data.values.dld.ladder[ladder]].package =
-									environment.data.calibration[package->data.values.dld.ladder[ladder]].steps;
-								environment.data.calibration[package->data.values.dld.ladder[ladder]].drawed = d_false;
-								for (channel = 0; channel < d_package_channels; ++channel) {
-									environment.data.computed_calibrations.ladder[package->data.values.dld.ladder[ladder]].
-										pedestal[channel] = (package->data.values.dld.pedestal[ladder][channel]*
-												d_view_pedestal_k);
-									if (package->data.values.dld.rms[ladder][channel] == 0xff) { /* bad strip */
-										environment.data.computed_calibrations.
-											ladder[package->data.values.dld.ladder[ladder]].
-											flags[channel] = e_stk_math_flag_bad_sigma;
-										environment.data.computed_calibrations.
-											ladder[package->data.values.dld.ladder[ladder]].sigma[channel] = 0;
-									} else
-										environment.data.computed_calibrations.
-											ladder[package->data.values.dld.ladder[ladder]].
-											sigma[channel] = ((float)package->data.values.dld.rms[ladder][channel]/
-													d_view_rms_k);
-								}
-							}
-					break;
-				case d_package_nrm_workmode:
-					if ((v_flags&e_view_action_filter_compressed) == e_view_action_filter_compressed) {
-						v_analyze_adc_pedestal = d_false;
-						v_analyze_adc_pedestal_cn = d_false;
-						for (ladder = 0, clusters = 0; ladder < d_trb_device_ladders; ++ladder) {
-							environment.data.calibration[ladder].computed = d_true;
-							environment.data.calibration[ladder].package = environment.data.calibration[ladder].steps;
-							environment.data.counters[ladder].events++;
-							environment.data.counters[ladder].trigger_counter = package->data.trigger_counter;
-							p_view_loop_analyze(interface, ladder, package->data.values.nrm.ladders_data[ladder].values);
-							if (!environment.data.data[ladder].compressed_event.clusters) {
-								last_counter = environment.data.counters[ladder].data_events;
-								last_trigger = environment.data.counters[ladder].trigger_counter;
-							} else
-								clusters += environment.data.data[ladder].compressed_event.clusters;
+	if (package->data.kind == d_package_tmp_workmode) {
+		environment.data.seconds = d_view_dampe_epoch+package->data.values.tmp.seconds;
+		environment.data.mseconds = package->data.values.tmp.mseconds;
+	} else if (package->trb == v_package_trbs[v_view_trb].code)
+		switch (package->data.kind) {
+			case d_package_raw_workmode:
+				if ((v_flags&e_view_action_filter_raw) == e_view_action_filter_raw) {
+					v_analyze_adc_pedestal = d_true;
+					v_analyze_adc_pedestal_cn = d_true;
+					for (ladder = 0; ladder < d_package_ladders; ++ladder)
+						if ((package->data.values.raw.ladder[ladder] >= 0) && (package->data.values.raw.ladder[ladder] <
+									d_analyze_ladders)) {
+							environment.data.counters[package->data.values.raw.ladder[ladder]].events++;
+							environment.data.counters[package->data.values.raw.ladder[ladder]].trigger_counter =
+								package->data.trigger_counter;
+							p_view_loop_analyze(interface, package->data.values.raw.ladder[ladder],
+									package->data.values.raw.values[ladder]);
+							if (package->data.values.raw.ladder[ladder] == v_view_ladder)
+								v_view_label_refresh = d_true;
 						}
-						if ((clusters == 0) && ((v_flags&e_view_action_exports_clusters) == e_view_action_exports_clusters))
-							f_clusters_save(NULL, (last_counter-1), last_trigger, -1, environment.data.seconds,
-									environment.data.mseconds, environment.clusters_stream);
-						f_chart_append_histogram(&(interface->logic_charts[e_interface_chart_packets_size_distribution]), 0,
-								package->data.frame_length);
-						v_view_label_refresh = d_true;
+				}
+				break;
+			case d_package_dld_workmode:
+				if ((v_flags&e_view_action_filter_download) == e_view_action_filter_download)
+					for (ladder = 0; ladder < d_package_ladders; ++ladder)
+						if ((package->data.values.dld.ladder[ladder] >= 0) && (package->data.values.dld.ladder[ladder] <
+									d_analyze_ladders)) {
+							if (!environment.data.calibration[package->data.values.dld.ladder[ladder]].computed)
+								if (++environment.data.calibrated >= d_analyze_ladders)
+									gtk_widget_set_sensitive(GTK_WIDGET(interface->buttons[e_interface_button_dump]),
+											TRUE);
+							environment.data.calibration[package->data.values.dld.ladder[ladder]].computed = d_true;
+							environment.data.calibration[package->data.values.dld.ladder[ladder]].package =
+								environment.data.calibration[package->data.values.dld.ladder[ladder]].steps;
+							environment.data.calibration[package->data.values.dld.ladder[ladder]].drawed = d_false;
+							for (channel = 0; channel < d_package_channels; ++channel) {
+								environment.data.computed_calibrations.ladder[package->data.values.dld.ladder[ladder]].
+									pedestal[channel] = (package->data.values.dld.pedestal[ladder][channel]*
+											d_view_pedestal_k);
+								if (package->data.values.dld.rms[ladder][channel] == 0xff) { /* bad strip */
+									environment.data.computed_calibrations.ladder[package->data.values.dld.ladder[ladder]].
+										flags[channel] = e_stk_math_flag_bad_sigma;
+									environment.data.computed_calibrations.ladder[package->data.values.dld.ladder[ladder]].
+										sigma[channel] = 0;
+								} else
+									environment.data.computed_calibrations.ladder[package->data.values.dld.ladder[ladder]].
+										sigma[channel] = ((float)package->data.values.dld.rms[ladder][channel]/
+												d_view_rms_k);
+							}
+						}
+				break;
+			case d_package_nrm_workmode:
+				if ((v_flags&e_view_action_filter_compressed) == e_view_action_filter_compressed) {
+					v_analyze_adc_pedestal = d_false;
+					v_analyze_adc_pedestal_cn = d_false;
+					for (ladder = 0, clusters = 0; ladder < d_trb_device_ladders; ++ladder) {
+						environment.data.calibration[ladder].computed = d_true;
+						environment.data.calibration[ladder].package = environment.data.calibration[ladder].steps;
+						environment.data.counters[ladder].events++;
+						environment.data.counters[ladder].trigger_counter = package->data.trigger_counter;
+						p_view_loop_analyze(interface, ladder, package->data.values.nrm.ladders_data[ladder].values);
+						if (!environment.data.data[ladder].compressed_event.clusters) {
+							last_counter = environment.data.counters[ladder].data_events;
+							last_trigger = environment.data.counters[ladder].trigger_counter;
+						} else
+							clusters += environment.data.data[ladder].compressed_event.clusters;
 					}
-			}
-	}
+					if ((clusters == 0) && ((v_flags&e_view_action_exports_clusters) == e_view_action_exports_clusters))
+						f_clusters_save(NULL, (last_counter-1), last_trigger, -1, environment.data.seconds, environment.data.mseconds,
+								environment.clusters_stream);
+					f_chart_append_histogram(&(interface->logic_charts[e_interface_chart_packets_size_distribution]), 0,
+							package->data.frame_length);
+					v_view_label_refresh = d_true;
+				}
+		}
 }
 
 int p_view_loop_read(struct s_interface *interface, int delay) {
@@ -315,12 +311,15 @@ int p_view_loop_read(struct s_interface *interface, int delay) {
 		if (backup > environment.buffer) {
 			environment.bytes -= (backup-environment.buffer);
 			memmove(environment.buffer, backup, environment.bytes);
-			if (package.wrong_sumcheck)
-				fprintf(stderr, "[WARNING] the package has a wrong CRC code\n");
-			else
-				p_view_loop_read_process(interface, &package);
+			if (package.complete) {
+				if (!package.wrong_sumcheck)
+					p_view_loop_read_process(interface, &package);
+				else
+					d_err(e_log_level_medium, "package [%s | frame: %4d Bytes| data: %4d Bytes] has a wrong CRC code"
+							" (frame CRC %5d != %5d magrathea CRC)", v_package_kind[package.data.kind], package.frame_length,
+							package.data.frame_length, package.sumcheck, package.real_sumcheck);
+			}
 		}
-
 	}
 	p_view_loop_append_signals(interface, v_view_ladder);
 	return result;
