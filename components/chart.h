@@ -20,7 +20,7 @@
 #include <math.h>
 #include "keys.h"
 #include "interface_scale.h"
-#define d_chart_bucket 5120 /* maximum number of entries */
+#define d_chart_bucket 10240 /* maximum number of entries */
 #define d_chart_max_nested 6
 #define d_chart_font_size 7.0
 #define d_chart_font_height 12.0
