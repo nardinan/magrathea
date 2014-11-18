@@ -17,6 +17,7 @@
  */
 #include "convert.h"
 unsigned int tree_adc[d_convert_ladders][d_package_channels], tree_trigger[d_convert_ladders], tree_wrong_crc[d_convert_ladders];
+unsigned short tree_dampe_crc[d_convert_ladders], tree_magrathea_crc[d_convert_ladders];
 unsigned char v_convert_mode = d_package_dmg_workmode;
 struct s_convert_environment *f_convert_init(struct s_convert_environment *supplied, const char *prefix, int trb) {
 	char directory[PATH_MAX], postfix[d_string_buffer_size], path[PATH_MAX], h_name[d_string_buffer_size], t_name[d_string_buffer_size];
@@ -39,6 +40,8 @@ struct s_convert_environment *f_convert_init(struct s_convert_environment *suppl
 				}
 				result->structure[ladder]->Branch("t_Trigger", &(tree_trigger[ladder]), "trigger_id/i");
 				result->structure[ladder]->Branch("t_WrongCRC", &(tree_wrong_crc[ladder]), "wrong_crc/i");
+				result->structure[ladder]->Branch("t_dampeCRC", &(tree_dampe_crc[ladder]), "dampe_crc/s");
+				result->structure[ladder]->Branch("t_magratheaCRC", &(tree_magrathea_crc[ladder]), "magrathea_crc/s");
 			} else
 				d_die(d_error_malloc);
 		}
@@ -61,7 +64,10 @@ int p_convert_insert_raw(struct s_convert_environment *environment, struct s_pac
 			for (channel = 0; channel < d_package_channels; ++channel)
 				tree_adc[selected_ladder][channel] = package->data.values.raw.values[ladder][channel];
 			tree_trigger[selected_ladder] = package->data.trigger_counter;
+			/* CRC informations */
 			tree_wrong_crc[selected_ladder] = package->wrong_sumcheck;
+			tree_dampe_crc[selected_ladder] = package->sumcheck;
+			tree_magrathea_crc[selected_ladder] = package->real_sumcheck;
 			environment->structure[selected_ladder]->Fill();
 		}
 	return result;
@@ -73,7 +79,10 @@ int p_convert_insert_nrm(struct s_convert_environment *environment, struct s_pac
 		for (channel = 0; channel < d_package_channels; ++channel)
 			tree_adc[ladder][channel] = package->data.values.nrm.ladders_data[ladder].values[channel];
 		tree_trigger[ladder] = package->data.trigger_counter;
+		/* CRC informations */
 		tree_wrong_crc[ladder] = package->wrong_sumcheck;
+		tree_dampe_crc[ladder] = package->sumcheck;
+		tree_magrathea_crc[ladder] = package->real_sumcheck;
 		environment->structure[ladder]->Fill();
 	}
 	return result;
