@@ -300,7 +300,7 @@ void p_view_loop_read_process(struct s_interface *interface, struct s_package *p
 				}
 		}
 }
-
+unsigned short int minimum_value = 65500, maximum_value = 0;
 int p_view_loop_read(struct s_interface *interface, int delay) {
 	struct s_package package;
 	unsigned char *backup;
@@ -314,10 +314,16 @@ int p_view_loop_read(struct s_interface *interface, int delay) {
 			if (package.complete) {
 				if (!package.wrong_sumcheck)
 					p_view_loop_read_process(interface, &package);
-				else
+				else {
+					if (package.sumcheck < minimum_value)
+						minimum_value = package.sumcheck;
+					if (package.sumcheck > maximum_value)
+						maximum_value = package.sumcheck;
 					d_err(e_log_level_medium, "package [%s | frame: %4d Bytes| data: %4d Bytes] has a wrong CRC code"
-							" (frame CRC %5d != %5d magrathea CRC)", v_package_kind[package.data.kind], package.frame_length,
-							package.data.frame_length, package.sumcheck, package.real_sumcheck);
+							" (frame CRC %5d != %5d magrathea CRC) {%d - %d}", v_package_kind[package.data.kind],
+							package.frame_length, package.data.frame_length, package.sumcheck, package.real_sumcheck, minimum_value,
+							maximum_value);
+				}
 			}
 		}
 	}
