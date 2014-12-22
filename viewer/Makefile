@@ -8,6 +8,7 @@ executable = $(name).bin
 
 all: $(objects)
 	$(cc) $(lflags) $(objects) -o $(executable) $(liblink)
+	$(cc) $(lflags) firefly_linker.c -o firefly_linker.bin
 
 view.o: view.c view.h analyze.h interface.h
 	$(cc) $(cflags) view.c
