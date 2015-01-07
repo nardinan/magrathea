@@ -17,7 +17,6 @@
  */
 #ifndef magrathea_trb_device_h
 #define magrathea_trb_device_h
-#include "rs232.h"
 #include "console.h"
 #define d_trb_device_boards 8
 #define d_trb_device_ladders 24

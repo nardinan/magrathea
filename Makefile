@@ -5,7 +5,6 @@ EXTRA_CFLAGS += -D_FILE_OFFSET_BITS=64 -I.. -I../miranda/
 LFLAGS += -L../miranda/ -lmiranda_ground
 PLX_OBJECTS = \
 	$(OBJ_DIR)/package.o \
-	$(OBJ_DIR)/rs232.o \
 	$(OBJ_DIR)/plx.o \
 	$(OBJ_DIR)/adlink.o \
 	$(OBJ_DIR)/device.o \
