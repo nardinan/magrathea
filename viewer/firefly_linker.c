@@ -17,7 +17,8 @@
 #define d_linker_time_format "%d %b %Y %H:%M:%S"
 #define d_true 1
 #define d_false 0
-char v_working_directory[d_linker_string_size], v_ladder_name[d_linker_ladders][d_linker_ladders], v_test_kind = 0x00, v_test_location[d_linker_location_size];
+char v_working_directory[d_linker_string_size], v_ladder_name[d_linker_ladders][d_linker_ladders], v_test_kind = 0x00, v_test_location[d_linker_location_size],
+     v_source_bin[d_linker_string_size];
 void p_linker_load_temperature(int trb_id, float *values) {
 
 }
@@ -29,10 +30,9 @@ void p_linker_move_cal(const char *source, int ladder, const char *destination, 
 	if ((source_stream = fopen(source, "r"))) {
 		if ((destination_stream = fopen(destination, "w"))) {
 			printf("[>] ladder %s (%d) [%s -> %s]\n", v_ladder_name[ladder], ladder, source, destination);
-			/* TODO: temperature sensors readout */
 			strftime(buffer_time, d_linker_string_size, d_linker_time_format, localtime(&(timestamp)));
-			fprintf(destination_stream, "name=%s\nstarting_time=%s\ntemp_left=%.03f\ntemp_right=%.03f\n", v_ladder_name[ladder], buffer_time,
-					temperature_right, temperature_left);
+			fprintf(destination_stream, "name=%s\nTRB_position=%02d\nTRB_file=%s\nstarting_time=%s\ntemp_left=%.03f\ntemp_right=%.03f\n",
+					v_ladder_name[ladder], ladder, v_source_bin, buffer_time, temperature_right, temperature_left);
 			while (fgets(buffer_input, d_linker_string_size, source_stream) > 0)
 				fprintf(destination_stream, buffer_input);
 			fclose(destination_stream);
@@ -134,12 +134,13 @@ void f_linker_load(const char *configuration) {
 
 int main (int argc, char *argv[]) {
 	/* prototype argv[0] <calibration directory> */
-	if (argc == 2) {
+	if (argc == 3) {
 		/* load configuration file */
+		strncpy(v_source_bin, argv[2], d_linker_string_size);
 		f_linker_load("./firefly_linker.cfg");
 		f_linker(argv[1]);
 		mkdir(v_working_directory, 0777);
 	} else
-		fprintf(stderr, "usage:\n%s <calibration directory>\n", argv[0]);
+		fprintf(stderr, "usage:\n%s <calibration directory> <source BIN>\n", argv[0]);
 	return 0;
 }
