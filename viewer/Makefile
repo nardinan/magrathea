@@ -43,3 +43,4 @@ package.o: ../package.c ../package.h ../trb_device.h
 clean:
 	rm -f *.o
 	rm -f $(executable)
+	rm -rf firefly_linker.bin*

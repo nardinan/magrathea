@@ -75,7 +75,7 @@ void f_linker_move(const char *source, int ladder, float temperature_left, float
 
 void f_linker(const char *source) {
 	char result_source[d_linker_string_size];
-	int index, trb_id = 0, loaded;
+	int index, trb_id = 0;
 	float temperatures[d_linker_temperatures];
 	FILE *stream;
 	for (index = 0; index < d_linker_ladders; ++index) {
@@ -87,7 +87,7 @@ void f_linker(const char *source) {
 				break;
 			}
 		}
-		f_linker_move(result_source, index);
+		f_linker_move(result_source, index, 0.0, 0.0);
 	}
 }
 
