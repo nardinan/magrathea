@@ -20,7 +20,7 @@
 char v_working_directory[d_linker_string_size], v_ladder_name[d_linker_ladders][d_linker_ladders], v_test_kind = 0x00, v_test_location[d_linker_location_size],
      v_source_bin[d_linker_string_size];
 void p_linker_load_temperature(int trb_id, float *values) {
-
+	/* todo */
 }
 
 void p_linker_move_cal(const char *source, int ladder, const char *destination, float temperature_left, float temperature_right) {
@@ -76,7 +76,6 @@ void f_linker_move(const char *source, int ladder, float temperature_left, float
 void f_linker(const char *source) {
 	char result_source[d_linker_string_size];
 	int index, trb_id = 0;
-	float temperatures[d_linker_temperatures];
 	FILE *stream;
 	for (index = 0; index < d_linker_ladders; ++index) {
 		for (; trb_id < d_linker_trbs; ++trb_id) {
