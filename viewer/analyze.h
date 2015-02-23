@@ -19,7 +19,7 @@
 #define magrathea_analyze_h
 #include <dirent.h>
 #include "../clusters.h"
-#define d_analyze_calibration_steps 256
+#define d_analyze_calibration_steps 2048
 #define d_analyze_ladders 24
 #define d_analyze_occupancy_k 5.0f
 #define d_analyze_sigma_k 10.0f
