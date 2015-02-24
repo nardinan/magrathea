@@ -229,8 +229,8 @@ int f_trb_device_stream(unsigned char code, char **tokens, size_t elements, int 
 			strcpy(v_trb_device_boards[code].stream.destination, buffer); /* same length */
 			snprintf(status, PATH_MAX, "#%d TRB: stream has been redirected to %s\n", code, buffer);
 		} else
-			snprintf(status, PATH_MAX, "#%d TRB: %sunaccessible%s location %s\n", code, v_console_styles[e_console_style_red],
-					v_console_styles[e_console_style_reset], buffer);
+			snprintf(status, PATH_MAX, "#%d TRB: %sunaccessible%s location %s (errno %d: %s)\n", code, v_console_styles[e_console_style_red],
+					v_console_styles[e_console_style_reset], buffer, errno, strerror(errno));
 		if (output != d_console_descriptor_null) {
 			write(output, status, f_string_strlen(status));
 			fsync(output);
