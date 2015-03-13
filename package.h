@@ -36,7 +36,7 @@
 #define d_package_data_header_const_size 2	/* number of constants in the header 	*/
 #define d_package_data_header_info_size 4	/* number of informations in the header */
 #define d_package_data_tail_size 4		/* total dimension of the tail		*/
-#define d_package_alignment_size 6
+#define d_package_alignment_size 8
 #define d_package_dmg_workmode 0 /* damaged workmode 		*/
 #define d_package_raw_workmode 3 /* raw workmode 		*/
 #define d_package_nrm_workmode 2 /* compressed workmode 	*/

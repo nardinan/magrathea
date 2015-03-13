@@ -168,6 +168,8 @@ unsigned char *p_package_analyze_header_data(struct s_package *package, unsigned
 					}
 					if ((backup) && ((size-(backup-buffer)) >= d_package_data_tail_size)) {
 						pointer = backup;
+						pointer++;
+						pointer++;
 						package->data.trigger_kind = ((unsigned short int)pointer[0])>>5;
 						package->data.trigger_counter = ((unsigned short int)pointer[1])|((unsigned short int)(pointer[0]&0xf))<<8;
 						pointer += 2;
@@ -205,7 +207,7 @@ unsigned char *p_package_analyze_header(struct s_package *package, unsigned char
 					pointer = backup;
 					package->sumcheck = ((unsigned short int)pointer[1])|((unsigned short int)pointer[0])<<8;
 					package->real_sumcheck = f_package_crc(crc_started, pointer-crc_started);
-					package->wrong_sumcheck = (package->real_sumcheck != package->sumcheck);
+					//package->wrong_sumcheck = (package->real_sumcheck != package->sumcheck);
 					result = (pointer+2);
 				}
 			}
@@ -242,11 +244,11 @@ unsigned char *p_package_analyze_timestamp(struct s_package *package, unsigned c
 
 unsigned char *p_package_analyze(struct s_package *package, unsigned char *buffer, size_t size) {
 	unsigned char *result = NULL;
-	package->complete = d_false;
 	if (((result = p_package_analyze_header(package, buffer, size))) || ((result = p_package_analyze_timestamp(package, buffer, size)))) {
 		package->damaged = d_false;
 		package->complete = d_true;
-	}
+	} else
+		package->complete = d_false;
 	return result;
 }
 
