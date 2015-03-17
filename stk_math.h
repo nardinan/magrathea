@@ -22,17 +22,22 @@
 #include "package.h"
 #include "trb_device.h"
 #define d_stk_math_sigma_k 10.0
-#define d_stk_math_sigma_k_max 2.0
+#define d_stk_math_sigma_k_mean 2.0
+#define d_stk_math_sigma_k_rms 5.0
 #define d_stk_math_sigma_min 1.0
 #define d_stk_math_sigma_max 6.0
 #define d_stk_math_sigma_raw_min 1.0
 #define d_stk_math_sigma_raw_max 15.0
+#define d_stk_math_sigma_occupancy_k 3
+#define d_stk_math_sigma_occupancy_k_max 5
 typedef enum e_stk_math_flags {
 	e_stk_math_flag_ok =			0x00,
 	e_stk_math_flag_bad = 			0x01,
 	e_stk_math_flag_bad_sigma = 		0x02,
 	e_stk_math_flag_bad_sigma_raw_range = 	0x04,
-	e_stk_math_flag_bad_sigma_range = 	0x08
+	e_stk_math_flag_bad_sigma_range = 	0x08,
+	e_stk_math_flag_bad_occupancy =		0x10,
+	e_stk_math_flag_bad_sigma_rms =		0x11
 } e_stk_math_flags;
 extern float *f_stk_math_pedestal(float values[][d_package_channels], size_t size, float *supplied);
 extern float *f_stk_math_sigma_raw(float values[][d_package_channels], size_t size, float *supplied, unsigned short *supplied_flags);

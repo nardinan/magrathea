@@ -77,7 +77,7 @@ float *f_stk_math_cn(float *values, float sigma_multiplicator, float *pedestal, 
 float *f_stk_math_sigma(float values[][d_package_channels], size_t size, float sigma_multiplicator, float *sigma_raw, float *pedestal, float *supplied_values,
 		unsigned short *supplied_flags) {
 	float *result = supplied_values, common_noise[d_package_vas], common_noise_pure[d_package_channels] = {0},
-		common_noise_pure_square[d_package_channels] = {0}, value, fraction, mean = 0;
+		common_noise_pure_square[d_package_channels] = {0}, value, fraction, sigma_rms, sigma_mean = 0, sigma_mean_square = 0;
 	int channel, event, local_entries[d_package_channels] = {0};
 	if (!result)
 		if (!(result = (float *) d_malloc(sizeof(float)*d_package_channels)))
@@ -99,12 +99,18 @@ float *f_stk_math_sigma(float values[][d_package_channels], size_t size, float s
 			common_noise_pure[channel] *= fraction;
 			common_noise_pure_square[channel] *= fraction;
 			result[channel] = sqrt(fabs(common_noise_pure_square[channel]-(common_noise_pure[channel]*common_noise_pure[channel])));
-			mean += result[channel];
+			sigma_mean += result[channel];
+			sigma_mean_square += (result[channel]*result[channel]);
 		}
 	if (supplied_flags) {
-		mean /= (float)d_package_channels;
+		sigma_mean /= (float)d_package_channels;
+		sigma_mean_square /= (float)d_package_channels;
+		sigma_rms = sqrt(fabs(sigma_mean_square-(sigma_mean*sigma_mean)));
 		for (channel = 0; channel < d_package_channels; ++channel) {
-			if (result[channel] > (d_stk_math_sigma_k_max*mean))
+			if ((result[channel] > (sigma_mean+(d_stk_math_sigma_k_rms*sigma_rms))) ||
+					(result[channel] < (sigma_mean-(d_stk_math_sigma_k_rms*sigma_rms))))
+				supplied_flags[channel] |= e_stk_math_flag_bad_sigma_rms;
+			if ((result[channel] > (d_stk_math_sigma_k_mean*sigma_mean) || (result[channel] < (d_stk_math_sigma_k_mean*(-sigma_mean)))))
 				supplied_flags[channel] |= e_stk_math_flag_bad_sigma;
 			if ((result[channel] > d_stk_math_sigma_max) || (result[channel] < d_stk_math_sigma_min))
 				supplied_flags[channel] |= e_stk_math_flag_bad_sigma_range;
