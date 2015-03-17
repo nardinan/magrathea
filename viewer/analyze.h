@@ -21,8 +21,6 @@
 #include "../clusters.h"
 #define d_analyze_calibration_steps 2048
 #define d_analyze_ladders 24
-#define d_analyze_occupancy_k 5.0f
-#define d_analyze_sigma_k 10.0f
 #define d_analyze_clusters_max 5.0f
 #define d_analyze_clusters_min 3.0f
 typedef struct s_analyze_data {

@@ -33,7 +33,7 @@ int f_analyze_data(struct s_analyze_environment *environment, unsigned short int
 				environment->computed_calibrations.ladder[ladder].pedestal);
 		f_stk_math_sigma_raw(environment->calibration[ladder].bucket, environment->calibration[ladder].package,
 				environment->computed_calibrations.ladder[ladder].sigma_raw, environment->computed_calibrations.ladder[ladder].flags);
-		f_stk_math_sigma(environment->calibration[ladder].bucket, environment->calibration[ladder].package, d_analyze_sigma_k,
+		f_stk_math_sigma(environment->calibration[ladder].bucket, environment->calibration[ladder].package, d_stk_math_sigma_k,
 				environment->computed_calibrations.ladder[ladder].sigma_raw, environment->computed_calibrations.ladder[ladder].pedestal,
 				environment->computed_calibrations.ladder[ladder].sigma, environment->computed_calibrations.ladder[ladder].flags);
 		environment->calibration[ladder].computed = d_true;
@@ -47,7 +47,7 @@ int f_analyze_data(struct s_analyze_environment *environment, unsigned short int
 		else
 			memcpy(environment->data[ladder].adc_pedestal, environment->data[ladder].bucket, (sizeof(float)*d_package_channels));
 		if (v_analyze_adc_pedestal_cn)
-			f_stk_math_adc_pedestal_cn(environment->data[ladder].bucket, d_analyze_sigma_k,
+			f_stk_math_adc_pedestal_cn(environment->data[ladder].bucket, d_stk_math_sigma_k,
 					environment->computed_calibrations.ladder[ladder].pedestal, environment->computed_calibrations.ladder[ladder].sigma,
 					environment->computed_calibrations.ladder[ladder].flags, environment->data[ladder].adc_pedestal_cn, common_noise);
 		else {
