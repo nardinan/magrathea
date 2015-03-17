@@ -20,9 +20,41 @@ struct s_view_environment environment;
 int v_view_ladder, v_view_trb, v_view_calibration_steps = d_view_calibration_steps, v_view_skip_frames, v_view_pause, v_view_label_refresh = d_true, v_frames,
     v_flags;
 long long v_starting_time;
+void p_view_action_dump_bad_channels(struct s_interface *interface) {
+	FILE *stream;
+	char filename[PATH_MAX];
+	int ladder, channel;
+	snprintf(filename, PATH_MAX, "%s%s.txt", environment.filename, d_view_bad_channels_tail);
+	if ((stream = fopen(filename, "w"))) {
+		for (ladder = 0; ladder < d_analyze_ladders; ++ladder)
+			for (channel = 0; channel < d_package_channels; ++channel)
+				if (environment.data.computed_calibrations.ladder[ladder].flags[channel])
+					fprintf(stream, "%d %d %d\n", v_view_trb, ladder, channel);
+		fclose(stream);
+	}
+}
+
 void f_view_action_dump(GtkWidget *widget, struct s_interface *interface) {
-	if (environment.data.calibrated >= d_analyze_ladders)
+	int ladder, channel;
+	float occupancy_mean, occupancy_mean_square, occupancy_rms;
+	if (environment.data.calibrated >= d_analyze_ladders) {
+		for (ladder = 0; ladder < d_analyze_ladders; ++ladder) {
+			for (channel = 0; channel < d_package_channels; ++channel) {
+				occupancy_mean += environment.data.data[ladder].occupancy[channel];
+				occupancy_mean_square += (environment.data.data[ladder].occupancy[channel]*environment.data.data[ladder].occupancy[channel]);
+			}
+			occupancy_mean = (occupancy_mean/(float)environment.data.counters[ladder].data_events);
+			occupancy_mean_square = (occupancy_mean_square/(float)environment.data.counters[ladder].data_events);
+			occupancy_rms = sqrt(fabs(occupancy_mean_square-(occupancy_mean*occupancy_mean)));
+			for (channel = 0; channel < d_package_channels; ++channel)
+				if ((environment.data.data[ladder].occupancy[channel] > (occupancy_mean+(d_stk_math_sigma_occupancy_k_max*occupancy_rms))) ||
+						(environment.data.data[ladder].occupancy[channel] <
+						 (occupancy_mean-(d_stk_math_sigma_occupancy_k_max*occupancy_rms))))
+					environment.data.computed_calibrations.ladder[ladder].flags[channel] |= e_stk_math_flag_bad_occupancy;
+		}
 		f_calibrations_export(&(environment.data.computed_calibrations), environment.filename, v_view_trb);
+		p_view_action_dump_bad_channels(interface);
+	}
 }
 
 void f_view_action_redo(GtkWidget *widget, struct s_interface *interface) {
@@ -271,7 +303,7 @@ void p_view_loop_read_process(struct s_interface *interface, struct s_package *p
 								} else
 									environment.data.computed_calibrations.ladder[package->data.values.dld.ladder[ladder]].
 										sigma[channel] = ((float)package->data.values.dld.rms[ladder][channel]/
-												d_view_rms_k);
+										d_view_rms_k);
 							}
 						}
 				break;
