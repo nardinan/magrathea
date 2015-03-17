@@ -58,6 +58,7 @@ typedef struct s_chart {
 		float x_axis, y_axis;
 	} normalized;
 	struct s_chart_axis axis_x, axis_y;
+	struct s_chart_color background;
 	struct {
 		float dot_size[d_chart_max_nested], line_size[d_chart_max_nested];
 		struct s_chart_color color[d_chart_max_nested];
