@@ -65,7 +65,7 @@ int f_analyze_data(struct s_analyze_environment *environment, unsigned short int
 		for (channel = 0; channel < d_package_channels; ++channel)
 			if (environment->computed_calibrations.ladder[ladder].flags[channel] == e_stk_math_flag_ok) /* no bad channel */
 				if (environment->data[ladder].adc_pedestal_cn[channel] >
-						(d_analyze_occupancy_k*environment->computed_calibrations.ladder[ladder].sigma[channel]))
+						(d_stk_math_sigma_occupancy_k*environment->computed_calibrations.ladder[ladder].sigma[channel]))
 					environment->data[ladder].occupancy[channel]++;
 	}
 	return result;
