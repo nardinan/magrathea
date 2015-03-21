@@ -17,7 +17,7 @@
  */
 #ifndef magrathea_device_h
 #define magrathea_device_h
-#include "console.h"
+#include <miranda/ground.h>
 typedef enum e_device_calls {
 	e_device_calls_trigger = 0,
 	e_device_calls_description,

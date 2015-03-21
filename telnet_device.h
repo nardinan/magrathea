@@ -22,7 +22,6 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include "adlink.h"
-#include "console.h"
 #include "magrathea.h"
 #define d_telnet_device_stream_null -1
 #define d_telnet_device_port 8090

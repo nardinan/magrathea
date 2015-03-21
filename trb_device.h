@@ -17,7 +17,7 @@
  */
 #ifndef magrathea_trb_device_h
 #define magrathea_trb_device_h
-#include "console.h"
+#include <miranda/ground.h>
 #define d_trb_device_boards 8
 #define d_trb_device_ladders 24
 #define d_trb_device_raw_command_size 12

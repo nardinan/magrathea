@@ -17,7 +17,6 @@
  */
 #ifndef magrathea_commands_h
 #define magrathea_commands_h
-#include "console.h"
 #include "device.h"
 extern struct s_console_command v_commands[];
 extern int f_commands_trigger(struct s_console *console, struct s_console_command *command, char **tokens, size_t elements, int output);

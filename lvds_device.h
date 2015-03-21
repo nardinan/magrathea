@@ -18,7 +18,6 @@
 #ifndef magrathea_lvds_device_h
 #define magrathea_lvds_device_h
 #include "adlink.h"
-#include "console.h"
 #include "trb_device.h" /* it's needed to get output descriptor */
 #define d_lvds_device_timeout (10*1000) /* milliseconds */
 extern int f_lvds_device_refresh(unsigned char code, struct s_console *console);

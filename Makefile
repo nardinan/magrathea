@@ -12,7 +12,6 @@ PLX_OBJECTS = \
 	$(OBJ_DIR)/trigger_device.o \
 	$(OBJ_DIR)/lvds_device.o \
 	$(OBJ_DIR)/telnet_device.o \
-	$(OBJ_DIR)/console.o \
 	$(OBJ_DIR)/commands.o \
 	$(OBJ_DIR)/magrathea.o \
 

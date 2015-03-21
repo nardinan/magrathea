@@ -17,8 +17,8 @@
  */
 #ifndef magrathea_trigger_device_h
 #define magrathea_trigger_device_h
+#include <miranda/ground.h>
 #include "adlink.h"
-#include "console.h"
 extern int f_trigger_device_trigger(unsigned char code, char **tokens, size_t elements, int output);
 extern int f_trigger_device_initialize(unsigned char code);
 extern int f_trigger_device_destroy(unsigned char code);
