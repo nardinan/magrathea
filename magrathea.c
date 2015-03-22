@@ -116,6 +116,7 @@ int f_magrathea_init(int descriptor) {
 		if ((status = f_console_init(&console, v_commands, STDIN_FILENO))) {
 			strcpy(console->prefix, "\r[input]>");
 			console->level = e_console_level_guest;
+			console->input_enabled = d_true;
 		}
 	}
 	d_magrathea_module(status, descriptor, "devices") {
