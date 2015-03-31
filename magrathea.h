@@ -18,7 +18,7 @@
 #ifndef magrathea_magrathea_h
 #define magrathea_magrathea_h
 #include <signal.h>
-#include <magrathea/ground.h>
+#include <miranda/ground.h>
 #include "commands.h"
 #include "trb_device.h"
 #include "trigger_device.h"
