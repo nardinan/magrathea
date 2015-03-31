@@ -62,11 +62,13 @@ int f_analyze_data(struct s_analyze_environment *environment, unsigned short int
 		f_clusters_search(&(environment->data[ladder].compressed_event), environment->data[ladder].adc_pedestal_cn,
 				environment->computed_calibrations.ladder[ladder].sigma, common_noise, environment->computed_calibrations.ladder[ladder].flags,
 				d_analyze_clusters_max, d_analyze_clusters_min);
-		for (channel = 0; channel < d_package_channels; ++channel)
+		for (channel = 0; channel < d_package_channels; ++channel) {
 			if (environment->computed_calibrations.ladder[ladder].flags[channel] == e_stk_math_flag_ok) /* no bad channel */
 				if (environment->data[ladder].adc_pedestal_cn[channel] >
 						(d_stk_math_sigma_occupancy_k*environment->computed_calibrations.ladder[ladder].sigma[channel]))
-					environment->data[ladder].occupancy[channel]++;
+					environment->data[ladder].occupancy[channel] += environment->data[ladder].adc_pedestal_cn[channel];
+			environment->data[ladder].occupancy_counter[channel]++;
+		}
 	}
 	return result;
 }

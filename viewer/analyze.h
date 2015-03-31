@@ -25,7 +25,8 @@
 #define d_analyze_clusters_min 3.0f
 typedef struct s_analyze_data {
 	struct s_event_environment compressed_event;
-	float bucket[d_package_channels], adc_pedestal[d_package_channels], adc_pedestal_cn[d_package_channels], occupancy[d_package_channels];
+	float bucket[d_package_channels], adc_pedestal[d_package_channels], adc_pedestal_cn[d_package_channels], occupancy[d_package_channels],
+	      occupancy_counter[d_package_channels];
 	unsigned int new_bucket:1;
 } s_analyze_data;
 typedef struct s_analyze_calibration {
