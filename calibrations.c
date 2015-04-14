@@ -47,21 +47,24 @@ int p_calibrations_file_read_row(char *string, float *pedestal, float *sigma_raw
 }
 
 int p_calibrations_file_read(struct s_calibrations_environment *environment, FILE *stream, int ladder) {
-	char buffer[d_string_buffer_size];
+	char buffer[d_string_buffer_size], *pointer, *next;
 	float pedestal = 0.0f, sigma_raw = 0.0f, sigma = 0.0f;
 	unsigned short flag = 0;
-	int channel = 0, result = d_true;
+	int channel = 0, entries, result = d_true;
 	while (!feof(stream))
 		if (fgets(buffer, d_string_buffer_size, stream) > 0) {
-			channel = p_calibrations_file_read_row(buffer, &pedestal, &sigma_raw, &sigma, &flag);
-			if ((channel >= 0) && (channel < d_package_channels)) {
-				environment->ladder[ladder].pedestal[channel] = pedestal;
-				environment->ladder[ladder].sigma_raw[channel] = sigma_raw;
-				environment->ladder[ladder].sigma[channel] = sigma;
-				environment->ladder[ladder].flags[channel] = flag;
-			} else
-				fprintf(stderr, "warning, channel %d has been readed (but channels have to be between 0 and %d)\n", channel,
-						d_package_channels);
+			for (pointer = buffer, entries = 0; (next = strchr(pointer, ',')); pointer = (next+1), ++entries);
+			if (entries >= (d_calibrations_columns-1)) {
+				channel = p_calibrations_file_read_row(buffer, &pedestal, &sigma_raw, &sigma, &flag);
+				if ((channel >= 0) && (channel < d_package_channels)) {
+					environment->ladder[ladder].pedestal[channel] = pedestal;
+					environment->ladder[ladder].sigma_raw[channel] = sigma_raw;
+					environment->ladder[ladder].sigma[channel] = sigma;
+					environment->ladder[ladder].flags[channel] = flag;
+				} else
+					fprintf(stderr, "warning, channel %d has been readed (but channels have to be between 0 and %d)\n", channel,
+							d_package_channels);
+			}
 		}
 	return result;
 }
@@ -80,7 +83,7 @@ int p_calibrations_file(struct s_calibrations_environment *environment, const ch
 	return result;
 }
 
-int f_calibrations(struct s_calibrations_environment *environment, const char *directory) {
+int p_calibrations(struct s_calibrations_environment *environment, const char *directory, int child) {
 	DIR *stream;
 	struct dirent *descriptor;
 	int result = d_false;
@@ -89,13 +92,18 @@ int f_calibrations(struct s_calibrations_environment *environment, const char *d
 		while ((descriptor = readdir(stream)))
 			if (descriptor->d_name[0] != '.') {
 				snprintf(next_directory, d_string_buffer_size, "%s/%s", directory, descriptor->d_name);
-				f_calibrations(environment, next_directory);
+				if (!child)
+					p_calibrations(environment, next_directory, d_true);
 			}
 		closedir(stream);
 		result = d_true;
 	} else if ((next_pointer = strrchr(directory, '.')) && (f_string_strcmp(next_pointer, ".cal") == 0))
 		result = p_calibrations_file(environment, directory);
 	return result;
+}
+
+int f_calibrations(struct s_calibrations_environment *environment, const char *directory) {
+	return p_calibrations(environment, directory, d_false);
 }
 
 void f_calibrations_export(struct s_calibrations_environment *environment, const char *destination, unsigned int trb) {

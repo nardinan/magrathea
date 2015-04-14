@@ -128,7 +128,7 @@ unsigned char *p_package_analyze_raw(struct s_package *package, unsigned char *b
 
 unsigned char *p_package_analyze_header_data(struct s_package *package, unsigned char *buffer, size_t size) {
 	static unsigned char header_data[] = {0xEE, 0xBB};
-	unsigned char *pointer = buffer, *backup = NULL, *result = NULL, workmode, group;
+	unsigned char *pointer = buffer, *backup = NULL, *result = NULL, workmode;
 	int index;
 	if (size >= d_package_alignment_size)
 		for (index = 0; index < d_package_alignment_size; ++index) {
@@ -145,7 +145,7 @@ unsigned char *p_package_analyze_header_data(struct s_package *package, unsigned
 		if (index >= d_package_data_header_const_size) {
 			if ((size-(pointer-buffer)) > d_package_data_header_info_size) {
 				workmode = (pointer[0]>>4)&0x0f;
-				group = (pointer[0])&0x0f;
+				//group = (pointer[0])&0x0f; // not needed
 				if ((workmode == d_package_raw_workmode) || (workmode == d_package_nrm_workmode) || (workmode == d_package_dld_workmode)) {
 					package->data.kind = workmode;
 					pointer++;

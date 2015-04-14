@@ -37,6 +37,7 @@ extern void f_calibrations_values(struct s_calibrations_environment *environment
 extern int p_calibrations_file_read_row(char *string, float *pedestal, float *sigma_raw, float *sigma, unsigned short *flags);
 extern int p_calibrations_file_read(struct s_calibrations_environment *environment, FILE *stream, int ladder);
 extern int p_calibrations_file(struct s_calibrations_environment *environment, const char *file);
+extern int p_calibrations(struct s_calibrations_environment *environment, const char *directory, int child);
 extern int f_calibrations(struct s_calibrations_environment *environment, const char *directory);
 extern void f_calibrations_export(struct s_calibrations_environment *environment, const char *destination, unsigned int trb);
 #endif
