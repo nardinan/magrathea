@@ -54,14 +54,14 @@ unsigned int v_trb_device_bytes[] = {
 	31	/* 0x07 - version code B				*/
 };
 struct s_trb_device v_trb_device_boards[d_trb_device_boards] = {
-	{d_rs232_null, d_false, d_false, d_false, 0x00, "/dev/ttyL0"},
-	{d_rs232_null, d_false, d_false, d_false, 0x01, "/dev/ttyL1"},
-	{d_rs232_null, d_false, d_false, d_false, 0x08, "/dev/ttyL2"},
-	{d_rs232_null, d_false, d_false, d_false, 0x09, "/dev/ttyL3"},
-	{d_rs232_null, d_false, d_false, d_false, 0x04, "/dev/ttyL4"},
-	{d_rs232_null, d_false, d_false, d_false, 0x05, "/dev/ttyL5"},
-	{d_rs232_null, d_false, d_false, d_false, 0x0C, "/dev/ttyL6"},
-	{d_rs232_null, d_false, d_false, d_false, 0x0D, "/dev/ttyL7"}
+	{d_rs232_null, d_false, d_false, d_false, 0x00, "/dev/ttyL4"},
+	{d_rs232_null, d_false, d_false, d_false, 0x01, "/dev/ttyL5"},
+	{d_rs232_null, d_false, d_false, d_false, 0x08, "/dev/ttyL6"},
+	{d_rs232_null, d_false, d_false, d_false, 0x09, "/dev/ttyL7"},
+	{d_rs232_null, d_false, d_false, d_false, 0x04, "/dev/ttyL0"},
+	{d_rs232_null, d_false, d_false, d_false, 0x05, "/dev/ttyL1"},
+	{d_rs232_null, d_false, d_false, d_false, 0x0C, "/dev/ttyL2"},
+	{d_rs232_null, d_false, d_false, d_false, 0x0D, "/dev/ttyL3"}
 };
 void p_trb_device_description_format(unsigned char code, char *destination, size_t size) {
 	static const char *bytes_postfixes[] = {
