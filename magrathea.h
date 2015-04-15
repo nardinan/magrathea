@@ -31,6 +31,7 @@
 #define d_magrathea_exit_command "quit"
 extern const char *quit_greetings[];
 extern void p_magrathea_sigpipe_ignore(int signal);
+extern void p_magrathea_sighalt_ignore(int signal);
 extern int p_magrathea_init_verbose(int descriptor, const char *subsystem);
 extern int f_magrathea_init(int descriptor);
 #endif

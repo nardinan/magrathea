@@ -156,6 +156,7 @@ int main (int argc, char *argv[]) {
 	f_memory_init();
 	if (f_magrathea_init(STDOUT_FILENO)) {
 		signal(SIGPIPE, p_magrathea_sigpipe_ignore);
+		signal(SIGINT, p_magrathea_sigpipe_ignore);
 		while (d_true) {
 			f_console_read(console, &input, STDOUT_FILENO, 0, 10);
 			if (input.ready) {
