@@ -365,13 +365,13 @@ int f_trb_device_convert(unsigned char code, char **tokens, size_t elements, int
 
 int p_trb_device_inject_command(unsigned char code, const char *command, int output) {
 	char current_code[d_trb_device_hexadecimal_size+1] = {0}, packet[d_trb_device_inject_hexadecimal_size+1] = {0},
-	     *commands[d_trb_device_inject_commands] = {"-w", NULL};
+	     *commands[d_trb_device_inject_commands] = {"-x", NULL};
 	unsigned char check_code;
 	int result = d_false;
 	sscanf(command, "%s %s %s %s", current_code, &(packet[0]), &(packet[2]), &(packet[4]));
 	check_code = (unsigned char)strtol(current_code, NULL, 16);
 	if (check_code == v_trb_device_boards[code].code) {
-		commands[2] = packet;
+		commands[1] = packet;
 		result = f_trb_device_write(code, commands, d_trb_device_inject_commands, d_console_descriptor_null);
 		usleep(d_trb_device_inject_timeout_command);
 	}
