@@ -364,7 +364,7 @@ int f_trb_device_convert(unsigned char code, char **tokens, size_t elements, int
 }
 
 int p_trb_device_inject_command(unsigned char code, const char *command, int output) {
-	char current_code[d_trb_device_hexadecimal_size+1] = 0, packet[d_trb_device_inject_hexadecimal_size+1] = 0,
+	char current_code[d_trb_device_hexadecimal_size+1] = {0}, packet[d_trb_device_inject_hexadecimal_size+1] = {0},
 	     *commands[d_trb_device_inject_commands] = {"-w", NULL};
 	unsigned char check_code;
 	int result = d_false;
@@ -391,7 +391,7 @@ int p_trb_device_inject_file(unsigned char code, const char *file, int output) {
 					singleton[hexadecimal] = *trb_pointer;
 					trb_pointer++;
 				} else
-					singleton[hexadecimal] = 0
+					singleton[hexadecimal] = 0;
 			}
 			current_code = (unsigned char)strtol(singleton, NULL, 16);
 			if (current_code == v_trb_device_boards[code].code) {
@@ -432,7 +432,7 @@ int p_trb_device_inject(unsigned char code, const char *directory, int output) {
 			}
 		closedir(stream);
 		result = d_true;
-	} else if ((next_pointer = strrchr(directory, '.')) && (f_string_compare(next_pointer, ".injlst") == 00))
+	} else if ((next_pointer = strrchr(directory, '.')) && (f_string_strcmp(next_pointer, ".injlst") == 00))
 		result = p_trb_device_inject_file(code, directory, output);
 	return result;
 }
