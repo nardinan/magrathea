@@ -513,7 +513,7 @@ void p_trb_device_refresh_analyze(unsigned char code, unsigned char *buffer, siz
 						current = (value*8.0f)-7.1f;
 						v_trb_device_boards[code].status.currents[e_trb_device_currents_33] = (current<0.0f)?0.0f:current;
 						value = (int)(buffer[B(e_trb_device_bytes_0x05_current_57)]);
-						current = (value*0.8f)-5.1f;
+						current = (value*3.4f);
 						v_trb_device_boards[code].status.currents[e_trb_device_currents_57] = (current<0.0f)?0.0f:current;
 						value = (int)(buffer[B(e_trb_device_bytes_0x05_current_12)]);
 						current = value;
@@ -576,7 +576,7 @@ void p_trb_device_refresh_analyze(unsigned char code, unsigned char *buffer, siz
 							current = (value*8.0f)-7.1f;
 							v_trb_device_boards[code].status.currents[e_trb_device_currents_33] = (current<0.0f)?0.0f:current;
 							value = (int)(buffer[B(e_trb_device_bytes_0x07BB_current_S57)]);
-							current = (value*0.8f)-5.1f;
+							current = (value*3.4f);
 							v_trb_device_boards[code].status.currents[e_trb_device_currents_57] = (current<0.0f)?0.0f:current;
 							value = (int)(buffer[B(e_trb_device_bytes_0x07BB_current_S12)]);
 							current = value;
