@@ -93,6 +93,12 @@ void p_magrathea_sigpipe_ignore(int signal) {
 	/* do nothing */
 }
 
+void p_magrathea_sighalt_ignore(int signal) {
+	fprintf(stderr, "\n[%sWARNING%s] - Ok mate, probably you want to quit this is not the proper way to do it!"
+			"\n[%sWARNING%s] - Please use '%s' command!", v_console_styles[e_console_style_yellow], v_console_styles[e_console_style_reset],
+			v_console_styles[e_console_style_yellow], v_console_styles[e_console_style_reset], d_magrathea_exit_command);
+}
+
 int p_magrathea_init_verbose(int descriptor, const char *subsystem) {
 	char buffer[d_string_buffer_size];
 	int result = d_true;
