@@ -133,12 +133,9 @@ int f_convert_read(const char *prefix, FILE *stream, int trb) {
 							case d_package_tmp_workmode:
 								strcpy(package_kind, "TIMESTAMP      ");
 						}
-						if ((v_convert_mode == d_package_dmg_workmode) || (v_convert_mode == current_mode)) {
-							if ((current_mode != d_package_raw_workmode) || ((current_mode == d_package_raw_workmode) && 
-										(package.data.values.raw.ladder[0]) && 
-										(package.data.values.raw.ladder[1] == 12)))
-								write_event = d_true;
-						} else
+						if ((v_convert_mode == d_package_dmg_workmode) || (v_convert_mode == current_mode))
+							write_event = d_true;
+						else
 							write_event = d_false;
 						if (write_event)
 							f_convert_insert(&environment, &package);
