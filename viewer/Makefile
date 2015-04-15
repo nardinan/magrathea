@@ -1,7 +1,7 @@
 objects = view.o analyze.o interface.o calibrations.o clusters.o stk_math.o package.o chart.o keys.o interface_scale.o
 name = magrathea_view
 cc = gcc
-cflags = -Wall `pkg-config --cflags gtk+-2.0` -I../../ -Wno-variadic-macros -Wno-pointer-arith -c
+cflags = -Wall -D_FILE_OFFSET_BITS=64 `pkg-config --cflags gtk+-2.0` -I../../ -Wno-variadic-macros -Wno-pointer-arith -c
 lflags = -Wall
 liblink = `pkg-config --libs gtk+-2.0` -L../../miranda -lm -lmiranda_ground
 executable = $(name).bin
