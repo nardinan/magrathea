@@ -383,7 +383,7 @@ int p_trb_device_inject_file(unsigned char code, const char *file, int output) {
 	char *filename_pointer, *trb_pointer, singleton[(d_trb_device_hexadecimal_size+1)], buffer[d_string_buffer_size];
 	unsigned char current_code;
 	int hexadecimal, result = d_false;
-	if ((filename_pointer = strrchr(file, '/'))) {
+	if ((filename_pointer = strrchr(file, '/')))
 		if ((trb_pointer = strstr(file, d_trb_device_inject_prefix))) {
 			trb_pointer += f_string_strlen(d_trb_device_inject_prefix);
 			for (hexadecimal = 0; hexadecimal < d_trb_device_hexadecimal_size; ++hexadecimal) {
@@ -412,10 +412,9 @@ int p_trb_device_inject_file(unsigned char code, const char *file, int output) {
 					write(output, buffer, f_string_strlen(buffer));
 					fsync(output);
 				}
+				usleep(d_trb_device_inject_timeout_trb);
 			}
-			usleep(d_trb_device_inject_timeout_trb);
 		}
-	}
 	return result;
 }
 
@@ -432,7 +431,7 @@ int p_trb_device_inject(unsigned char code, const char *directory, int output) {
 			}
 		closedir(stream);
 		result = d_true;
-	} else if ((next_pointer = strrchr(directory, '.')) && (f_string_strcmp(next_pointer, ".injlst") == 00))
+	} else if ((next_pointer = strrchr(directory, '.')) && (f_string_strcmp(next_pointer, ".injlst") == 0))
 		result = p_trb_device_inject_file(code, directory, output);
 	return result;
 }
