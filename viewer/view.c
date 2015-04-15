@@ -341,7 +341,10 @@ int p_view_loop_read(struct s_interface *interface, int delay) {
 	if ((backup = f_package_analyze(&package, environment.buffer, environment.bytes))) {
 		result = d_true;
 		if (backup > environment.buffer) {
-			environment.bytes -= (backup-environment.buffer);
+			if (environment.bytes > (backup-environment.buffer)) 
+				environment.bytes -= (backup-environment.buffer);
+			else
+				environment.bytes = 0;
 			memmove(environment.buffer, backup, environment.bytes);
 			if (package.complete) {
 				if (!package.wrong_sumcheck)
