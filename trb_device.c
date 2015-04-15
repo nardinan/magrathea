@@ -363,6 +363,93 @@ int f_trb_device_convert(unsigned char code, char **tokens, size_t elements, int
 	return result;
 }
 
+int p_trb_device_inject_command(unsigned char code, const char *command, int output) {
+	char current_code[d_trb_device_hexadecimal_size+1] = 0, packet[d_trb_device_inject_hexadecimal_size+1] = 0,
+	     *commands[d_trb_device_inject_commands] = {"-w", NULL}, buffer[d_string_buffer_size];
+	unsigned char check_code;
+	int result = d_false;
+	sscanf(command, "%s %s %s %s", current_code, &(packet[0]), &(packet[2]), &(packet[4]));
+	check_code = (unsigned char)strtol(current_code, NULL, 16);
+	if (check_code == v_trb_device_boards[code].code) {
+		commands[2] = packet;
+		printf("%s\n", packet); // test me on the ADLink, please!
+		//result = f_trb_device_write(code, commands, d_trb_device_inject_commands, d_console_descriptor_null);
+		usleep(d_trb_device_inject_timeout_command);
+	} else if (output != d_console_descriptor_null) {
+		/* p_trb_device_inject_file says that this string is for me, but looks like that is for another trb ... a GIA! */
+		snprintf(buffer, d_string_buffer_size, "#%d TRB returning an unexpected error with the format of this string: %s\n", command);
+		write(output, buffer, f_string_strlen(buffer));
+		fsync(output);
+	}
+	return result;
+}
+
+int p_trb_device_inject_file(unsigned char code, const char *file, int output) {
+	FILE *stream;
+	char *filename_pointer, *trb_pointer, singleton[(d_trb_device_hexadecimal_size+1)], buffer[d_string_buffer_size];
+	unsigned char current_code;
+	int hexadecimal, result = d_false;
+	if ((filename_pointer = strrchr(file, '/'))) {
+		if ((trb_pointer = strstr(filename, d_trb_device_inject_prefix))) {
+			for (hexadecimal = 0; hexadecimal < d_trb_device_hexadecimal_size; ++hexadecimal) {
+				if (*trb_pointer) {
+					singleton[hexadecimal] = *trb_pointer;
+					trb_pointer++;
+				} else
+					singleton[hexadecimal] = 0
+			}
+			current_code = (unsigned char)strtol(singleton, NULL, 16);
+		}
+		if (current_code == v_trb_device_boards[code].code) {
+			if ((stream = fopen(file, "r"))) {
+				while (!feof(stream))
+					if (fgets(buffer, d_string_buffer_size, stream)) {
+						f_string_trim(buffer);
+						if (f_string_strlen(buffer) > 0) {
+							p_trb_device_inject_command(code, buffer, output);
+					}
+				fclose(stream);
+				snprintf(buffer, d_string_buffer_size, "#%d TRB: file %s has been %sinjected%s\n", code, file, 
+						v_console_styles[e_console_style_green], v_console_styles[e_console_style_reset]);
+			} else
+				snprintf(buffer, d_string_buffer_size, "#%d TRB: file %s is %sunreadable%s\n", code, file, 
+						v_console_styles[e_console_style_red], v_console_styles[e_console_style_reset]);
+			if (output != d_console_descriptor_null) {
+				write(output, buffer, f_string_strlen(buffer));
+				fsync(output);
+			}
+			usleep(d_trb_device_inject_timeout_trb);
+		}
+	}
+	return result;
+}
+
+int p_trb_device_inject(unsigned char code, const char *directory, int output) {
+	DIR *stream;
+	struct dirent *descriptor;
+	int result = d_false;
+	char next_directory[PATH_MAX], *next_pointer;
+	if ((stream = opendir(directory))) {
+		while ((descriptor = readdir(stream)))
+			if (descriptor->d_name[0] != '.') {
+				snprintf(next_directory, PATH_MAX, "%s/%s", directory, descriptor->d_name);
+				if (!child)
+					p_trb_device_inject(code, next_directory);
+			}
+		closedir(stream);
+		result = d_true;
+	} else if ((next_pointer = strrchr(directory, '.')) && (f_string_compare(next_pointer, ".injlst") == 00))
+		result = p_trb_device_inject_file(code, directory, output);
+	return result;
+}
+
+int f_trb_device_inject(unsigned char code, char **tokens, size_t elements, int output) {
+	char *folder = tokens[f_console_parameter("-f", tokens, elements, d_false)];
+	if (v_trb_device_boards[code].descriptor != d_rs232_null)
+		p_trb_device_inject(code, folder, output);
+	return result;
+}
+
 int f_trb_device_enabled(unsigned char code) {
 	return v_trb_device_boards[code].selected;
 }

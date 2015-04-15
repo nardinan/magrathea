@@ -29,4 +29,5 @@ extern int f_commands_mask(struct s_console *console, struct s_console_command *
 extern int f_commands_focus(struct s_console *console, struct s_console_command *command, char **tokens, size_t elements, int output);
 extern int f_commands_view(struct s_console *console, struct s_console_command *command, char **tokens, size_t elements, int output);
 extern int f_commands_convert(struct s_console *console, struct s_console_command *command, char **tokens, size_t elements, int output);
+extern int f_commands_inject(struct s_console *console, struct s_console_command *command, char **tokens, size_t elements, int output);
 #endif

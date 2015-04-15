@@ -37,8 +37,14 @@
 #define V(a) v_trb_device_boards[(a)].status
 #define d_trb_device_viewer "./viewer.sh"
 #define d_trb_device_status "./status.sh"
-#define d_trb_device_viewer_skip 25
 #define d_trb_device_converter "./converter.sh"
+#define d_trb_device_viewer_skip 25
+#define d_trb_device_inject_prefix "ID0x"
+#define d_trb_device_inject_commands 2
+#define d_trb_device_inject_command_size 11
+#define d_trb_device_inject_hexadecimal_size 6
+#define d_trb_device_inject_timeout_command 500	/* microseconds */
+#define d_trb_device_inject_timeout_trb 100000	/* microseconds */
 typedef enum e_trb_device_currents {
 	e_trb_device_currents_34 = 0,
 	e_trb_device_currents_33,
@@ -147,6 +153,10 @@ extern int f_trb_device_mask(unsigned char code, char **tokens, size_t elements,
 extern int f_trb_device_focus(unsigned char code, char **tokens, size_t elements, int output);
 extern int f_trb_device_view(unsigned char code, char **tokens, size_t elements, int output);
 extern int f_trb_device_convert(unsigned char code, char **tokens, size_t elements, int output);
+extern int p_trb_device_inject_command(unsigned char code, const char *command, int output);
+extern int p_trb_device_inject_file(unsigned char code, const char *file, int output);
+extern int p_trb_device_inject(unsigned char code, const char *directory, int output);
+extern int f_trb_device_inject(unsigned char code, char **tokens, size_t elements, int output);
 extern int f_trb_device_enabled(unsigned char code);
 extern int f_trb_device_initialize(unsigned char code);
 extern void p_trb_device_destroy_descriptor(unsigned char code);

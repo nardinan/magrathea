@@ -29,6 +29,7 @@ typedef enum e_device_calls {
 	e_device_calls_focus,
 	e_device_calls_view,
 	e_device_calls_convert,
+	e_device_calls_inject,
 	e_device_calls_null
 } e_device_calls;
 typedef enum e_device_system_calls {

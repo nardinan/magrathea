@@ -89,6 +89,13 @@ struct s_console_command v_commands[] = {
 		},
 		&f_commands_convert, e_console_level_guest, d_true
 	},
+	{"inject", "(usage: inject -f /home/testsys/inject_directory) injects a directory with .injlst files for sigma updating",
+		(struct s_console_parameter[]){
+			{"-f", "(string) folder with .injlst files", d_false, d_false, d_true},
+			{.initialized = d_false}
+		},
+		&f_commans_inject, e_console_level_guest, d_true
+	},
 	{.initialized = d_false}
 };
 int f_commands_trigger(struct s_console *console, struct s_console_command *command, char **tokens, size_t elements, int output) {
@@ -131,3 +138,6 @@ int f_commands_convert(struct s_console *console, struct s_console_command *comm
 	return f_device_recall(e_device_calls_convert, d_true, tokens, elements, output);
 }
 
+int f_commands_inject(struct s_console *console, struct s_console_command *command, char **tokens, size_t elements, int output) {
+	return f_device_recall(e_device_calls_inject, d_true, tokens, elements, output);
+}
