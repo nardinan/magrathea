@@ -18,6 +18,8 @@
 #ifndef magrathea_trb_device_h
 #define magrathea_trb_device_h
 #include <miranda/ground.h>
+#include <sys/types.h>
+#include <dirent.h>
 #define d_trb_device_boards 8
 #define d_trb_device_ladders 24
 #define d_trb_device_raw_command_size 12
@@ -27,10 +29,10 @@
 #define d_trb_device_sentinel_size 2
 #define d_trb_device_hexadecimal_size 2
 #define d_trb_device_temperatures_size 48
-#define d_trb_device_timeout 5000 		/* microseconds */
-#define d_trb_device_timeout_online 250000 	/* microseconds */
-#define d_trb_device_timeout_refresh 10 	/* milliseconds */
-#define d_trb_device_timeout_status 10 		/* seconds */
+#define d_trb_device_timeout 5000 			/* microseconds */
+#define d_trb_device_timeout_online 250000 		/* microseconds */
+#define d_trb_device_timeout_refresh 10 		/* milliseconds */
+#define d_trb_device_timeout_status 10 			/* seconds */
 #define d_trb_device_log "magrathea.log"
 #define d_trb_device_csv_character '\t'
 #define B(a) v_trb_device_bytes[(a)]
@@ -43,8 +45,8 @@
 #define d_trb_device_inject_commands 2
 #define d_trb_device_inject_command_size 11
 #define d_trb_device_inject_hexadecimal_size 6
-#define d_trb_device_inject_timeout_command 500	/* microseconds */
-#define d_trb_device_inject_timeout_trb 100000	/* microseconds */
+#define d_trb_device_inject_timeout_command 10000	/* microseconds */
+#define d_trb_device_inject_timeout_trb 100000		/* microseconds */
 typedef enum e_trb_device_currents {
 	e_trb_device_currents_34 = 0,
 	e_trb_device_currents_33,

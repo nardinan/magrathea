@@ -94,7 +94,7 @@ struct s_console_command v_commands[] = {
 			{"-f", "(string) folder with .injlst files", d_false, d_false, d_true},
 			{.initialized = d_false}
 		},
-		&f_commans_inject, e_console_level_guest, d_true
+		&f_commands_inject, e_console_level_guest, d_true
 	},
 	{.initialized = d_false}
 };
