@@ -52,7 +52,7 @@ while [ 1 ]; do
 			;;
 		2) 
 			echo "| $this_name | $date_human_readable $time_human_readable | I: 100Hz || ALL | RAW ||" >> $remote_log;  
-			$magrathea_run stream -o raw"$this_name"_"$date_name"_"$time_name"
+			$magrathea_run stream -o $folder_name/raw"$this_name"_"$date_name"_"$time_name"
 			$magrathea_run write -x 040700
 			$magrathea_run trigger -s 100
 			sleep 720 # 12 minutes
@@ -61,7 +61,7 @@ while [ 1 ]; do
 			;;
 		3)
 			echo "| $this_name | $date_human_readable $time_human_readable | --- || ALL | PED&DLD ||" >> $remote_log;
-			$magrathea_run stream -o dld"$this_name"_"$date_name"_"$time_name"
+			$magrathea_run stream -o $folder_name/dld"$this_name"_"$date_name"_"$time_name"
 			$magrathea_run write -x 040b00
 			$magrathea_run trigger -s 100
 			sleep 120 # 2 minutes
@@ -70,7 +70,7 @@ while [ 1 ]; do
 			;;
 		4)	
 			echo "| $this_name | $date_human_readable $time_human_readable | Ext cosmics || ALL | NOR ||" >> $remote_log;
-			$magrathea_run stream -o nrm"$this_name"_"$date_name"_"$time_name"
+			$magrathea_run stream -o $folder_name/nrm"$this_name"_"$date_name"_"$time_name"
 			$magrathea_run write -x 040500
 			$magrathea_run trigger -s 100
 			sleep 3600 # 60 minutes
