@@ -23,6 +23,7 @@
 #define d_package_channels 384
 #define d_package_channels_half 192
 #define d_package_channels_on_va 64
+#define d_package_channels_on_dva 128
 #define d_package_vas 6
 #define d_package_trbs 8
 #define d_package_timestamp_header_const_size 4 /* number of constants in the hader	*/
