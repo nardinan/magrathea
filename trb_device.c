@@ -168,7 +168,17 @@ int p_trb_device_status_refresh(unsigned char code) {
 int f_trb_device_status(unsigned char code, char **tokens, size_t elements, int output) {
 	char buffer[d_string_buffer_size], currents[d_string_buffer_size], temperatures[d_string_buffer_size], voltages[d_string_buffer_size],
 	     status[d_string_buffer_size], thresholds[d_string_buffer_size];
-	int argument, selected = d_true, viewer = d_false, result = d_true;
+	const char *operations[] = {
+		"REL",
+		"GODLIKE-MODE",
+		"NORMAL",
+		"RAW",
+		"GAIN CALIBRATION",
+		"PEDESTAL UPDATE",
+		"DOWNLOAD MODE",
+		"RDL"
+	};
+	int argument, operation_code, selected = d_true, viewer = d_false, result = d_true;
 	FILE *process;
 	if ((argument = f_console_parameter("-d", tokens, elements, d_false)) != d_console_descriptor_null)
 		if (code != atoi(tokens[argument]))
@@ -225,8 +235,10 @@ int f_trb_device_status(unsigned char code, char **tokens, size_t elements, int 
 						v_console_styles[e_console_style_reset], v_console_styles[e_console_style_bold],
 						v_trb_device_boards[code].status.voltages[e_trb_device_voltages_HV2], v_console_styles[e_console_style_reset]);
 				write(output, voltages, f_string_strlen(voltages));
-				snprintf(status, d_string_buffer_size, "%sstatus%s\n\t[Trigger   :   %5d]\n\t[Cut CN    : %5d]\n\t[Hold Delay: %5.01fuS]\n",
-						v_console_styles[e_console_style_yellow], v_console_styles[e_console_style_reset],
+				operation_code = operations[(v_trb_device_boards[code].status.status[e_trb_device_status_mode]>>1)&0x07];
+				snprintf(status, d_string_buffer_size, "%sstatus%s\n\t[%s%s%s]\n\n\t[Trigger   :   %5d]\n\t[Cut CN    : %5d]\n"
+						"\t[Hold Delay: %5.01fuS]\n", v_console_styles[e_console_style_yellow], v_console_styles[e_console_style_reset],
+						v_console_styles[e_console_style_green], operations[operation_code], v_console_styles[e_console_style_reset], 
 						v_trb_device_boards[code].trigger, v_trb_device_boards[code].status.status[e_trb_device_status_CN],
 						((float)((unsigned int)v_trb_device_boards[code].status.status[e_trb_device_status_HD]*50)/1000.0));
 				write(output, status, f_string_strlen(status));
@@ -387,7 +399,7 @@ int p_trb_device_inject_command(unsigned char code, const char *command, int out
 	     *commands[d_trb_device_inject_commands] = {"-x", NULL};
 	unsigned char check_code;
 	int result = d_false;
-	sscanf(command, "%s %s %s %s", current_code, &(packet[0]), &(packet[2]), &(packet[4]));
+	sscanf(command, "%2s %2s %2s %2s", current_code, &(packet[0]), &(packet[2]), &(packet[4]));
 	check_code = (unsigned char)strtol(current_code, NULL, 16);
 	if (check_code == v_trb_device_boards[code].code) {
 		commands[1] = packet;
