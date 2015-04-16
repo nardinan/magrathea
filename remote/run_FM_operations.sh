@@ -1,6 +1,6 @@
 #!/bin/bash
 folder_name="" # here your folder name
-if [ -n "$folder_name"]; then
+if [ -n "$folder_name" ]; then
 	echo "[error] you forgot the folder name"
 	exit
 fi
@@ -26,9 +26,9 @@ while [ 1 ]; do
 	else
 		current_status=$((current_status+1))
 	fi
-	date_human_readable=`date +"%y/%m/%d"`
+	date_human_readable=`date +"%Y/%m/%d"`
 	time_human_readable=`date +"%H:%M"`
-	date_name=`date +"%y%m%d"`
+	date_name=`date +"%Y%m%d"`
 	time_name=`date +"%H%M"`
 	this_name=`printf %04d $current_run`
 	case "$current_status" in
