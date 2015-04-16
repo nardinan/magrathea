@@ -1,6 +1,6 @@
 #!/bin/bash
 folder_name="" # here your folder name
-if [ -n "$folder_name" ]; then
+if [ ! "$folder_name" ]; then
 	echo "[error] you forgot the folder name"
 	exit
 fi
@@ -58,6 +58,7 @@ while [ 1 ]; do
 			sleep 720 # 12 minutes
 			$magrathea_run trigger -off
 			$magrathea_run stream -o /dev/null
+			current_run=$((current_run+1));
 			;;
 		3)
 			echo "| $this_name | $date_human_readable $time_human_readable | --- || ALL | PED&DLD ||" >> $remote_log;
@@ -67,6 +68,7 @@ while [ 1 ]; do
 			sleep 120 # 2 minutes
 			$magrathea_run trigger -off
 			$magrathea_run stream -o /dev/null
+			current_run=$((current_run+1))
 			;;
 		4)	
 			echo "| $this_name | $date_human_readable $time_human_readable | Ext cosmics || ALL | NOR ||" >> $remote_log;
@@ -76,7 +78,7 @@ while [ 1 ]; do
 			sleep 3600 # 60 minutes
 			$magrathea_run trigger -off
 			$magrathea_run stream -o /dev/null
+			current_run=$((current_run+1))
 			;;
 	esac
-	current_run=$((current_run+1));
 done
