@@ -214,12 +214,13 @@ int f_trb_device_status(unsigned char code, char **tokens, size_t elements, int 
 				write(output, currents, f_string_strlen(currents));
 				snprintf(thresholds, d_string_buffer_size, "%slow thresholds%s\n\t[layer 1: %02d | layer 2: %02d | layer 3: %02d]\n"
 						"\t[layer 4: %02d | layer 5: %02d | layer 6: %02d]\n", v_console_styles[e_console_style_yellow],
-						v_console_styles[e_console_style_reset], v_trb_device_boards[code].status[e_trb_device_status_low_t_layer1],
-						v_trb_device_boards[code].status[e_trb_device_status_low_t_layer2],
-						v_trb_device_boards[code].status[e_trb_device_status_low_t_layer3],
-						v_trb_device_boards[code].status[e_trb_device_status_low_t_layer4],
-						v_trb_device_boards[code].status[e_trb_device_status_low_t_layer5],
-						v_trb_device_boards[code].status[e_trb_device_status_low_t_layer6]);
+						v_console_styles[e_console_style_reset], 
+						v_trb_device_boards[code].status.status[e_trb_device_status_low_t_layer1],
+						v_trb_device_boards[code].status.status[e_trb_device_status_low_t_layer2],
+						v_trb_device_boards[code].status.status[e_trb_device_status_low_t_layer3],
+						v_trb_device_boards[code].status.status[e_trb_device_status_low_t_layer4],
+						v_trb_device_boards[code].status.status[e_trb_device_status_low_t_layer5],
+						v_trb_device_boards[code].status.status[e_trb_device_status_low_t_layer6]);
 				write(output, thresholds, f_string_strlen(thresholds));		
 				snprintf(temperatures, d_string_buffer_size, "%stemperatures%s\n\t[ADC    %6.02fC|%6.02fC    PWR]\n"
 						"\t[FPGA A %6.02fC|%6.02fC FPGA B]\n",
@@ -236,7 +237,7 @@ int f_trb_device_status(unsigned char code, char **tokens, size_t elements, int 
 						v_trb_device_boards[code].status.voltages[e_trb_device_voltages_HV2], v_console_styles[e_console_style_reset]);
 				write(output, voltages, f_string_strlen(voltages));
 				operation_code = operations[(v_trb_device_boards[code].status.status[e_trb_device_status_mode]>>1)&0x07];
-				snprintf(status, d_string_buffer_size, "%sstatus%s\n\t[%s%s%s]\n\n\t[Trigger   :   %5d]\n\t[Cut CN    : %5d]\n"
+				snprintf(status, d_string_buffer_size, "%sstatus%s\n\t[%s%s%s]\n\n\t[Trigger   :   %5d]\n\t[Cut CN    :   %5d]\n"
 						"\t[Hold Delay: %5.01fuS]\n", v_console_styles[e_console_style_yellow], v_console_styles[e_console_style_reset],
 						v_console_styles[e_console_style_green], operations[operation_code], v_console_styles[e_console_style_reset], 
 						v_trb_device_boards[code].trigger, v_trb_device_boards[code].status.status[e_trb_device_status_CN],

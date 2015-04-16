@@ -27,4 +27,7 @@
 #include <errno.h>
 #define d_remote_separator " "
 #define d_remote_final "\r\n"
+#define d_remote_exit_command "quit\r\n"
+#define d_remote_hard_delay 500000
+extern int f_remote_inject(const char *ip, const char *port, const char *command);
 #endif

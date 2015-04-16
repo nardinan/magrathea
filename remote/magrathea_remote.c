@@ -25,16 +25,19 @@ int f_remote_inject(const char *ip, const char *port, const char *command) {
 				if ((flags = fcntl(client_socket, F_GETFL)) != -1) {
 					fcntl(client_socket, F_SETFL, flags|O_NONBLOCK);
 					write(client_socket, command, f_string_strlen(command));
+					write(client_socket, d_remote_exit_command, f_string_strlen(d_remote_exit_command));
+					usleep(d_remote_hard_delay);
 					result = d_true;
 				}
-				close(client_socket);
+				shutdown(client_socket, SHUT_RDWR);
 			}
-			shutdown(client_socket, SHUT_RDWR);
+			close(client_socket);
 		}
 		freeaddrinfo(response);
 	}
 	return result;
 }
+
 int main (int argc, char *argv[]) {
 	char buffer[d_string_buffer_size] = {0};
 	int index;
