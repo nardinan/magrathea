@@ -236,7 +236,7 @@ int f_trb_device_status(unsigned char code, char **tokens, size_t elements, int 
 						v_console_styles[e_console_style_reset], v_console_styles[e_console_style_bold],
 						v_trb_device_boards[code].status.voltages[e_trb_device_voltages_HV2], v_console_styles[e_console_style_reset]);
 				write(output, voltages, f_string_strlen(voltages));
-				operation_code = operations[(v_trb_device_boards[code].status.status[e_trb_device_status_mode]>>1)&0x07];
+				operation_code = (v_trb_device_boards[code].status.status[e_trb_device_status_mode]>>1)&0x07;
 				snprintf(status, d_string_buffer_size, "%sstatus%s\n\t[%s%s%s]\n\n\t[Trigger   :   %5d]\n\t[Cut CN    :   %5d]\n"
 						"\t[Hold Delay: %5.01fuS]\n", v_console_styles[e_console_style_yellow], v_console_styles[e_console_style_reset],
 						v_console_styles[e_console_style_green], operations[operation_code], v_console_styles[e_console_style_reset], 
