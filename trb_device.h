@@ -75,11 +75,21 @@ typedef enum e_trb_device_voltages {
 	e_trb_device_voltages_null
 } e_trb_device_voltages;
 typedef enum e_trb_device_status {
-	e_trb_device_status_trigger_low = 0,
+	e_trb_device_status_mode = 0,
+	e_trb_device_status_trigger_low,
 	e_trb_device_status_trigger_high,
+	e_trb_device_status_CN,
 	e_trb_device_status_HD,
+	e_trb_device_status_low_t_layer1,
+	e_trb_device_status_low_t_layer2,
+	e_trb_device_status_low_t_layer3,
+	e_trb_device_status_low_t_layer4,
+	e_trb_device_status_low_t_layer5,
+	e_trb_device_status_low_t_layer6,
 	e_trb_device_status_version_M,
+	e_trb_device_status_version_Mlow,
 	e_trb_device_status_version_L,
+	e_trb_device_status_version_Llow,
 	e_trb_device_status_null
 } e_trb_device_status;
 typedef enum e_trb_device_bytes {
@@ -112,11 +122,21 @@ typedef enum e_trb_device_bytes {
 	e_trb_device_bytes_0x07BB_current_S12,
 	e_trb_device_bytes_0x07BB_voltage_HV1,
 	e_trb_device_bytes_0x07BB_voltage_HV2,
+	e_trb_device_bytes_0x07AA_mode,
+	e_trb_device_bytes_0x07AA_status_CN,
 	e_trb_device_bytes_0x07AA_status_HD,
 	e_trb_device_bytes_0x07_status_trigger_low,
 	e_trb_device_bytes_0x07_status_trigger_high,
+	e_trb_device_bytes_0x07_status_low_T_layer1,
+	e_trb_device_bytes_0x07_status_low_T_layer2,
+	e_trb_device_bytes_0x07_status_low_T_layer3,
+	e_trb_device_bytes_0x07_status_low_T_layer4,
+	e_trb_device_bytes_0x07_status_low_T_layer5,
+	e_trb_device_bytes_0x07_status_low_T_layer6,
 	e_trb_device_bytes_0x07_status_version_M,
-	e_trb_device_bytes_0x07_status_version_L
+	e_trb_device_bytes_0x07_status_version_Mlow,
+	e_trb_device_bytes_0x07_status_version_L,
+	e_trb_device_bytes_0x07_status_version_Llow
 } e_trb_bytes;
 typedef struct s_trb_status {
 	float currents[e_trb_device_currents_null], temperatures[e_trb_device_temperatures_null], tfh_temperatures[d_trb_device_temperatures_size],

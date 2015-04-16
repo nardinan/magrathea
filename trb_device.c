@@ -47,11 +47,21 @@ unsigned int v_trb_device_bytes[] = {
 	13,	/* 0x07BB - current @ 12V				*/
 	8,	/* 0x07BB - BIAS voltage #1				*/
 	9,	/* 0x07BB - BIAS voltage #2				*/
+	8,	/* 0x07AA - mode					*/
+	10,	/* 0x07AA - CN value					*/
 	11,	/* 0x07AA - hold delay value				*/
 	14,	/* 0x07 - trigger low byte				*/
 	15,	/* 0x07 - trigger high byte				*/
-	29,	/* 0x07 - version code A				*/
-	31	/* 0x07 - version code B				*/
+	25,	/* 0x07 - lower T layer 1				*/
+	26,	/* 0x07 - lower T layer 2				*/
+	27,	/* 0x07 - lower T layer 3				*/
+	59,	/* 0x07 - lower T layer 4				*/
+	60,	/* 0x07 - lower T layer 5				*/
+	61,	/* 0x07 - lower T layer 6				*/
+	28,	/* 0x07 - version code A				*/
+	29,	/* 0x07 - version code A (low)				*/
+	30,	/* 0x07 - version code B				*/
+	31	/* 0x07 - version code B (low)				*/
 };
 struct s_trb_device v_trb_device_boards[d_trb_device_boards] = {
 	{d_rs232_null, d_false, d_false, d_false, 0x00, "/dev/ttyL4"},
@@ -157,7 +167,7 @@ int p_trb_device_status_refresh(unsigned char code) {
 
 int f_trb_device_status(unsigned char code, char **tokens, size_t elements, int output) {
 	char buffer[d_string_buffer_size], currents[d_string_buffer_size], temperatures[d_string_buffer_size], voltages[d_string_buffer_size],
-	     status[d_string_buffer_size];
+	     status[d_string_buffer_size], thresholds[d_string_buffer_size];
 	int argument, selected = d_true, viewer = d_false, result = d_true;
 	FILE *process;
 	if ((argument = f_console_parameter("-d", tokens, elements, d_false)) != d_console_descriptor_null)
@@ -192,6 +202,15 @@ int f_trb_device_status(unsigned char code, char **tokens, size_t elements, int 
 						v_trb_device_boards[code].status.currents[e_trb_device_currents_33VDD1],
 						v_trb_device_boards[code].status.currents[e_trb_device_currents_33VDD2]);
 				write(output, currents, f_string_strlen(currents));
+				snprintf(thresholds, d_string_buffer_size, "%slow thresholds%s\n\t[layer 1: %02d | layer 2: %02d | layer 3: %02d]\n"
+						"\t[layer 4: %02d | layer 5: %02d | layer 6: %02d]\n", v_console_styles[e_console_style_yellow],
+						v_console_styles[e_console_style_reset], v_trb_device_boards[code].status[e_trb_device_status_low_t_layer1],
+						v_trb_device_boards[code].status[e_trb_device_status_low_t_layer2],
+						v_trb_device_boards[code].status[e_trb_device_status_low_t_layer3],
+						v_trb_device_boards[code].status[e_trb_device_status_low_t_layer4],
+						v_trb_device_boards[code].status[e_trb_device_status_low_t_layer5],
+						v_trb_device_boards[code].status[e_trb_device_status_low_t_layer6]);
+				write(output, thresholds, f_string_strlen(thresholds));		
 				snprintf(temperatures, d_string_buffer_size, "%stemperatures%s\n\t[ADC    %6.02fC|%6.02fC    PWR]\n"
 						"\t[FPGA A %6.02fC|%6.02fC FPGA B]\n",
 						v_console_styles[e_console_style_yellow], v_console_styles[e_console_style_reset],
@@ -206,9 +225,9 @@ int f_trb_device_status(unsigned char code, char **tokens, size_t elements, int 
 						v_console_styles[e_console_style_reset], v_console_styles[e_console_style_bold],
 						v_trb_device_boards[code].status.voltages[e_trb_device_voltages_HV2], v_console_styles[e_console_style_reset]);
 				write(output, voltages, f_string_strlen(voltages));
-				snprintf(status, d_string_buffer_size, "%sstatus%s\n\t[Trigger   :   %5d]\n\t[Hold Delay: %5.01fuS]\n",
+				snprintf(status, d_string_buffer_size, "%sstatus%s\n\t[Trigger   :   %5d]\n\t[Cut CN    : %5d]\n\t[Hold Delay: %5.01fuS]\n",
 						v_console_styles[e_console_style_yellow], v_console_styles[e_console_style_reset],
-						v_trb_device_boards[code].trigger,
+						v_trb_device_boards[code].trigger, v_trb_device_boards[code].status.status[e_trb_device_status_CN],
 						((float)((unsigned int)v_trb_device_boards[code].status.status[e_trb_device_status_HD]*50)/1000.0));
 				write(output, status, f_string_strlen(status));
 				fsync(output);
@@ -565,6 +584,10 @@ void p_trb_device_refresh_analyze(unsigned char code, unsigned char *buffer, siz
 						current = value*0.8;
 						v_trb_device_boards[code].status.currents[e_trb_device_currents_33VDD2] = (current<0.0f)?0.0f:current;
 						if (buffer[B(e_trb_device_bytes_0x07_control)] == 0xAA) {
+							v_trb_device_boards[code].status.status[e_trb_device_status_mode] = 
+								buffer[B(e_trb_device_bytes_0x07AA_mode)];
+							v_trb_device_boards[code].status.status[e_trb_device_status_CN] =
+								buffer[B(e_trb_device_bytes_0x07AA_status_CN)];
 							v_trb_device_boards[code].status.status[e_trb_device_status_HD] =
 								buffer[B(e_trb_device_bytes_0x07AA_status_HD)];
 						} else if (buffer[B(e_trb_device_bytes_0x07_control)] == 0xBB) {
@@ -594,10 +617,26 @@ void p_trb_device_refresh_analyze(unsigned char code, unsigned char *buffer, siz
 						v_trb_device_boards[code].trigger =
 							(((unsigned int)buffer[B(e_trb_device_bytes_0x07_status_trigger_low)])&0xFF)|
 							(((unsigned int)buffer[B(e_trb_device_bytes_0x07_status_trigger_high)])<<8);
+						v_trb_device_boards[code].status.status[e_trb_device_status_low_t_layer1] =
+							buffer[B(e_trb_device_bytes_0x07_status_low_T_layer1)];
+						v_trb_device_boards[code].status.status[e_trb_device_status_low_t_layer2] =
+							buffer[B(e_trb_device_bytes_0x07_status_low_T_layer2)];
+						v_trb_device_boards[code].status.status[e_trb_device_status_low_t_layer3] =
+							buffer[B(e_trb_device_bytes_0x07_status_low_T_layer3)];
+						v_trb_device_boards[code].status.status[e_trb_device_status_low_t_layer4] =
+							buffer[B(e_trb_device_bytes_0x07_status_low_T_layer4)];
+						v_trb_device_boards[code].status.status[e_trb_device_status_low_t_layer5] =
+							buffer[B(e_trb_device_bytes_0x07_status_low_T_layer5)];
+						v_trb_device_boards[code].status.status[e_trb_device_status_low_t_layer6] =
+							buffer[B(e_trb_device_bytes_0x07_status_low_T_layer6)];
 						v_trb_device_boards[code].status.status[e_trb_device_status_version_M] =
 							buffer[B(e_trb_device_bytes_0x07_status_version_M)];
+						v_trb_device_boards[code].status.status[e_trb_device_status_version_Mlow] =
+							buffer[B(e_trb_device_bytes_0x07_status_version_Mlow)];
 						v_trb_device_boards[code].status.status[e_trb_device_status_version_L] =
 							buffer[B(e_trb_device_bytes_0x07_status_version_L)];
+						v_trb_device_boards[code].status.status[e_trb_device_status_version_Llow] =
+							buffer[B(e_trb_device_bytes_0x07_status_version_Llow)];
 					}
 					break;
 			}

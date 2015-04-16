@@ -22,11 +22,9 @@ int p_rms_toolbox_mask_channels_apply(int trb, int ladder, int channel, const ch
 	     command[d_trb_device_hexadecimal_size+1] = {0}, rms_va1[d_trb_device_hexadecimal_size+1] = {0}, rms_va2[d_trb_device_hexadecimal_size+1] = {0};
 	unsigned char row_values[d_rms_toolbox_command_row][d_rms_toolbox_command_size], rms_values[d_package_channels_on_dva];
 	unsigned short current_crc;
-	int index, double_ladder, double_va, va_channel, file_column, result = d_false, current_row = 0, current_rms = 0;
-	double_ladder = (ladder/2);
-	double_va = ((ladder%2)*(d_package_channels/d_package_channels_on_dva))+(channel/d_package_channels_on_dva);
-	va_channel = (channel%d_package_channels_on_va);
-	file_column = ((channel/d_package_channels_on_va)%2);
+	int index, double_ladder = (ladder/2), double_va = ((ladder%2)*(d_package_channels/d_package_channels_on_dva))+(channel/d_package_channels_on_dva), 
+	    va_channel = (channel%d_package_channels_on_va), file_column = ((channel/d_package_channels_on_va)%2), current_row = 0, current_rms = 0,
+	    result = d_false;
 	snprintf(filename, PATH_MAX, "%s/%s0x%02X%s%02d_%d%s", inject_directory, d_rms_toolbox_filename_prefix, v_package_trbs[trb].code, 
 			d_rms_toolbox_filename_postfix, double_ladder, double_va, d_rms_toolbox_filename_extension);
 	if ((stream = fopen(filename, "r"))) {
@@ -60,14 +58,15 @@ int p_rms_toolbox_mask_channels_apply(int trb, int ladder, int channel, const ch
 					fprintf(stream, "%02x %02x %02x %02x\n\n", row_values[index][0], row_values[index][1], row_values[index][2],
 							row_values[index][3]);
 				fclose(stream);
-			}
-			printf("[masked: TRB %02d | ladder %02d | channel %02d - file %s] row %d, column %d\n", trb, ladder, channel, filename, (va_channel+1),
-					(file_column+2));
-
+				printf("[masked: TRB %02d | ladder %02d | channel %02d - file %s] row %d, column %d\n", trb, ladder, channel, filename,
+						(va_channel+1), (file_column+2));
+				result = d_true;
+			} else
+				d_err(e_log_level_ever, "error, file %s cannot be written", filename);
 		} else
-			d_err(e_log_level_ever, "Error, file %s is damaged", filename);
+			d_err(e_log_level_ever, "error, file %s is damaged", filename);
 	} else
-		d_err(e_log_level_ever, "Error, file not found (unable to mask %d, %d, %d): %s", trb, ladder, channel, filename);
+		d_err(e_log_level_ever, "error, file not found (unable to mask %d, %d, %d): %s", trb, ladder, channel, filename);
 	return result;
 }
 
@@ -90,12 +89,8 @@ int f_rms_toolbox_mask_channels(const char *channels_file, const char *inject_di
 }
 
 int main (int argc, char *argv[]) {
-	/* usage: <rms_toolbox.bin <opt> <rms_directory> {arguments ...}
-	 * - rms_toolbox.bin -m <rms_directory> <mask_file> (masks channels)
-	 */
 	if (argc > 1) {
 		if (f_string_strcmp(argv[1], "-m") == 0) {
-			/* masking option */
 			if (argc == 4)
 				f_rms_toolbox_mask_channels(argv[3], argv[2]);
 			else 
