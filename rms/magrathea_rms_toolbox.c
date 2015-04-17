@@ -30,8 +30,8 @@ int f_rms_toolbox_write(unsigned short int trb, const char *inject_directory, un
 				fprintf(stream, "%02x 90 %02x %02x\n\n", v_package_trbs[trb].code, 
 						((unsigned char)(double_ladder)<<3)|((unsigned char)double_va), 0x00);
 				for (channel = 0; channel < d_package_channels_on_va; ++channel)
-					fprintf(stream, "%02x %02x %02x %02x\n\n", v_package_trbs[trb].code, (0x40+channel), mask[channel], 
-							mask[channel+d_package_channels_on_va]);
+					fprintf(stream, "%02x %02x %02x %02x\n\n", v_package_trbs[trb].code, (0x40+channel), 
+							mask[channel+d_package_channels_on_va], mask[channel]);
 				current_crc = f_package_crc(mask, d_package_channels_on_dva);
 				fprintf(stream, "%02x 80 %02x %02x\n\n", v_package_trbs[trb].code, (current_crc>>8), (current_crc&0xff));
 				mask += d_package_channels_on_dva;
@@ -54,6 +54,11 @@ int p_rms_toolbox_mask_channels_apply(unsigned short int trb, unsigned short int
 	int index, double_ladder = (ladder/2), double_va = ((ladder%2)*(d_package_channels/d_package_channels_on_dva))+(channel/d_package_channels_on_dva), 
 	    va_channel = (channel%d_package_channels_on_va), file_column = ((channel/d_package_channels_on_va)%2), current_row = 0, current_rms = 0,
 	    result = d_false;
+	/* fix; the order of the columns is inverted */
+	if (file_column)
+		file_column = 0;
+	else
+		file_column = 1;
 	snprintf(filename, PATH_MAX, "%s/%s0x%02X%s%02d_%d%s", inject_directory, d_rms_toolbox_filename_prefix, v_package_trbs[trb].code, 
 			d_rms_toolbox_filename_postfix, double_ladder, double_va, d_rms_toolbox_filename_extension);
 	if ((stream = fopen(filename, "r"))) {
@@ -67,8 +72,8 @@ int p_rms_toolbox_mask_channels_apply(unsigned short int trb, unsigned short int
 					row_values[current_row][2] = (unsigned char)strtol(rms_va1, 0, 16);
 					row_values[current_row][3] = (unsigned char)strtol(rms_va2, 0, 16);
 					if ((current_row > 0) && (current_row < (d_rms_toolbox_command_row-1))) {
-						rms_values[current_rms] = row_values[current_row][2];
-						rms_values[(current_rms+d_package_channels_on_va)] = row_values[current_row][3];
+						rms_values[current_rms] = row_values[current_row][3];
+						rms_values[(current_rms+d_package_channels_on_va)] = row_values[current_row][2];
 						current_rms++;
 					}
 					if (++current_row >= d_rms_toolbox_command_row)
