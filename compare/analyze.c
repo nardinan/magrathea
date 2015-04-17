@@ -26,18 +26,21 @@ void f_analyze_values_write(struct s_analyze_environment *environment, FILE *str
 		fprintf(stream, "ladder %02d [different channels %s%d\x1B[0m]", ladder, (bad_channels>0)?"\x1B[31m":"\x1B[32m", bad_channels);
 		fprintf(stream, "\tPED ");
 		for (calibration = 0; calibration < d_analyze_calibrations; ++calibration)
-			fprintf(stream, "%c %7.02f(+/-%5.02f) ", ((calibration==0)?'[':'~'), environment->calibration[calibration].ladder[ladder].pedestal_mean,
-				environment->calibration[calibration].ladder[ladder].pedestal_rms);
+			fprintf(stream, "%c %7.02f(+/-%5.02f) ", ((calibration==0)?'[':'~'), 
+					environment->calibration[calibration].ladder[environment->selected_trb][ladder].pedestal_mean,
+					environment->calibration[calibration].ladder[environment->selected_trb][ladder].pedestal_rms);
 		fputc(']', stream);
 		fprintf(stream, "\tSRAW");
 		for (calibration = 0; calibration < d_analyze_calibrations; ++calibration)
-			fprintf(stream, "%c %7.02f(+/-%5.02f) ", ((calibration==0)?'[':'~'), environment->calibration[calibration].ladder[ladder].sigma_raw_mean,
-				environment->calibration[calibration].ladder[ladder].sigma_raw_rms);
+			fprintf(stream, "%c %7.02f(+/-%5.02f) ", ((calibration==0)?'[':'~'), 
+					environment->calibration[calibration].ladder[environment->selected_trb][ladder].sigma_raw_mean,
+					environment->calibration[calibration].ladder[environment->selected_trb][ladder].sigma_raw_rms);
 		fputc(']', stream);
 		fprintf(stream, "\tSIG ");
 		for (calibration = 0; calibration < d_analyze_calibrations; ++calibration)
-			fprintf(stream, "%c %7.02f(+/-%5.02f) ", ((calibration==0)?'[':'~'), environment->calibration[calibration].ladder[ladder].sigma_mean,
-				environment->calibration[calibration].ladder[ladder].sigma_rms);
+			fprintf(stream, "%c %7.02f(+/-%5.02f) ", ((calibration==0)?'[':'~'), 
+					environment->calibration[calibration].ladder[environment->selected_trb][ladder].sigma_mean,
+					environment->calibration[calibration].ladder[environment->selected_trb][ladder].sigma_rms);
 		fprintf(stream, "]\n");
 		fflush(stream);
 	}
@@ -48,14 +51,14 @@ void f_analyze_values(struct s_analyze_environment *environment) {
 	float value;
 	for (ladder = 0; ladder < d_calibrations_ladders; ++ladder) {
 		for (channel = 0; channel < d_package_channels; ++channel) {
-			value = environment->calibration[0].ladder[ladder].pedestal[channel];
+			value = environment->calibration[0].ladder[environment->selected_trb][ladder].pedestal[channel];
 			for (calibration = 1; calibration < d_analyze_calibrations; ++calibration)
-				value -= (float)environment->calibration[calibration].ladder[ladder].pedestal[channel];
+				value -= (float)environment->calibration[calibration].ladder[environment->selected_trb][ladder].pedestal[channel];
 			environment->pedestal_distance[ladder][channel] = value;
 		}
 	}
 	for (calibration = 0; calibration < d_analyze_calibrations; ++calibration)
-		f_calibrations_values(&(environment->calibration[calibration]));
+		f_calibrations_values(&(environment->calibration[calibration]), environment->selected_trb);
 }
 
 int f_analyze_calibration(struct s_analyze_environment *environment, const char *reference, const char *directory) {
@@ -75,17 +78,17 @@ void f_analyze_export(struct s_analyze_environment *environment, const char *fil
 			if (selected[ladder]) {
 				printf("ladder %d (channels with sigma > 5): ", ladder);
 				for (channel = 0; channel < d_package_channels; ++channel) {
-					if (environment->calibration[0].ladder[ladder].sigma[channel] > 5) {
+					if (environment->calibration[0].ladder[environment->selected_trb][ladder].sigma[channel] > 5) {
 						printf("%d, ", channel);
 						channels_bigger_five++;
-					} else if (environment->calibration[0].ladder[ladder].sigma[channel] >= 2)
+					} else if (environment->calibration[0].ladder[environment->selected_trb][ladder].sigma[channel] >= 2)
 						channels_lower_five++;
 					fprintf(stream, "%d%c%d", ladder, d_analyze_csv_divisor, channel);
 					for (calibration = 0; calibration < d_analyze_calibrations; ++calibration)
 						fprintf(stream, "%c%.02f%c%.02f%c%.02f", d_analyze_csv_divisor,
-								environment->calibration[calibration].ladder[ladder].pedestal[channel],
-								d_analyze_csv_divisor, environment->calibration[calibration].ladder[ladder].sigma_raw[channel],
-								d_analyze_csv_divisor, environment->calibration[calibration].ladder[ladder].sigma[channel]);
+								environment->calibration[calibration].ladder[environment->selected_trb][ladder].pedestal[channel],
+								d_analyze_csv_divisor, environment->calibration[calibration].ladder[environment->selected_trb][ladder].sigma_raw[channel],
+								d_analyze_csv_divisor, environment->calibration[calibration].ladder[environment->selected_trb][ladder].sigma[channel]);
 					fputc('\n', stream);
 				}
 				putchar('\n');

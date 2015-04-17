@@ -28,7 +28,7 @@ void p_view_action_dump_bad_channels(struct s_interface *interface) {
 	if ((stream = fopen(filename, "w"))) {
 		for (ladder = 0; ladder < d_analyze_ladders; ++ladder)
 			for (channel = 0; channel < d_package_channels; ++channel)
-				if (environment.data.computed_calibrations.ladder[ladder].flags[channel])
+				if (environment.data.computed_calibrations.ladder[v_view_trb][ladder].flags[channel])
 					fprintf(stream, "%d %d %d\n", v_view_trb, ladder, channel);
 		fclose(stream);
 	}
@@ -50,7 +50,7 @@ void f_view_action_dump(GtkWidget *widget, struct s_interface *interface) {
 				if ((environment.data.data[ladder].occupancy[channel] > (occupancy_mean+(d_stk_math_sigma_occupancy_k_max*occupancy_rms))) ||
 						(environment.data.data[ladder].occupancy[channel] <
 						 (occupancy_mean-(d_stk_math_sigma_occupancy_k_max*occupancy_rms))))
-					environment.data.computed_calibrations.ladder[ladder].flags[channel] |= e_stk_math_flag_bad_occupancy;
+					environment.data.computed_calibrations.ladder[v_view_trb][ladder].flags[channel] |= e_stk_math_flag_bad_occupancy;
 		}
 		f_calibrations_export(&(environment.data.computed_calibrations), environment.filename, v_view_trb);
 		p_view_action_dump_bad_channels(interface);
@@ -121,7 +121,7 @@ void f_view_destroy(GtkWidget *widget, struct s_interface *interface) {
 }
 
 void p_view_loop_analyze(struct s_interface *interface, unsigned short int ladder, unsigned short int *values) {
-	int result = f_analyze_data(&(environment.data), ladder, values);
+	int result = f_analyze_data(&(environment.data), v_view_trb, ladder, values);
 	if (environment.data.calibrated >= d_analyze_ladders) {
 		if ((v_flags&e_view_action_exports_clusters) == e_view_action_exports_clusters)
 			f_clusters_save(&(environment.data.data[ladder].compressed_event), (environment.data.counters[ladder].data_events-1),
@@ -148,13 +148,13 @@ void p_view_loop_append_signals(struct s_interface *interface, unsigned short in
 				f_chart_flush(&(interface->logic_charts[e_interface_chart_sigma]));
 				for (index = 0; index < d_package_channels; ++index) {
 					f_chart_append_signal(&(interface->logic_charts[e_interface_chart_pedestal]), 0, index,
-							environment.data.computed_calibrations.ladder[v_view_ladder].pedestal[index]);
+							environment.data.computed_calibrations.ladder[v_view_trb][v_view_ladder].pedestal[index]);
 					f_chart_append_signal(&(interface->logic_charts[e_interface_chart_sigma_raw]), 1, index,
-							environment.data.computed_calibrations.ladder[v_view_ladder].sigma_raw[index]);
+							environment.data.computed_calibrations.ladder[v_view_trb][v_view_ladder].sigma_raw[index]);
 					f_chart_append_signal(&(interface->logic_charts[e_interface_chart_sigma_raw]), 0, index,
-							-((float)environment.data.computed_calibrations.ladder[v_view_ladder].flags[index]));
+							-((float)environment.data.computed_calibrations.ladder[v_view_trb][v_view_ladder].flags[index]));
 					f_chart_append_signal(&(interface->logic_charts[e_interface_chart_sigma]), 0, index,
-							environment.data.computed_calibrations.ladder[v_view_ladder].sigma[index]);
+							environment.data.computed_calibrations.ladder[v_view_trb][v_view_ladder].sigma[index]);
 				}
 				interface->logic_charts[e_interface_chart_sigma_raw].kind[0] = e_chart_kind_histogram;
 				environment.data.calibration[v_view_ladder].drawed = d_true;
@@ -292,18 +292,19 @@ void p_view_loop_read_process(struct s_interface *interface, struct s_package *p
 								environment.data.calibration[package->data.values.dld.ladder[ladder]].steps;
 							environment.data.calibration[package->data.values.dld.ladder[ladder]].drawed = d_false;
 							for (channel = 0; channel < d_package_channels; ++channel) {
-								environment.data.computed_calibrations.ladder[package->data.values.dld.ladder[ladder]].
+								environment.data.computed_calibrations.ladder[v_view_trb][package->data.values.dld.ladder[ladder]].
 									pedestal[channel] = (package->data.values.dld.pedestal[ladder][channel]*
 											d_view_pedestal_k);
 								if (package->data.values.dld.rms[ladder][channel] == 0xff) { /* bad strip */
-									environment.data.computed_calibrations.ladder[package->data.values.dld.ladder[ladder]].
-										flags[channel] = e_stk_math_flag_bad_sigma;
-									environment.data.computed_calibrations.ladder[package->data.values.dld.ladder[ladder]].
-										sigma[channel] = 0;
+									environment.data.computed_calibrations.ladder[v_view_trb]
+										[package->data.values.dld.ladder[ladder]].flags[channel] = 
+										e_stk_math_flag_bad_sigma;
+									environment.data.computed_calibrations.ladder[v_view_trb]
+										[package->data.values.dld.ladder[ladder]].sigma[channel] = 0;
 								} else
-									environment.data.computed_calibrations.ladder[package->data.values.dld.ladder[ladder]].
-										sigma[channel] = ((float)package->data.values.dld.rms[ladder][channel]/
-										d_view_rms_k);
+									environment.data.computed_calibrations.ladder[v_view_trb]
+										[package->data.values.dld.ladder[ladder]].sigma[channel] = 
+										((float)package->data.values.dld.rms[ladder][channel]/d_view_rms_k);
 							}
 						}
 				break;
@@ -410,7 +411,7 @@ int f_view_load_channel(const char *filename) {
 			if ((trb >= 0) && (trb <= d_trb_device_boards) && (trb == v_view_trb))
 				if ((ladder >= 0) && (ladder <= d_trb_device_ladders))
 					if ((channel >= 0) && (channel <= d_package_channels))
-						environment.data.computed_calibrations.ladder[ladder].flags[channel] = e_stk_math_flag_bad;
+						environment.data.computed_calibrations.ladder[v_view_trb][ladder].flags[channel] = e_stk_math_flag_bad;
 		}
 		fclose(stream);
 	}

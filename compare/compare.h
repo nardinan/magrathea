@@ -29,6 +29,6 @@ extern struct s_analyze_environment environment;
 extern int v_selected_ladder;
 extern int f_compare_initialize(struct s_interface *supplied, const char *builder_path);
 extern void f_compare_destroy(GtkWidget *widget, struct s_interface *supplied);
-extern int p_compare_loop_toggle(struct s_interface *interface, int ladder, int enable);
+extern int p_compare_loop_toggle(struct s_interface *interface, unsigned short int ladder, unsigned short int enable);
 extern int f_compare_loop(struct s_interface *interface);
 #endif

@@ -16,15 +16,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "calibrations.h"
-void f_calibrations_values(struct s_calibrations_environment *environment) {
+void f_calibrations_values(struct s_calibrations_environment *environment, int trb) {
 	int ladder;
 	for (ladder = 0; ladder < d_calibrations_ladders; ++ladder) {
-		environment->ladder[ladder].pedestal_mean = f_math_mean(environment->ladder[ladder].pedestal, d_package_channels);
-		environment->ladder[ladder].sigma_raw_mean = f_math_mean(environment->ladder[ladder].sigma_raw, d_package_channels);
-		environment->ladder[ladder].sigma_mean = f_math_mean(environment->ladder[ladder].sigma, d_package_channels);
-		environment->ladder[ladder].pedestal_rms = f_math_rms(environment->ladder[ladder].pedestal, d_package_channels, 0.01);
-		environment->ladder[ladder].sigma_raw_rms = f_math_rms(environment->ladder[ladder].sigma_raw, d_package_channels, 0.01);
-		environment->ladder[ladder].sigma_rms = f_math_rms(environment->ladder[ladder].sigma, d_package_channels, 0.01);
+		environment->ladder[trb][ladder].pedestal_mean = f_math_mean(environment->ladder[trb][ladder].pedestal, d_package_channels);
+		environment->ladder[trb][ladder].sigma_raw_mean = f_math_mean(environment->ladder[trb][ladder].sigma_raw, d_package_channels);
+		environment->ladder[trb][ladder].sigma_mean = f_math_mean(environment->ladder[trb][ladder].sigma, d_package_channels);
+		environment->ladder[trb][ladder].pedestal_rms = f_math_rms(environment->ladder[trb][ladder].pedestal, d_package_channels, 0.01);
+		environment->ladder[trb][ladder].sigma_raw_rms = f_math_rms(environment->ladder[trb][ladder].sigma_raw, d_package_channels, 0.01);
+		environment->ladder[trb][ladder].sigma_rms = f_math_rms(environment->ladder[trb][ladder].sigma, d_package_channels, 0.01);
 	}
 }
 
@@ -46,7 +46,7 @@ int p_calibrations_file_read_row(char *string, float *pedestal, float *sigma_raw
 	return (int)content[0];
 }
 
-int p_calibrations_file_read(struct s_calibrations_environment *environment, FILE *stream, int ladder) {
+int p_calibrations_file_read(struct s_calibrations_environment *environment, FILE *stream, int trb, int ladder) {
 	char buffer[d_string_buffer_size], *pointer, *next;
 	float pedestal = 0.0f, sigma_raw = 0.0f, sigma = 0.0f;
 	unsigned short flag = 0;
@@ -57,10 +57,10 @@ int p_calibrations_file_read(struct s_calibrations_environment *environment, FIL
 			if (entries >= (d_calibrations_columns-1)) {
 				channel = p_calibrations_file_read_row(buffer, &pedestal, &sigma_raw, &sigma, &flag);
 				if ((channel >= 0) && (channel < d_package_channels)) {
-					environment->ladder[ladder].pedestal[channel] = pedestal;
-					environment->ladder[ladder].sigma_raw[channel] = sigma_raw;
-					environment->ladder[ladder].sigma[channel] = sigma;
-					environment->ladder[ladder].flags[channel] = flag;
+					environment->ladder[trb][ladder].pedestal[channel] = pedestal;
+					environment->ladder[trb][ladder].sigma_raw[channel] = sigma_raw;
+					environment->ladder[trb][ladder].sigma[channel] = sigma;
+					environment->ladder[trb][ladder].flags[channel] = flag;
 				} else
 					fprintf(stderr, "warning, channel %d has been readed (but channels have to be between 0 and %d)\n", channel,
 							d_package_channels);
@@ -70,14 +70,22 @@ int p_calibrations_file_read(struct s_calibrations_environment *environment, FIL
 }
 
 int p_calibrations_file(struct s_calibrations_environment *environment, const char *file) {
-	int result = d_false, ladder = 0;
+	int result = d_false, ladder = 0, trb = 0;
 	FILE *stream;
-	char *next_pointer;
+	char *next_pointer, trb_code[3] = {0};
 	if ((stream = fopen(file, "r"))) {
+		if ((next_pointer = strstr(file, "TRB"))) {
+			next_pointer += f_string_strlen("TRB");
+			if (*next_pointer == '_')
+				next_pointer++;
+			trb_code[0] = next_pointer[0];
+			trb_code[1] = next_pointer[1];
+			trb = atoi(trb_code);
+		}
 		if ((next_pointer = strrchr(file, '_')))
 			ladder = atoi(next_pointer+1);
 		if ((ladder >= 0) && (ladder < d_calibrations_ladders))
-			result = p_calibrations_file_read(environment, stream, ladder);
+			result = p_calibrations_file_read(environment, stream, trb, ladder);
 		fclose(stream);
 	}
 	return result;
@@ -97,7 +105,7 @@ int p_calibrations(struct s_calibrations_environment *environment, const char *d
 			}
 		closedir(stream);
 		result = d_true;
-	} else if ((next_pointer = strrchr(directory, '.')) && (f_string_strcmp(next_pointer, ".cal") == 0))
+	} else if ((next_pointer = strrchr(directory, '.')) && ((f_string_strcmp(next_pointer, ".cal") == 0) || (f_string_strcmp(next_pointer, ".txt") == 0)))
 		result = p_calibrations_file(environment, directory);
 	return result;
 }
@@ -119,8 +127,8 @@ void f_calibrations_export(struct s_calibrations_environment *environment, const
 					va = channel/d_package_channels_on_va;
 					channel_on_va = channel%d_package_channels_on_va;
 					fprintf(stream, "%d, %d, %d, %.03f, %.03f, %.03f, %d\n", channel, va, channel_on_va,
-							environment->ladder[ladder].pedestal[channel], environment->ladder[ladder].sigma_raw[channel],
-							environment->ladder[ladder].sigma[channel], environment->ladder[ladder].flags[channel]);
+							environment->ladder[trb][ladder].pedestal[channel], environment->ladder[trb][ladder].sigma_raw[channel],
+							environment->ladder[trb][ladder].sigma[channel], environment->ladder[trb][ladder].flags[channel]);
 				}
 				fclose(stream);
 			}

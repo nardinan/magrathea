@@ -35,7 +35,7 @@ void f_compare_destroy(GtkWidget *widget, struct s_interface *supplied) {
 	exit(0);
 }
 
-int p_compare_loop_toggle(struct s_interface *interface, int ladder, int enable) {
+int p_compare_loop_toggle(struct s_interface *interface, unsigned short int ladder, unsigned short int enable) {
 	int result = d_false;
 	if ((ladder >= 0) && (ladder < d_calibrations_ladders)) {
 		if (enable)
@@ -69,23 +69,23 @@ int f_compare_loop(struct s_interface *interface) {
 			if (((v_selected_ladder < 0) && (local_selection[ladder])) || (v_selected_ladder == ladder))
 				for (channel = 0; channel < d_package_channels; ++channel) {
 					f_chart_append_histogram(&(interface->logic_charts[e_interface_chart_pedestal]), calibration,
-							environment.calibration[calibration].ladder[ladder].pedestal[channel]);
+							environment.calibration[calibration].ladder[environment.selected_trb][ladder].pedestal[channel]);
 					f_chart_append_histogram(&(interface->logic_charts[e_interface_chart_sigma_raw]), calibration,
-							environment.calibration[calibration].ladder[ladder].sigma_raw[channel]);
+							environment.calibration[calibration].ladder[environment.selected_trb][ladder].sigma_raw[channel]);
 					f_chart_append_histogram(&(interface->logic_charts[e_interface_chart_sigma]), calibration,
-							environment.calibration[calibration].ladder[ladder].sigma[channel]);
+							environment.calibration[calibration].ladder[environment.selected_trb][ladder].sigma[channel]);
 				}
 	}
 	if (v_selected_ladder >= 0)
 		for (channel = 0; channel < d_package_channels; ++channel) {
 			f_chart_append_signal(&(interface->logic_charts[e_interface_chart_sigma_raw_verify]), 0, channel,
-					environment.calibration[0].ladder[v_selected_ladder].sigma_raw[channel]);
+					environment.calibration[0].ladder[environment.selected_trb][v_selected_ladder].sigma_raw[channel]);
 			f_chart_append_signal(&(interface->logic_charts[e_interface_chart_sigma_verify]), 0, channel,
-					environment.calibration[0].ladder[v_selected_ladder].sigma[channel]);
+					environment.calibration[0].ladder[environment.selected_trb][v_selected_ladder].sigma[channel]);
 			f_chart_append_signal(&(interface->logic_charts[e_interface_chart_sigma_raw_verify]), 1, channel,
-					environment.calibration[1].ladder[v_selected_ladder].sigma_raw[channel]*-1.0);
+					environment.calibration[1].ladder[environment.selected_trb][v_selected_ladder].sigma_raw[channel]*-1.0);
 			f_chart_append_signal(&(interface->logic_charts[e_interface_chart_sigma_verify]), 1, channel,
-					environment.calibration[1].ladder[v_selected_ladder].sigma[channel]*-1.0);
+					environment.calibration[1].ladder[environment.selected_trb][v_selected_ladder].sigma[channel]*-1.0);
 			f_chart_append_signal(&(interface->logic_charts[e_interface_chart_pedestal_verify]), 0, channel,
 					environment.pedestal_distance[v_selected_ladder][channel]);
 		}
@@ -97,7 +97,7 @@ int f_compare_loop(struct s_interface *interface) {
 
 int main (int argc, char *argv[]) {
 	struct s_interface *main_interface = (struct s_interface *) malloc(sizeof(struct s_interface));
-	char *current_pointer, *next_pointer, csv_file[d_string_buffer_size], default_calibration[d_string_buffer_size],  buffer[d_string_buffer_size] = {'\0'};
+	char *current_pointer, *next_pointer, csv_file[d_string_buffer_size], default_calibration[d_string_buffer_size], buffer[d_string_buffer_size] = {'\0'};
 	int index = 0, ladder, local_selection[d_calibrations_ladders];
 	size_t length;
 	f_memory_init();
@@ -111,7 +111,8 @@ int main (int argc, char *argv[]) {
 				current_pointer++;
 			}
 		}
-		snprintf(default_calibration, d_string_buffer_size, "%s%02d", d_compare_default, atoi(buffer));
+		environment.selected_trb = atoi(buffer);
+		snprintf(default_calibration, d_string_buffer_size, "%s%02d", d_compare_default, environment.selected_trb);
 		if (argc >= 3)
 			strncpy(default_calibration, argv[2], d_string_buffer_size);
 		for (ladder = 0; ladder < d_calibrations_ladders; ++ladder)

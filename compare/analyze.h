@@ -25,6 +25,7 @@
 typedef struct s_analyze_environment {
 	struct s_calibrations_environment calibration[d_analyze_calibrations];
 	float pedestal_distance[d_calibrations_ladders][d_package_channels];
+	int selected_trb;
 } s_analyze_environment;
 extern void f_analyze_values_write(struct s_analyze_environment *environment, FILE *stream);
 extern void f_analyze_values(struct s_analyze_environment *environment);
