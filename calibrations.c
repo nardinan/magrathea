@@ -113,7 +113,7 @@ void f_calibrations_export(struct s_calibrations_environment *environment, const
 	snprintf(directory, PATH_MAX, "%s_TRB%02d%s", destination, trb, d_calibrations_directory);
 	if ((mkdir(directory, 0777) == 0) || (errno == EEXIST))
 		for (ladder = 0; ladder < d_calibrations_ladders; ++ladder) {
-			snprintf(filename, PATH_MAX, "%s/TRB%02d_ladder_%02d.%s", directory, trb, ladder, d_calibrations_extension);
+			snprintf(filename, PATH_MAX, "%s/TRB_%02d_LAD_%02d.%s", directory, trb, ladder, d_calibrations_extension);
 			if ((stream = fopen(filename, "w"))) {
 				for (channel = 0; channel < d_package_channels; ++channel) {
 					va = channel/d_package_channels_on_va;
