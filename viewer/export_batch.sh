@@ -2,9 +2,9 @@
 for parameter in $@;
 do
 	cd ~/Projects/magrathea/viewer
-	for trb in 0 1 2 3 4 5 6 7 8; # add here all TRBs that you need
+	for trb in 0 1 2 3 4 5 6 7; # add here all TRBs that you need
 	do
-		binary_name=$parameter$trb".bin"
+		binary_name=$parameter"$trb.bin"
 		./magrathea_view.bin $binary_name $trb 0 512 -x -k -r
 	done
 	# this piece of code has been used during EQM tests in Shanghai (9-18 Sept 2014)
