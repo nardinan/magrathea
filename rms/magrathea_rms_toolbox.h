@@ -20,11 +20,16 @@
 #include <linux/types.h>
 #include <miranda/ground.h>
 #include "../package.h"
+#include "../calibrations.h"
 #define d_rms_toolbox_command_size 4
 #define d_rms_toolbox_command_row 66
 #define d_rms_toolbox_filename_prefix "ID"
 #define d_rms_toolbox_filename_postfix "_rms_"
 #define d_rms_toolbox_filename_extension ".injlst"
-extern int p_rms_toolbox_mask_channels_apply(int trb, int ladder, int channel, const char *injected_directory);
-extern int f_rms_toolbox_masak_channels(const char *channels_file, const char *inject_directory);
+#define d_rms_toolbox_bad_channels_postfix "_BAD.lst"
+extern int f_rms_toolbox_write(unsigned short int trb, const char *inject_directory, unsigned char *mask);
+extern int p_rms_toolbox_mask_channels_apply(unsigned short int trb, unsigned short int ladder, unsigned short int channel, const char *injected_directory);
+extern int f_rms_toolbox_mask_channels(const char *channels_file, const char *inject_directory);
+extern int p_rms_toolbox_generate(const char *calibration_directory, struct s_calibrations_environment *environment);
+extern int f_rms_toolbox_generate(const char *calibration_directory, const char *inject_directory, float constant);
 #endif
