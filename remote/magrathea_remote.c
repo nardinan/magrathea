@@ -25,6 +25,7 @@ int f_remote_inject(const char *ip, const char *port, const char *command) {
 				if ((flags = fcntl(client_socket, F_GETFL)) != -1) {
 					fcntl(client_socket, F_SETFL, flags|O_NONBLOCK);
 					write(client_socket, command, f_string_strlen(command));
+					usleep(d_remote_hard_delay);
 					write(client_socket, d_remote_exit_command, f_string_strlen(d_remote_exit_command));
 					usleep(d_remote_hard_delay);
 					result = d_true;

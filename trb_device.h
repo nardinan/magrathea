@@ -20,7 +20,6 @@
 #include <miranda/ground.h>
 #include <sys/types.h>
 #include <dirent.h>
-#include "trigger_device.h" 
 #define d_trb_device_boards 8
 #define d_trb_device_ladders 24
 #define d_trb_device_raw_command_size 12

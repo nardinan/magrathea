@@ -13,7 +13,7 @@ while [ 1 ]; do
 	fi
 	case "$current_status" in
 		1)
-			# custom operation
+			# custom operations
 			;;
 		2)
 			trigger_log="I:100Hz"

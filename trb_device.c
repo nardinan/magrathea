@@ -16,6 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "trb_device.h"
+#include "trigger_device.h"
 unsigned char v_trb_device_raw_head[] = {0x55, 0xaa}, v_trb_device_raw_tail[] = {0x5a, 0xa5};
 unsigned int v_trb_device_bytes[] = {
 	4, 	/* board_code 						*/
