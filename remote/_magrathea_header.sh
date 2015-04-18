@@ -12,18 +12,18 @@ if [ -f $magrathea_run_number_file ]; then
 fi
 echo $run_number > $magrathea_run_number_file
 run_filename=`printf %04d $run_number`
-#if [ ! "$raw_data_folder" ]; then
-#	echo "NO RAW data folder";
-#	exit 0;
-#fi
-#if [ ! "$nor_data_folder" ]; then
-#	echo "NO NOR data folder";
-#	exit 0;
-#fi
-#if [ ! "$dld_data_folder" ]; then
-#	echo "NO DLD data folder";
-#	exit 0;
-#fi
+if [ ! "$raw_data_folder" ]; then
+	echo "NO RAW data folder";
+	exit 0;
+fi
+if [ ! "$nor_data_folder" ]; then
+	echo "NO NOR data folder";
+	exit 0;
+fi
+if [ ! "$dld_data_folder" ]; then
+	echo "NO DLD data folder";
+	exit 0;
+fi
 echo "[run number: $postfix_filename]"
 echo "[magrathea is configuring his environment ...]"
 $magrathea_command trigger -off

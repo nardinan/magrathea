@@ -2,7 +2,7 @@
 source _magrathea_header.sh
 source _magrathea_timer.sh
 source _magrathea_trigger.sh
-final_filename="raw"$postfix_filename
+final_filename=$raw_data_folder"/raw"$postfix_filename
 echo "[magrathea filename: $final_filename]"
 $magrathea_command stream -o $final_filename
 $magrathea_command write -x 040700
