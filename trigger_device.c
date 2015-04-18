@@ -26,17 +26,11 @@ void p_trigger_device_description_format(unsigned char code, char *destination, 
 			snprintf(destination, size, "[trg:  %sext%s]", v_console_styles[e_console_style_green], v_console_styles[e_console_style_reset]);
 			break;
 		case e_adlink_trigger_50:
-			snprintf(destination, size, "[trg: %s50Hz%s]", v_console_styles[e_console_style_green], v_console_styles[e_console_style_reset]);
-			break;
 		case e_adlink_trigger_100:
-			snprintf(destination, size, "[trg:%s100Hz%s]", v_console_styles[e_console_style_green], v_console_styles[e_console_style_reset]);
-			break;
 		case e_adlink_trigger_200:
-			snprintf(destination, size, "[trg:%s200Hz%s]", v_console_styles[e_console_style_green], v_console_styles[e_console_style_reset]);
-			break;
 		case e_adlink_trigger_300:
-			snprintf(destination, size, "[trg:%s300Hz%s]", v_console_styles[e_console_style_green], v_console_styles[e_console_style_reset]);
-			break;
+			snprintf(destination, size, "[trg: %s%-3dHz%s]", v_console_styles[e_console_style_green], trigger, 
+				v_console_styles[e_console_style_reset]);
 	}
 }
 
