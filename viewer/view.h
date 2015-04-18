@@ -31,7 +31,7 @@
 #define d_view_timeout_online 150
 #define d_view_dampe_epoch 1356998400 /* GTM */
 #define d_view_clusters_title "# timestamp seconds, mseconds, dampe_event_ID, viewer_event_ID, ladder, CoG\n"
-#define d_view_rms_k 5
+#define d_view_rms_k 1
 #define d_view_pedestal_k 2
 #define d_view_bad_channels_tail "badchs"
 typedef enum e_view_actions {
