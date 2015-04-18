@@ -29,7 +29,7 @@ void p_trigger_device_description_format(unsigned char code, char *destination, 
 		case e_adlink_trigger_100:
 		case e_adlink_trigger_200:
 		case e_adlink_trigger_300:
-			snprintf(destination, size, "[trg: %s%-3dHz%s]", v_console_styles[e_console_style_green], v_trigger_current, 
+			snprintf(destination, size, "[trg:%s%-3dHz%s]", v_console_styles[e_console_style_green], v_trigger_current, 
 				v_console_styles[e_console_style_reset]);
 	}
 }
