@@ -16,6 +16,30 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "trigger_device.h"
+enum e_adlink_trigger v_trigger_current = e_adlink_trigger_disabled;
+void p_trigger_device_description_format(unsigned char code, char *destination, size_t size) {
+	switch (v_trigger_current) {
+		case e_adlink_trigger_disabled:
+			snprintf(destination, size, "[trigger:   %soff%s]", v_console_styles[e_console_style_yellow], v_console_styles[e_console_style_reset]);
+			break;
+		case e_adlink_trigger_external:
+			snprintf(destination, size, "[trigger:   %sext%s]", v_console_styles[e_console_style_green], v_console_styles[e_console_style_reset]);
+			break;
+		case e_adlink_trigger_50:
+			snprintf(destination, size, "[trigger:  %s50Hz%s]", v_console_styles[e_console_style_green], v_console_styles[e_console_style_reset]);
+			break;
+		case e_adlink_trigger_100:
+			snprintf(destination, size, "[trigger: %s100Hz%s]", v_console_styles[e_console_style_green], v_console_styles[e_console_style_reset]);
+			break;
+		case e_adlink_trigger_200:
+			snprintf(destination, size, "[trigger: %s200Hz%s]", v_console_styles[e_console_style_green], v_console_styles[e_console_style_reset]);
+			break;
+		case e_adlink_trigger_300:
+			snprintf(destination, size, "[trigger: %s300Hz%s]", v_console_styles[e_console_style_green], v_console_styles[e_console_style_reset]);
+			break;
+	}
+}
+
 int f_trigger_device_trigger(unsigned char code, char **tokens, size_t elements, int output) {
 	char buffer[d_string_buffer_size];
 	enum e_adlink_trigger trigger = e_adlink_trigger_50;
@@ -39,9 +63,10 @@ int f_trigger_device_trigger(unsigned char code, char **tokens, size_t elements,
 			default:
 				trigger = e_adlink_trigger_50;
 		}
-	result = f_adlink_trigger_setup(trigger);
+	if ((result = f_adlink_trigger_setup(trigger)))
+		v_trigger_current = trigger;
 	if (output != d_console_descriptor_null) {
-		if (result)
+		if (result) {
 			switch (trigger) {
 				case e_adlink_trigger_disabled:
 					strncpy(buffer, "trigger has been disabled\n", d_string_buffer_size);
@@ -56,11 +81,12 @@ int f_trigger_device_trigger(unsigned char code, char **tokens, size_t elements,
 				default:
 					snprintf(buffer, d_string_buffer_size, "running trigger @ %dHz\n", trigger);
 			}
-		else
-			snprintf(buffer, d_string_buffer_size, "%sYEK!%s 404 of trigger board\n", v_console_styles[e_console_style_red],
-					v_console_styles[e_console_style_reset]);
-		write(output, buffer, f_string_strlen(buffer));
-		fsync(output);
+			else
+				snprintf(buffer, d_string_buffer_size, "%sYEK!%s 404 of trigger board\n", v_console_styles[e_console_style_red],
+						v_console_styles[e_console_style_reset]);
+			write(output, buffer, f_string_strlen(buffer));
+			fsync(output);
+		}
 	}
 	return result;
 }

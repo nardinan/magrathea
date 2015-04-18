@@ -673,17 +673,17 @@ int p_trb_device_refresh_status(unsigned char code) {
 
 int f_trb_device_refresh(unsigned char code, struct s_console *console) {
 	int result = p_trb_device_refresh_status(code);
-	char buffer[d_console_output_size];
+	char buffer[d_console_output_size], trigger[d_console_output_size];
 	time_t current_time;
 	if (v_trb_device_boards[code].descriptor != d_rs232_null) {
 		current_time = time(NULL);
 		if ((v_trb_device_boards[code].last_refresh+d_trb_device_timeout_status) < current_time)
 			p_trb_device_status_refresh(code);
-		if (console)
 			if (v_trb_device_boards[code].focused) {
 				p_trb_device_description_format(code, buffer, d_console_output_size);
-				snprintf(console->prefix, d_console_output_size, "\r[%s]>", buffer);
+				p_trigger_device_description_format(code, trigger, d_console_output_size);
+				snprintf(console->prefix, d_console_output_size, "\r[%s]%s>", buffer, trigger);
 			}
+		}
+		return result;
 	}
-	return result;
-}
