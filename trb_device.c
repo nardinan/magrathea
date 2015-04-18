@@ -86,8 +86,7 @@ void p_trb_device_description_format(unsigned char code, char *destination, size
 	char status[d_string_buffer_size], stream[PATH_MAX];
 	float value;
 	int postfix;
-	snprintf(destination, size, "#%d [%s]%s TRB 0x%02x ", code, v_trb_device_boards[code].location, (v_trb_device_boards[code].selected)?"[*]":"",
-			v_trb_device_boards[code].code);
+	snprintf(destination, size, "#%d [TRB 0x%02x]%s ", code, v_trb_device_boards[code].code, (v_trb_device_boards[code].selected)?"[*]":"");
 	if (f_trb_device_initialize(code)) {
 		if (v_trb_device_boards[code].wrong)
 			snprintf(status, d_string_buffer_size, "[%swrong connector%s]", v_console_styles[e_console_style_yellow],

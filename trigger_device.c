@@ -20,22 +20,22 @@ enum e_adlink_trigger v_trigger_current = e_adlink_trigger_disabled;
 void p_trigger_device_description_format(unsigned char code, char *destination, size_t size) {
 	switch (v_trigger_current) {
 		case e_adlink_trigger_disabled:
-			snprintf(destination, size, "[trigger:   %soff%s]", v_console_styles[e_console_style_yellow], v_console_styles[e_console_style_reset]);
+			snprintf(destination, size, "[trg:  %soff%s]", v_console_styles[e_console_style_yellow], v_console_styles[e_console_style_reset]);
 			break;
 		case e_adlink_trigger_external:
-			snprintf(destination, size, "[trigger:   %sext%s]", v_console_styles[e_console_style_green], v_console_styles[e_console_style_reset]);
+			snprintf(destination, size, "[trg:  %sext%s]", v_console_styles[e_console_style_green], v_console_styles[e_console_style_reset]);
 			break;
 		case e_adlink_trigger_50:
-			snprintf(destination, size, "[trigger:  %s50Hz%s]", v_console_styles[e_console_style_green], v_console_styles[e_console_style_reset]);
+			snprintf(destination, size, "[trg: %s50Hz%s]", v_console_styles[e_console_style_green], v_console_styles[e_console_style_reset]);
 			break;
 		case e_adlink_trigger_100:
-			snprintf(destination, size, "[trigger: %s100Hz%s]", v_console_styles[e_console_style_green], v_console_styles[e_console_style_reset]);
+			snprintf(destination, size, "[trg:%s100Hz%s]", v_console_styles[e_console_style_green], v_console_styles[e_console_style_reset]);
 			break;
 		case e_adlink_trigger_200:
-			snprintf(destination, size, "[trigger: %s200Hz%s]", v_console_styles[e_console_style_green], v_console_styles[e_console_style_reset]);
+			snprintf(destination, size, "[trg:%s200Hz%s]", v_console_styles[e_console_style_green], v_console_styles[e_console_style_reset]);
 			break;
 		case e_adlink_trigger_300:
-			snprintf(destination, size, "[trigger: %s300Hz%s]", v_console_styles[e_console_style_green], v_console_styles[e_console_style_reset]);
+			snprintf(destination, size, "[trg:%s300Hz%s]", v_console_styles[e_console_style_green], v_console_styles[e_console_style_reset]);
 			break;
 	}
 }
