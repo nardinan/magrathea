@@ -75,12 +75,12 @@ int f_trigger_device_trigger(unsigned char code, char **tokens, size_t elements,
 				default:
 					snprintf(buffer, d_string_buffer_size, "running trigger @ %dHz\n", trigger);
 			}
-			else
-				snprintf(buffer, d_string_buffer_size, "%sYEK!%s 404 of trigger board\n", v_console_styles[e_console_style_red],
-						v_console_styles[e_console_style_reset]);
-			write(output, buffer, f_string_strlen(buffer));
-			fsync(output);
 		}
+		else
+			snprintf(buffer, d_string_buffer_size, "%sYEK!%s 404 of trigger board\n", v_console_styles[e_console_style_red],
+					v_console_styles[e_console_style_reset]);
+		write(output, buffer, f_string_strlen(buffer));
+		fsync(output);
 	}
 	return result;
 }
