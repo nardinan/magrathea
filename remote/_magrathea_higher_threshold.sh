@@ -22,6 +22,6 @@ echo "[*] higher treshold selected and injected: ${higher_threshold_human_readab
 # this command will be very slow! We need about 10 minutes to be sure that everything works
 echo "[*] sleeping for 10 minutes (just to give to the 'inject' command its time)"
 $magrathea_command inject -f $higher_threshold_directory"/"${higher_threshold_code[$higher_threshold_number]}
-sleep 600 # wait 10 minutes
+sleep 360 # wait 6 minutes
 echo "|| --- | $date_human_readable $time_human_readable | --- | ALL | operation | "\
 	"HIGHER THRESHOLD has been replaced with ${higher_threshold_human_readable[$higher_threshold_number]} |" >> $log_file
