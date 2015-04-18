@@ -1,15 +1,14 @@
 #!/bin/bash
-echo "[trigger selection]"
 if [ ! "$trigger_command" ]; then
 	kind=""
 	while [ "$kind" != "i" ] && [ "$kind" != "e" ]; do
-		read -r -s -p "[uhm ... what do you want? Internal or External trigger? (i/e)]" -n 1 kind
+		read -r -s -p "[?] uhm ... what do you want? Internal or External trigger? (i/e)" -n 1 kind
 		echo " $kind"
 	done
 	if [ "$kind" == "i" ]; then
 		speed=""
 		while [ "$speed" != "1" ] && [ "$speed" != "2" ] && [ "$speed" != "3" ] && [ "$speed" != "4" ]; do
-			read -r -s -p "[ok, which speed? (1 - 50Hz | 2 - 100Hz | 3 - 200Hz | 4 - 300Hz)]" -n 1 speed
+			read -r -s -p "[?] ok, which speed? (1 - 50Hz | 2 - 100Hz | 3 - 200Hz | 4 - 300Hz)" -n 1 speed
 			echo " $speed"
 		done
 		case "$speed" in
@@ -40,3 +39,4 @@ if [ ! "$trigger_command" ]; then
 		trigger_command="-ext"
 	fi
 fi
+echo "[*] trigger selected and injected: $trigger_human_readable"
