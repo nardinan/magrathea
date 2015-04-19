@@ -39,6 +39,8 @@ int f_chart_hook_interface(struct s_chart *supplied, const char *interface) {
 		gtk_widget_add_events(GTK_WIDGET(supplied->plane), GDK_BUTTON_PRESS_MASK);
 		g_signal_connect(G_OBJECT(supplied->plane), "button-press-event", G_CALLBACK(p_chart_callback_scale_show), &(supplied->interface));
 		g_signal_connect(G_OBJECT(supplied->interface.action), "clicked", G_CALLBACK(p_chart_callback_scale_action), &(supplied->interface));
+		g_signal_connect(G_OBJECT(supplied->interface.export_csv), "clicked", G_CALLBACK(p_chart_callback_scale_export_csv), &(supplied->interface));
+		g_signal_connect(G_OBJECT(supplied->interface.export_png), "clicked", G_CALLBACK(p_chart_callback_scale_export_png), &(supplied->interface));
 		g_signal_connect(G_OBJECT(supplied->interface.window), "delete-event", G_CALLBACK(p_chart_callback_scale_hide), &(supplied->interface));
 		result = d_true;
 	}
@@ -64,6 +66,7 @@ void f_chart_style(struct s_chart *chart, const char *path) {
 	char buffer[d_string_buffer_size];
 	struct s_list *dictionary;
 	int index;
+	strncpy(chart->style_path, path, PATH_MAX);
 	if ((dictionary = f_keys_initialize(NULL, path, '='))) {
 		p_chart_style_axis(dictionary, 'x', &(chart->axis_x));
 		p_chart_style_axis(dictionary, 'y', &(chart->axis_y));
@@ -87,6 +90,56 @@ void f_chart_style(struct s_chart *chart, const char *path) {
 			snprintf(buffer, d_string_buffer_size, "bins_%d", index);
 			p_keys_int(dictionary, buffer, 'z', &(chart->bins[index]));
 		}
+	}
+}
+
+void p_chart_style_store_float(FILE *configuration, const char *key, const char postfix, float value) {
+	fprintf(configuration, "%s_%c=%f\n", key, postfix, value);
+}
+
+void p_chart_style_store_int(FILE *configuration, const char *key, const char postfix, int value) {
+	fprintf(configuration, "%s_%c=%d\n", key, postfix, value);
+}
+
+void p_chart_style_store_axis(FILE *configuration, const char postfix, struct s_chart_axis *axis) {
+	p_chart_style_store_int(configuration, "segments", postfix, (int)axis->segments);
+	p_chart_style_store_int(configuration, "show_negative", postfix, axis->show_negative);
+	p_chart_style_store_int(configuration, "show_positive", postfix, axis->show_positive);
+	p_chart_style_store_int(configuration, "show_grid", postfix, axis->show_grid);
+	p_chart_style_store_float(configuration, "range_bottom", postfix, axis->range[0]);
+	p_chart_style_store_float(configuration, "range_top", postfix, axis->range[1]);
+	p_chart_style_store_float(configuration, "minimum_distance", postfix, axis->minimum_distance);
+	p_chart_style_store_float(configuration, "offset", postfix, axis->offset);
+	p_chart_style_store_float(configuration, "size", postfix, axis->size);
+	p_chart_style_store_float(configuration, "color_R", postfix, axis->color.R);
+	p_chart_style_store_float(configuration, "color_G", postfix, axis->color.G);
+	p_chart_style_store_float(configuration, "color_B", postfix, axis->color.B);
+}
+
+void f_chart_style_store(struct s_chart *chart, FILE *configuration) {
+	char buffer[d_string_buffer_size];
+	int index;
+	p_chart_style_store_axis(configuration, 'x', &(chart->axis_x));
+	p_chart_style_store_axis(configuration, 'y', &(chart->axis_y));
+	p_chart_style_store_int(configuration, "border", 'x', chart->border_x);
+	p_chart_style_store_int(configuration, "border", 'y', chart->border_y);
+	p_chart_style_store_int(configuration, "show_borders", 'z', chart->show_borders);
+	p_chart_style_store_float(configuration, "background_color_R", 'z', chart->background.R);
+	p_chart_style_store_float(configuration, "background_color_G", 'z', chart->background.G);
+	p_chart_style_store_float(configuration, "background_color_B", 'z', chart->background.B);
+	for (index = 0; index < d_chart_max_nested; index++) {
+		snprintf(buffer, d_string_buffer_size, "dot_size_%d", index);
+		p_chart_style_store_float(configuration, buffer, 'z', chart->data.dot_size[index]);
+		snprintf(buffer, d_string_buffer_size, "line_size_%d", index);
+		p_chart_style_store_float(configuration, buffer, 'z', chart->data.line_size[index]);
+		snprintf(buffer, d_string_buffer_size, "color_R_%d", index);
+		p_chart_style_store_float(configuration, buffer, 'z', chart->data.color[index].R);
+		snprintf(buffer, d_string_buffer_size, "color_G_%d", index);
+		p_chart_style_store_float(configuration, buffer, 'z', chart->data.color[index].G);
+		snprintf(buffer, d_string_buffer_size, "color_B_%d", index);
+		p_chart_style_store_float(configuration, buffer, 'z', chart->data.color[index].B);
+		snprintf(buffer, d_string_buffer_size, "bins_%d", index);
+		p_chart_style_store_float(configuration, buffer, 'z', chart->bins[index]);
 	}
 }
 
@@ -341,9 +394,10 @@ void p_chart_redraw_grid_y(cairo_t *cr, struct s_chart *chart, float full_h, flo
 }
 
 void p_chart_normalize_switch(struct s_chart *chart, unsigned int code, unsigned int left, unsigned int right) {
-	struct s_chart_value support = chart->values[code][left];
-	chart->values[code][left] = chart->values[code][right];
-	chart->values[code][right] = support;
+	struct s_chart_value support;
+	memcpy(&(support), &(chart->values[code][left]), sizeof(struct s_chart_value));
+	memcpy(&(chart->values[code][left]), &(chart->values[code][right]), sizeof(struct s_chart_value));
+	memcpy(&(chart->values[code][right]), &(support), sizeof(struct s_chart_value));
 }
 
 void p_chart_normalize_sort(struct s_chart *chart, unsigned int code) {
@@ -390,9 +444,10 @@ int p_chart_callback(GtkWidget *widget, GdkEvent *event, void *v_chart) {
 	struct s_chart *chart = (struct s_chart *)v_chart;
 	float full_w = fabs(chart->axis_x.range[1]-chart->axis_x.range[0]), full_h = fabs(chart->axis_y.range[1]-chart->axis_y.range[0]),
 	      arc_size = (2.0*G_PI), min_value[d_chart_max_nested] = {0}, max_value[d_chart_max_nested] = {0}, min_channel[d_chart_max_nested] = {0},
-	      max_channel[d_chart_max_nested] = {0}, rms[d_chart_max_nested], pedestal[d_chart_max_nested], total_square, fraction;
-	int index, code, first, multiple, current_position_y;
+	      max_channel[d_chart_max_nested] = {0}, rms[d_chart_max_nested], pedestal[d_chart_max_nested], total_square, fraction, total_width;
+	int index, code, first, current_position_y;
 	char buffer[d_string_buffer_size];
+	size_t length;
 	if ((chart->cairo_brush = gdk_cairo_create(chart->plane->window))) {
 		gtk_widget_get_allocation(GTK_WIDGET(chart->plane), &dimension);
 		if ((dimension.width != chart->last_width) || (dimension.height != chart->last_height)) {
@@ -409,13 +464,9 @@ int p_chart_callback(GtkWidget *widget, GdkEvent *event, void *v_chart) {
 		cairo_move_to(chart->cairo_brush, (dimension.width/2.0), 0);
 		cairo_line_to(chart->cairo_brush, (dimension.width/2.0), dimension.height);
 		cairo_stroke(chart->cairo_brush);
-		multiple = d_false;
-		for (code = 0; code < d_chart_max_nested; code++) {
-			if ((!multiple) && (chart->head[code+1]))
-				multiple = d_true;
+		for (code = 0; code < d_chart_max_nested; code++)
 			if (chart->head[code]) {
-				cairo_set_source_rgba(chart->cairo_brush, chart->data.color[code].R, chart->data.color[code].G,
-						chart->data.color[code].B, 0.7f);
+				cairo_set_source_rgb(chart->cairo_brush, chart->data.color[code].R, chart->data.color[code].G, chart->data.color[code].B);
 				cairo_set_line_width(chart->cairo_brush, chart->data.line_size[code]);
 				for (index = 0, first = d_true; index < chart->head[code]; index++) {
 					if (chart->values[code][index].normalized.done) {
@@ -458,23 +509,23 @@ int p_chart_callback(GtkWidget *widget, GdkEvent *event, void *v_chart) {
 					rms[code] = sqrtf(fabs(total_square-(pedestal[code]*pedestal[code])));
 				}
 				if (chart->show_borders) {
-					cairo_set_font_size(chart->cairo_brush, d_chart_default_font_size);
-					cairo_move_to(chart->cairo_brush, (chart->border_x-d_chart_font_size), (chart->border_y+(code*d_chart_font_height)));
+					cairo_move_to(chart->cairo_brush, (chart->border_x-d_chart_font_size), (chart->border_y+
+								(code*d_chart_font_height)));
 					cairo_show_text(chart->cairo_brush, "@");
 				}
 				cairo_stroke(chart->cairo_brush);
 				if (chart->kind[code] == e_chart_kind_histogram_numeric) {
 					cairo_set_source_rgb(chart->cairo_brush, 0.0, 0.0, 0.0);
-					cairo_set_font_size(chart->cairo_brush, d_chart_giant_font_size);
+					cairo_set_font_size(chart->cairo_brush, d_chart_font_size_giant);
 					for (index = 0; index < chart->head[code]; index++)
 						if (chart->values[code][index].normalized.done) {
 							snprintf(buffer, d_string_buffer_size, "%g%s", chart->values[code][index].y,
 									chart->data.extension[code]);
 							cairo_text_extents(chart->cairo_brush, buffer, &extents);
 							if (chart->values[code][index].normalized.y > chart->normalized.x_axis)
-								current_position_y = chart->normalized.x_axis+(d_chart_giant_font_size/2.0)+extents.height;
+								current_position_y = chart->normalized.x_axis+(d_chart_font_size_giant/2.0)+extents.height;
 							else
-								current_position_y = chart->normalized.x_axis-(d_chart_giant_font_size/2.0);
+								current_position_y = chart->normalized.x_axis-(d_chart_font_size_giant/2.0);
 
 							cairo_move_to(chart->cairo_brush, (chart->values[code][index].normalized.x-(extents.width/2.0f)),
 									current_position_y);
@@ -482,26 +533,38 @@ int p_chart_callback(GtkWidget *widget, GdkEvent *event, void *v_chart) {
 						}
 					cairo_stroke(chart->cairo_brush);
 				}
+
+
 			}
-		}
 		if (chart->show_borders) {
 			cairo_set_source_rgb(chart->cairo_brush, 0.0, 0.0, 0.0);
-			cairo_set_font_size(chart->cairo_brush, d_chart_default_font_size);
 			for (code = 0; code < d_chart_max_nested; code++)
 				if (chart->head[code]) {
-					cairo_move_to(chart->cairo_brush, (chart->border_x+d_chart_default_font_size),
-							(chart->border_y+(code*d_chart_font_height)));
+					cairo_move_to(chart->cairo_brush, chart->border_x+d_chart_font_size, (chart->border_y+(code*d_chart_font_height)));
 					if (chart->kind[code] == e_chart_kind_envelope)
-						snprintf(buffer, d_string_buffer_size, "%s [min %.02f (%.0f)| max: %.02f (%.0f)]",
-								chart->data.description[code], min_value[code], min_channel[code], max_value[code],
+						snprintf(buffer, d_string_buffer_size, "%s [min %.02f (%.0f)| max: %.02f (%.0f)]", 
+								chart->data.description[code], min_value[code], min_channel[code], max_value[code], 
 								max_channel[code]);
 					else
 						snprintf(buffer, d_string_buffer_size, "%s [min: %.02f (%.0f)| max: %.02f (%.0f)| mean: %.02f | RMS: %.02f]",
-								chart->data.description[code], min_value[code], min_channel[code], max_value[code],
-								max_channel[code], pedestal[code],
-								rms[code]);
+								chart->data.description[code], min_value[code], min_channel[code], max_value[code], 
+								max_channel[code], pedestal[code], rms[code]);
 					cairo_show_text(chart->cairo_brush, buffer);
 				}
+			for (code = 0, total_width = 0; code < d_chart_max_message_rows; ++code)
+				if ((length = strlen(chart->message[code])) > 0)
+					if ((length*(d_chart_font_message_size/2.0)) > total_width)
+						total_width = (length*(d_chart_font_message_size/2.0));
+			cairo_set_font_size(chart->cairo_brush, d_chart_font_message_title_size);
+			for (code = 0; code < d_chart_max_message_rows; ++code) {
+				if (strlen(chart->message[code]) > 0) {
+					cairo_move_to(chart->cairo_brush, (dimension.width-total_width)-d_chart_font_message_size,
+							(chart->border_y+(code*d_chart_font_message_title_size)));
+					cairo_show_text(chart->cairo_brush, chart->message[code]);
+				}
+				cairo_set_font_size(chart->cairo_brush, d_chart_font_message_size);
+			}
+			cairo_set_font_size(chart->cairo_brush, d_chart_font_default_size);
 		}
 		p_chart_redraw_axis_x(chart->cairo_brush, chart, full_h, full_w, dimension.width, dimension.height);
 		p_chart_redraw_axis_y(chart->cairo_brush, chart, full_h, full_w, dimension.width, dimension.height);
@@ -520,6 +583,15 @@ int p_chart_callback_scale_show(GtkWidget *widget, GdkEvent *event, struct s_int
 	gtk_spin_button_set_value(interface->spins[e_interface_scale_spin_x_top], interface->hooked_chart->axis_x.range[1]);
 	gtk_spin_button_set_value(interface->spins[e_interface_scale_spin_x_segments], interface->hooked_chart->axis_x.segments);
 	gtk_toggle_button_set_active(interface->switches[e_interface_scale_switch_informations], interface->hooked_chart->show_borders);
+	gtk_spin_button_set_value(interface->spins[e_interface_scale_spin_line_size], interface->hooked_chart->data.line_size[0]);
+	gtk_spin_button_set_value(interface->spins[e_interface_scale_spin_dot_size], interface->hooked_chart->data.dot_size[0]);
+	gtk_range_set_value(GTK_RANGE(interface->scales[e_interface_scale_scale_line_R]), (interface->hooked_chart->data.color[0].R*255.0));
+	gtk_range_set_value(GTK_RANGE(interface->scales[e_interface_scale_scale_line_G]), (interface->hooked_chart->data.color[0].G*255.0));
+	gtk_range_set_value(GTK_RANGE(interface->scales[e_interface_scale_scale_line_B]), (interface->hooked_chart->data.color[0].B*255.0));
+	gtk_range_set_value(GTK_RANGE(interface->scales[e_interface_scale_scale_background_R]), (interface->hooked_chart->background.R*255.0));
+	gtk_range_set_value(GTK_RANGE(interface->scales[e_interface_scale_scale_background_G]), (interface->hooked_chart->background.G*255.0));
+	gtk_range_set_value(GTK_RANGE(interface->scales[e_interface_scale_scale_background_B]), (interface->hooked_chart->background.B*255.0));
+	gtk_window_set_default_size(interface->window, d_interface_scale_width, d_interface_scale_height);
 	gtk_widget_show_all(GTK_WIDGET(interface->window));
 	gtk_window_set_position(interface->window, GTK_WIN_POS_MOUSE);
 	gtk_window_present(interface->window);
@@ -527,6 +599,7 @@ int p_chart_callback_scale_show(GtkWidget *widget, GdkEvent *event, struct s_int
 }
 
 int p_chart_callback_scale_action(GtkWidget *widget, struct s_interface_scale *interface) {
+	FILE *style_stream;
 	float value_top, value_bottom;
 	if (interface->hooked_chart) {
 		value_top = (float)gtk_spin_button_get_value(interface->spins[e_interface_scale_spin_y_top]);
@@ -540,10 +613,31 @@ int p_chart_callback_scale_action(GtkWidget *widget, struct s_interface_scale *i
 		interface->hooked_chart->axis_x.range[1] = d_max(value_top, value_bottom);
 		interface->hooked_chart->axis_x.segments = gtk_spin_button_get_value_as_int(interface->spins[e_interface_scale_spin_x_segments]);
 		interface->hooked_chart->show_borders = gtk_toggle_button_get_active(interface->switches[e_interface_scale_switch_informations]);
+		interface->hooked_chart->data.line_size[0] = gtk_spin_button_get_value_as_int(interface->spins[e_interface_scale_spin_line_size]);
+		interface->hooked_chart->data.dot_size[0] = gtk_spin_button_get_value_as_int(interface->spins[e_interface_scale_spin_dot_size]);
+		interface->hooked_chart->data.color[0].R = ((float)gtk_range_get_value(GTK_RANGE(interface->scales[e_interface_scale_scale_line_R]))/255.0);
+		interface->hooked_chart->data.color[0].G = ((float)gtk_range_get_value(GTK_RANGE(interface->scales[e_interface_scale_scale_line_G]))/255.0);
+		interface->hooked_chart->data.color[0].B = ((float)gtk_range_get_value(GTK_RANGE(interface->scales[e_interface_scale_scale_line_B]))/255.0);
+		interface->hooked_chart->background.R = ((float)gtk_range_get_value(GTK_RANGE(interface->scales[e_interface_scale_scale_background_R]))/255.0);
+		interface->hooked_chart->background.G = ((float)gtk_range_get_value(GTK_RANGE(interface->scales[e_interface_scale_scale_background_G]))/255.0);
+		interface->hooked_chart->background.B = ((float)gtk_range_get_value(GTK_RANGE(interface->scales[e_interface_scale_scale_background_B]))/255.0);
 		f_chart_denormalize(interface->hooked_chart);
 		f_chart_integerize(interface->hooked_chart);
+		if (f_string_strlen(interface->hooked_chart->style_path) > 0)
+			if ((style_stream = fopen(interface->hooked_chart->style_path, "w"))) {
+				f_chart_style_store(interface->hooked_chart, style_stream);
+				fclose(style_stream);
+			}
 	}
 	p_chart_callback_scale_hide(GTK_WIDGET(interface->window), interface);
+	return d_true;
+}
+
+int p_chart_callback_scale_export_csv(GtkWidget *widget, struct s_interface_scale *interface) {
+	return d_true;
+}
+
+int p_chart_callback_scale_export_png(GtkWidget *widget, struct s_interface_scale *interface) {
 	return d_true;
 }
 

@@ -20,12 +20,16 @@
 #include <math.h>
 #include "keys.h"
 #include "interface_scale.h"
-#define d_chart_bucket 10240 /* maximum number of entries */
-#define d_chart_max_nested 6
+#define d_chart_max_message 128
+#define d_chart_max_message_rows 15
+#define d_chart_bucket 10240
+#define d_chart_max_nested 16
 #define d_chart_font_size 7.0
+#define d_chart_font_size_giant 20.0
+#define d_chart_font_default_size 10.0
+#define d_chart_font_message_title_size 14.0
+#define d_chart_font_message_size 10.0
 #define d_chart_font_height 12.0
-#define d_chart_giant_font_size 20
-#define d_chart_default_font_size 10.0
 #define d_same_sign(a,b) (((a)>=0)^((b)<0))
 typedef enum e_chart_kinds {
 	e_chart_kind_signal = 0,
@@ -52,6 +56,7 @@ typedef struct s_chart_axis {
 typedef struct s_chart {
 	GtkWidget *plane;
 	cairo_t *cairo_brush;
+	char style_path[PATH_MAX], message[d_chart_max_message_rows][d_chart_max_message];
 	int head[d_chart_max_nested], last_width, last_height, show_borders, border_x, border_y, bins[d_chart_max_nested];
 	enum e_chart_kinds kind[d_chart_max_nested];
 	struct {
@@ -90,6 +95,8 @@ extern void p_chart_normalize(struct s_chart *chart, float full_h, float full_w,
 extern int p_chart_callback(GtkWidget *widget, GdkEvent *event, void *v_chart);
 extern int p_chart_callback_scale_show(GtkWidget *widget, GdkEvent *event, struct s_interface_scale *interface);
 extern int p_chart_callback_scale_action(GtkWidget *widget, struct s_interface_scale *interface);
+extern int p_chart_callback_scale_export_csv(GtkWidget *widget, struct s_interface_scale *interface);
+extern int p_chart_callback_scale_export_png(GtkWidget *widget, struct s_interface_scale *interface);
 extern int p_chart_callback_scale_hide(GtkWidget *widget, struct s_interface_scale *interfae);
 #endif
 
