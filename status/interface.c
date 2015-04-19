@@ -42,7 +42,8 @@ const char *v_interface_charts[] = {
 	"v_temperature_map_ladder_22",
 	"v_temperature_map_ladder_23",
 	"v_current_chart_alignment",
-	"v_temperature_chart_alignment"
+	"v_temperature_chart_alignment",
+	"v_voltage_chart_alignment"
 }, *v_interface_labels[] = {
 	"v_update_label"
 }, *v_interface_chart_labels[] = {
@@ -71,7 +72,8 @@ const char *v_interface_charts[] = {
 	"temperature_status_22",
 	"temperature_status_23",
 	"currents",
-	"temperatures"
+	"temperatures",
+	"voltages"
 }, *v_interface_chart_styles[] = {
 	"styles/temperature_small.keys",
 	"styles/temperature_small.keys",
@@ -98,7 +100,8 @@ const char *v_interface_charts[] = {
 	"styles/temperature_small.keys",
 	"styles/temperature_small.keys",
 	"styles/currents.keys",
-	"styles/temperatures.keys"
+	"styles/temperatures.keys",
+	"styles/voltages.keys"
 };
 
 struct s_interface *f_interface_initialize(struct s_interface *supplied, const char *builder_path) {
@@ -108,7 +111,7 @@ struct s_interface *f_interface_initialize(struct s_interface *supplied, const c
 		if (!(result = (struct s_interface *)d_malloc(sizeof(struct s_interface))))
 			d_die(d_error_malloc);
 	result->destroy = d_false;
-	if ((result->interface = gtk_builder_new())) {
+	if ((result->interface = gtk_builder_new()))
 		if ((gtk_builder_add_from_file(result->interface, builder_path, NULL))) {
 			d_assert(result->window = GTK_WINDOW(gtk_builder_get_object(result->interface, "v_window")));
 			for (index = 0; index < e_interface_chart_NULL; ++index) {
@@ -122,7 +125,6 @@ struct s_interface *f_interface_initialize(struct s_interface *supplied, const c
 			for (index = 0; index < e_interface_label_NULL; ++index)
 				d_assert(result->labels[index] = GTK_LABEL(gtk_builder_get_object(result->interface, v_interface_labels[index])));
 		}
-	}
 	return result;
 }
 

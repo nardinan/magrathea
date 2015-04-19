@@ -781,7 +781,7 @@
               <object class="GtkTable" id="v_temperature_charts_grid">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="n_rows">2</property>
+                <property name="n_rows">3</property>
                 <child>
                   <object class="GtkFrame" id="v_current_chart">
                     <property name="visible">True</property>
@@ -825,6 +825,34 @@
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="label" translatable="yes">Temperatures</property>
+                        <property name="use_markup">True</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="top_attach">2</property>
+                    <property name="bottom_attach">3</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkFrame" id="v_voltage_chart">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="label_xalign">0.5</property>
+                    <child>
+                      <object class="GtkAlignment" id="v_voltage_chart_alignment">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <child>
+                          <placeholder/>
+                        </child>
+                      </object>
+                    </child>
+                    <child type="label">
+                      <object class="GtkLabel" id="v_voltage_chart_label">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">BIAS</property>
                         <property name="use_markup">True</property>
                       </object>
                     </child>

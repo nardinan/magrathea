@@ -59,12 +59,18 @@ int p_analyze_next_code(size_t elements_size, char tokens[elements_size][d_strin
 	return result;
 }
 
-int f_analyze_next(FILE *stream, unsigned char trb_code, time_t *timestamp) {
+int f_analyze_next(FILE *stream, unsigned char trb_code, time_t *timestamp, time_t starting_timestamp) {
 	int elements, result = d_false;
 	char buffer[d_analyze_row_size], tokens[d_analyze_csv_elements][d_string_buffer_size];
-	if (fgets(buffer, d_analyze_row_size, stream) > 0)
-		if ((elements = p_analyze_next_split(buffer, d_trb_device_csv_character, d_analyze_csv_elements, tokens)) == d_analyze_csv_elements)
-			result = p_analyze_next_code(elements, tokens, trb_code, timestamp);
+	time_t current_timestamp;
+	while (fgets(buffer, d_analyze_row_size, stream) > 0)
+		if ((elements = p_analyze_next_split(buffer, d_trb_device_csv_character, d_analyze_csv_elements, tokens)) == d_analyze_csv_elements) {
+			current_timestamp = atol(tokens[0]);
+			if (current_timestamp >= starting_timestamp) {	
+				result = p_analyze_next_code(elements, tokens, trb_code, timestamp);
+				break;
+			}
+		}
 	return result;
 }
 

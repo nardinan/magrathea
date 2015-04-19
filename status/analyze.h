@@ -24,5 +24,5 @@
 extern struct s_trb_status v_current_status;
 extern int p_analyze_next_split(char *buffer, char divisor, size_t elements_size, char tokens[elements_size][d_string_buffer_size]);
 extern int p_analyze_next_code(size_t elements_size, char tokens[elements_size][d_string_buffer_size], unsigned char trb_code, time_t *timestamp);
-extern int f_analyze_next(FILE *stream, unsigned char trb_code, time_t *timestamp);
+extern int f_analyze_next(FILE *stream, unsigned char trb_code, time_t *timestamp, time_t starting_timestamp);
 #endif

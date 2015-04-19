@@ -1,6 +1,6 @@
-segments_x=4.0
+segments_x=12.0
 segments_y=20.0
-range_top_x=1440.0
+range_top_x=3600.0
 range_bottom_x=0.0
 range_bottom_y=-20.0
 range_top_y=60.0

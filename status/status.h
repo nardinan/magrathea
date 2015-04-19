@@ -26,27 +26,24 @@
 #define d_status_temperature_wrong 221.0f
 #define d_status_window_width 800
 #define d_status_window_height 600
-#define d_status_bucket_size 1445
+#define d_status_bucket_size 3600
 #define d_status_timestamp_format "%d %b %Y %H:%M:%S"
-#define d_status_timeout 100000
-#define d_status_timeout_online 20000
-#define d_status_skip_frames 15
+#define d_status_timeout 20000
+#define d_status_timeout_online 5000
+#define d_status_skip_frames 64
+typedef struct s_status_environment_values {
+	time_t timestamp;
+	float temperatures[e_trb_device_temperatures_null], currents[e_trb_device_currents_null], voltages[e_trb_device_voltages_null], tfh_mean;
+} s_status_environment_values;
 typedef struct s_status_environment {
 	FILE *stream;
 	unsigned char code;
-	time_t timestamp;
-	struct {
-		float tfh_mean[d_status_bucket_size], power_board[d_status_bucket_size], adc_board[d_status_bucket_size],
-		      fpga_board_busa[d_status_bucket_size], fpga_board_busb[d_status_bucket_size];
-	} temperatures;
-	struct {
-		float current_34[d_status_bucket_size], current_negative_33[d_status_bucket_size], current_57[d_status_bucket_size],
-		      current_12[d_status_bucket_size];
-	} currents;
+	struct s_status_environment_values values[d_status_bucket_size];
 	int entries;
 } s_status_environment;
+extern struct s_status_environment v_environment;
+extern time_t v_starting_timestamp;
 extern int v_frames;
-extern struct s_status_environment environment;
 extern struct s_chart_color temperature_colors[];
 extern int f_status_initialize(struct s_interface *supplied, const char *builder_path);
 extern void f_status_destroy(GtkWidget *widget, struct s_interface *supplied);

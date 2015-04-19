@@ -16,8 +16,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "status.h"
-int v_frames = 0;
-struct s_status_environment environment;
+struct s_status_environment v_environment;
+time_t v_starting_timestamp;
+int v_frames;
 struct s_chart_color temperature_colors[] = {
 	{179,	204,	255},
 	{180,	205,	255},
@@ -53,12 +54,12 @@ int f_status_initialize(struct s_interface *supplied, const char *builder_path) 
 	strncpy(supplied->logic_charts[e_interface_chart_current].data.description[1], "Current on -3.3V", d_string_buffer_size);
 	strncpy(supplied->logic_charts[e_interface_chart_current].data.description[2], "Current on +5.7V", d_string_buffer_size);
 	strncpy(supplied->logic_charts[e_interface_chart_current].data.description[3], "Current on +12V", d_string_buffer_size);
+	strncpy(supplied->logic_charts[e_interface_chart_voltage].data.description[0], "BIAS A", d_string_buffer_size);
+	strncpy(supplied->logic_charts[e_interface_chart_voltage].data.description[1], "BIAS B", d_string_buffer_size);
 	return result;
 }
 
 void f_status_destroy(GtkWidget *widget, struct s_interface *supplied) {
-	if (environment.stream)
-		fclose(environment.stream);
 	exit(0);
 }
 
@@ -74,7 +75,10 @@ void p_status_loop_fill_map_temperature(float kelvin, float *R, float *G, float 
 
 void p_status_loop_fill_map(struct s_interface *interface) {
 	int index, real_index;
+	time_t first_timestamp;
 	for (index = 0, real_index = 0; real_index < d_trb_device_temperatures_size; ++index, real_index += 2) {
+		interface->logic_charts[index].data.line_size[0] = (interface->logic_charts[index].last_width/3.0);
+		interface->logic_charts[index].data.line_size[1] = (interface->logic_charts[index].last_width/3.0);
 		f_chart_flush(&(interface->logic_charts[index]));
 		f_chart_append_signal(&(interface->logic_charts[index]), 0, 5.0f, v_current_status.tfh_temperatures[real_index]);
 		f_chart_append_signal(&(interface->logic_charts[index]), 1, 10.0f, v_current_status.tfh_temperatures[real_index+1]);
@@ -87,66 +91,67 @@ void p_status_loop_fill_map(struct s_interface *interface) {
 		interface->logic_charts[index].kind[0] = e_chart_kind_histogram_numeric;
 		interface->logic_charts[index].kind[1] = e_chart_kind_histogram_numeric;
 	}
+	first_timestamp = v_environment.values[0].timestamp;
 	f_chart_flush(&(interface->logic_charts[e_interface_chart_temperature]));
 	f_chart_flush(&(interface->logic_charts[e_interface_chart_current]));
-	for (index = 0; index < environment.entries; ++index) {
-		f_chart_append_signal(&(interface->logic_charts[e_interface_chart_temperature]), 0, index, environment.temperatures.tfh_mean[index]);
-		f_chart_append_signal(&(interface->logic_charts[e_interface_chart_temperature]), 1, index, environment.temperatures.power_board[index]);
-		f_chart_append_signal(&(interface->logic_charts[e_interface_chart_temperature]), 2, index, environment.temperatures.adc_board[index]);
-		f_chart_append_signal(&(interface->logic_charts[e_interface_chart_temperature]), 3, index, environment.temperatures.fpga_board_busa[index]);
-		f_chart_append_signal(&(interface->logic_charts[e_interface_chart_temperature]), 4, index, environment.temperatures.fpga_board_busb[index]);
-		f_chart_append_signal(&(interface->logic_charts[e_interface_chart_current]), 0, index, environment.currents.current_34[index]);
-		f_chart_append_signal(&(interface->logic_charts[e_interface_chart_current]), 1, index, environment.currents.current_negative_33[index]);
-		f_chart_append_signal(&(interface->logic_charts[e_interface_chart_current]), 2, index, environment.currents.current_57[index]);
-		f_chart_append_signal(&(interface->logic_charts[e_interface_chart_current]), 3, index, environment.currents.current_12[index]);
+	f_chart_flush(&(interface->logic_charts[e_interface_chart_voltage]));
+	for (index = 0; index < v_environment.entries; ++index) {
+		real_index = (first_timestamp-v_environment.values[index].timestamp);
+		f_chart_append_signal(&(interface->logic_charts[e_interface_chart_temperature]), 0, real_index, v_environment.values[index].tfh_mean);
+		f_chart_append_signal(&(interface->logic_charts[e_interface_chart_temperature]), 1, real_index, 
+				v_environment.values[index].temperatures[e_trb_device_temperatures_power]);
+		f_chart_append_signal(&(interface->logic_charts[e_interface_chart_temperature]), 2, real_index,
+				v_environment.values[index].temperatures[e_trb_device_temperatures_adc]);
+		f_chart_append_signal(&(interface->logic_charts[e_interface_chart_temperature]), 3, real_index,
+				v_environment.values[index].temperatures[e_trb_device_temperatures_fpga_A]);
+		f_chart_append_signal(&(interface->logic_charts[e_interface_chart_temperature]), 4, real_index,
+				v_environment.values[index].temperatures[e_trb_device_temperatures_fpga_B]);
+		f_chart_append_signal(&(interface->logic_charts[e_interface_chart_current]), 0, real_index, 
+				v_environment.values[index].currents[e_trb_device_currents_34]);
+		f_chart_append_signal(&(interface->logic_charts[e_interface_chart_current]), 1, real_index, 
+				v_environment.values[index].currents[e_trb_device_currents_33]);
+		f_chart_append_signal(&(interface->logic_charts[e_interface_chart_current]), 2, real_index, 
+				v_environment.values[index].currents[e_trb_device_currents_57]);
+		f_chart_append_signal(&(interface->logic_charts[e_interface_chart_current]), 3, real_index, 
+				v_environment.values[index].currents[e_trb_device_currents_12]);
+		f_chart_append_signal(&(interface->logic_charts[e_interface_chart_voltage]), 0, real_index,
+				v_environment.values[index].voltages[e_trb_device_voltages_HV1]);
+		f_chart_append_signal(&(interface->logic_charts[e_interface_chart_voltage]), 1, real_index,
+				v_environment.values[index].voltages[e_trb_device_voltages_HV2]);
 	}
 }
 
 void p_status_loop_fill_values(void) {
-	float tfh_mean = 0;
-	int index, tfh_elements = 0;
-	for (index = 0; index < d_trb_device_temperatures_size; ++index)
+	int index, tfh_elements;
+	for (index = (d_status_bucket_size-1); index > 0; --index)
+		memcpy(&(v_environment.values[index]), &(v_environment.values[index-1]), sizeof(struct s_status_environment_values));
+	v_environment.values[0].tfh_mean = 0;
+	for (index = 0, tfh_elements = 0; index < d_trb_device_temperatures_size; ++index)
 		if (v_current_status.tfh_temperatures[index] != d_status_temperature_wrong) {
-			tfh_mean += v_current_status.tfh_temperatures[index];
+			v_environment.values[0].tfh_mean += v_current_status.tfh_temperatures[index];
 			tfh_elements++;
 		}
 	if (tfh_elements > 1)
-		tfh_mean /= (float)tfh_elements;
-	environment.temperatures.tfh_mean[environment.entries] = tfh_mean;
-	environment.temperatures.power_board[environment.entries] = v_current_status.temperatures[e_trb_device_temperatures_power];
-	environment.temperatures.adc_board[environment.entries] = v_current_status.temperatures[e_trb_device_temperatures_adc];
-	environment.temperatures.fpga_board_busa[environment.entries] = v_current_status.temperatures[e_trb_device_temperatures_fpga_A];
-	environment.temperatures.fpga_board_busb[environment.entries] = v_current_status.temperatures[e_trb_device_temperatures_fpga_B];
-	environment.currents.current_34[environment.entries] = v_current_status.currents[e_trb_device_currents_34];
-	environment.currents.current_negative_33[environment.entries] = v_current_status.currents[e_trb_device_currents_33];
-	environment.currents.current_57[environment.entries] = v_current_status.currents[e_trb_device_currents_57];
-	environment.currents.current_12[environment.entries] = v_current_status.currents[e_trb_device_currents_12];
-	if (environment.entries >= (d_status_bucket_size-1)) {
-		for (index = 1; index < d_status_bucket_size; ++index) {
-			environment.temperatures.tfh_mean[index-1] = environment.temperatures.tfh_mean[index];
-			environment.temperatures.power_board[index-1] = environment.temperatures.power_board[index];
-			environment.temperatures.adc_board[index-1] = environment.temperatures.adc_board[index];
-			environment.temperatures.fpga_board_busa[index-1] = environment.temperatures.fpga_board_busa[index];
-			environment.temperatures.fpga_board_busb[index-1] = environment.temperatures.fpga_board_busb[index];
-			environment.currents.current_34[index-1] = environment.currents.current_34[index];
-			environment.currents.current_negative_33[index-1] = environment.currents.current_negative_33[index];
-			environment.currents.current_57[index-1] = environment.currents.current_57[index];
-			environment.currents.current_12[index-1] = environment.currents.current_12[index];
-		}
-		environment.entries = (d_status_bucket_size-1);
-	} else
-		environment.entries++;
+		v_environment.values[0].tfh_mean /= (float)tfh_elements;
+	for (index = 0; index < e_trb_device_temperatures_null; ++index)
+		v_environment.values[0].temperatures[index] = v_current_status.temperatures[index];
+	for (index = 0; index < e_trb_device_currents_null; ++index)
+		v_environment.values[0].currents[index] = v_current_status.currents[index];
+	for (index = 0; index < e_trb_device_voltages_null; ++index)
+		v_environment.values[0].voltages[index] = v_current_status.voltages[index];
+	if (v_environment.entries < d_status_bucket_size)
+		v_environment.entries++;
 }
 
 int f_status_loop(struct s_interface *interface) {
 	time_t timeout = d_status_timeout;
 	int result = d_true, index;
 	char label_buffer[d_string_buffer_size], time_buffer[d_string_buffer_size];
-	if (f_analyze_next(environment.stream, environment.code, &(environment.timestamp))) {
+	if (f_analyze_next(v_environment.stream, v_environment.code, &(v_environment.values[0].timestamp), v_starting_timestamp)) {
 		p_status_loop_fill_values();
-		if (environment.timestamp > 0) {
-			strftime(time_buffer, d_string_buffer_size, d_status_timestamp_format, localtime(&(environment.timestamp)));
-			snprintf(label_buffer, d_string_buffer_size, "Last entry: %s", time_buffer);
+		if (v_environment.values[0].timestamp > 0) {
+			strftime(time_buffer, d_string_buffer_size, d_status_timestamp_format, localtime(&(v_environment.values[0].timestamp)));
+			snprintf(label_buffer, d_string_buffer_size, "last entry: %s", time_buffer);
 			gtk_label_set_text(interface->labels[e_interface_label_update], label_buffer);
 		}
 		timeout = d_status_timeout_online;
@@ -165,12 +170,18 @@ int f_status_loop(struct s_interface *interface) {
 int main (int argc, char *argv[]) {
 	char buffer[d_string_buffer_size];
 	struct s_interface *main_interface = (struct s_interface *) malloc(sizeof(struct s_interface));
+	int index;
 	f_memory_init();
 	if (argc >= 3) {
-		environment.code = (unsigned char)strtol(argv[2], NULL, 16);
-		if ((environment.stream = fopen(argv[1], "r"))) {
-			if ((argc >= 4) && (f_string_strcmp(argv[3], "-l") == 0))
-				fseek(environment.stream, 0, SEEK_END);
+		v_environment.code = (unsigned char)strtol(argv[2], NULL, 16);
+		if ((v_environment.stream = fopen(argv[1], "r"))) {
+			for (index = 3; index < argc; ++index)
+				if (f_string_strcmp(argv[index], "-l") == 0)
+					fseek(v_environment.stream, 0, SEEK_END);
+				else if ((f_string_strcmp(argv[index], "-bt") == 0) && ((index+1) < argc)) {
+					v_starting_timestamp = atol(argv[index+1]);
+					index++;
+				}
 			gtk_init(&argc, &argv);
 			if (f_status_initialize(main_interface, "UI/UI_main.glade")) {
 				snprintf(buffer, d_string_buffer_size, "Magrathea status viewer (TRB %s)", argv[2]);
@@ -181,7 +192,9 @@ int main (int argc, char *argv[]) {
 		} else
 			fprintf(stderr, "404 - file %s not found\n", argv[1]);
 	} else
-		fprintf(stderr, "usage:\n%s <file> <code> {-l: skip to last position}\n", argv[0]);
+		fprintf(stderr, "usage: %s <path> <trb#> {...}\n"
+				"{-l: skip to last position}\n"
+				"{-bt <timestamp>: show status after a date}\n", argv[0]);
 	f_memory_destroy();
 	return 0;
 }

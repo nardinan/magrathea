@@ -1,0 +1,17 @@
+segments_x=12.0
+segments_y=20.0
+range_top_x=3600.0
+range_bottom_x=0.0
+range_bottom_y=0.0
+range_top_y=150.0
+dot_size_0_z=0.0
+line_size_0_z=2.5
+color_R_0_z=1.0
+color_G_0_z=0.5
+color_B_0_z=0.5
+dot_size_1_z=0.0
+line_size_1_z=2.0
+color_R_1_z=1.0
+color_G_1_z=0.0
+color_B_1_z=0.0
+show_borders_z=1

@@ -45,6 +45,7 @@ typedef enum e_interface_charts {
 	e_interface_chart_temperature_23,
 	e_interface_chart_current,
 	e_interface_chart_temperature,
+	e_interface_chart_voltage,
 	e_interface_chart_NULL
 } e_interface_charts;
 typedef enum e_interface_labels {
