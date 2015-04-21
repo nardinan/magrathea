@@ -34,6 +34,7 @@
 #define d_trb_device_timeout_refresh 10 		/* milliseconds */
 #define d_trb_device_timeout_status 10 			/* seconds */
 #define d_trb_device_log "magrathea.log"
+#define d_trb_device_raw_log "raw_magrathea.log"
 #define d_trb_device_csv_character '\t'
 #define B(a) v_trb_device_bytes[(a)]
 #define V(a) v_trb_device_boards[(a)].status

@@ -529,10 +529,19 @@ int f_trb_device_destroy(unsigned char code) {
 }
 
 void p_trb_device_refresh_analyze(unsigned char code, unsigned char *buffer, size_t size) {
+	FILE *stream;
 	int index;
 	float value, current, temperature, voltage;
 	if (size > B(e_trb_device_bytes_board_code))
 		if (v_trb_device_boards[code].code == buffer[B(e_trb_device_bytes_board_code)]) {
+			/* Drop information "as they are" into the raw log file */
+			if ((stream = fopen(d_trb_device_raw_log, "a"))) {
+				fprintf(stream, "%ld ", v_trb_device_boards[code].last_refresh);
+				for (index = 0; index < size; ++index)
+					fprintf(stream, "0x%02x ", buffer[index]);
+				fprintf(stream, "\n");
+				fclose(stream);
+			}
 			/* I'm so sorry for this bunch of sh*t but fine tuning is needed */
 			switch (buffer[B(e_trb_device_bytes_command)]) {
 				case 0x05:
@@ -679,11 +688,11 @@ int f_trb_device_refresh(unsigned char code, struct s_console *console) {
 		current_time = time(NULL);
 		if ((v_trb_device_boards[code].last_refresh+d_trb_device_timeout_status) < current_time)
 			p_trb_device_status_refresh(code);
-			if (v_trb_device_boards[code].focused) {
-				p_trb_device_description_format(code, buffer, d_console_output_size);
-				p_trigger_device_description_format(code, trigger, d_console_output_size);
-				snprintf(console->prefix, d_console_output_size, "\r[%s]%s>", buffer, trigger);
-			}
+		if (v_trb_device_boards[code].focused) {
+			p_trb_device_description_format(code, buffer, d_console_output_size);
+			p_trigger_device_description_format(code, trigger, d_console_output_size);
+			snprintf(console->prefix, d_console_output_size, "\r[%s]%s>", buffer, trigger);
 		}
-		return result;
 	}
+	return result;
+}
