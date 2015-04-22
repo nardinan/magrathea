@@ -6,7 +6,6 @@ execute_higher_threshold=1
 execute_raw_mode=1
 execute_dld_mode=1
 execute_nor_mode=1
-# format is: batch_operatiions.sh <use raw><use dld><use nor> <update higher threshold> <loop has to runs for #>
 if [ "$1" ] && [ "${#1}" -eq "4" ]; then
 	if [ "$2" ]; then
 		maximum_loop=$2;

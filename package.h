@@ -40,6 +40,7 @@
 #define d_package_alignment_size 8
 #define d_package_dmg_workmode 0 /* damaged workmode 		*/
 #define d_package_raw_workmode 3 /* raw workmode 		*/
+#define d_package_cal_workmode 4 /* calibration workmode	*/
 #define d_package_nrm_workmode 2 /* compressed workmode 	*/
 #define d_package_dld_workmode 6 /* download workmode		*/
 #define d_package_tmp_workmode 8 /* timestamp workmode		*/

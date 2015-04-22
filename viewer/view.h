@@ -40,7 +40,8 @@ typedef enum e_view_actions {
 	e_view_action_close_after_calibrations = 	0x04,
 	e_view_action_filter_raw = 			0x08,
 	e_view_action_filter_compressed = 		0x10,
-	e_view_action_filter_download =			0x20
+	e_view_action_filter_download =			0x20,
+	e_view_action_filter_calibration = 		0x40
 } e_view_actions;
 typedef struct s_view_environment {
 	FILE *stream, *clusters_stream;

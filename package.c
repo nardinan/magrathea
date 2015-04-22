@@ -31,7 +31,7 @@ char *v_package_kind[] = {
 	"unused workmode",	/* 1 */
 	"compressed workmode",	/* 2 */
 	"raw workmode",		/* 3 */
-	"unused workmode",	/* 4 */
+	"calibration workmode",	/* 4 */
 	"unused workmode",	/* 5 */
 	"download workmode",	/* 6 */
 	"unused wormkode",	/* 7 */
@@ -145,8 +145,10 @@ unsigned char *p_package_analyze_header_data(struct s_package *package, unsigned
 		if (index >= d_package_data_header_const_size) {
 			if ((size-(pointer-buffer)) > d_package_data_header_info_size) {
 				workmode = (pointer[0]>>4)&0x0f;
-				//group = (pointer[0])&0x0f; // not needed
-				if ((workmode == d_package_raw_workmode) || (workmode == d_package_nrm_workmode) || (workmode == d_package_dld_workmode)) {
+				if ((workmode == d_package_raw_workmode) || 
+						(workmode == d_package_cal_workmode) ||
+						(workmode == d_package_nrm_workmode) || 
+						(workmode == d_package_dld_workmode)) {
 					package->data.kind = workmode;
 					pointer++;
 					package->data.trb = (pointer[0]&0x3f);
@@ -155,6 +157,7 @@ unsigned char *p_package_analyze_header_data(struct s_package *package, unsigned
 					pointer += 2;
 					switch (workmode) {
 						case d_package_raw_workmode:
+						case d_package_cal_workmode:
 							backup = p_package_analyze_raw(package, pointer, (size-(pointer-buffer)));
 							break;
 						case d_package_dld_workmode:

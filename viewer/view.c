@@ -443,9 +443,11 @@ int main (int argc, char *argv[]) {
 						else if (f_string_strcmp(argv[index], "-k") == 0)
 							v_flags |= e_view_action_close_after_calibrations;
 						else if (f_string_strcmp(argv[index], "-r") == 0)
-							v_flags &= ~e_view_action_filter_compressed;
+							v_flags &= ~(e_view_action_filter_compressed|e_view_action_filter_calibration);
 						else if (f_string_strcmp(argv[index], "-n") == 0)
-							v_flags &= ~e_view_action_filter_raw;
+							v_flags &= ~(e_view_action_filter_calibration|e_view_action_filter_raw);
+						else if (f_string_strcmp(argv[index], "-g") == 0)
+							v_flags &= ~(e_view_action_filter_compressed|e_view_action_filter_raw);
 						else if (f_string_strcmp(argv[index], "-d") == 0)
 							v_flags |= e_view_action_filter_download;
 						else if (f_string_strcmp(argv[index], "-e") == 0) {
@@ -498,6 +500,7 @@ int main (int argc, char *argv[]) {
 				"\t{-m <file>: file with bad channels}\n"
 				"\t{-r: only raw data}\n"
 				"\t{-n: only compressed data}\n"
+				"\t{-g: only gain calbration data}\n"
 				"\t{-d: load download data as calibrations}\n", argv[0]);
 	f_memory_destroy();
 	return 0;

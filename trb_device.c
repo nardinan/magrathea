@@ -174,7 +174,7 @@ int f_trb_device_status(unsigned char code, char **tokens, size_t elements, int 
 		"GODLIKE MODE (maybe a bug)",
 		"NORMAL MODE",
 		"RAW MODE",
-		"GAIN CALIBRATION",
+		"GAIN CALIBRATION MODE",
 		"PEDESTAL UPDATE",
 		"DOWNLOAD MODE",
 		"RDL MODE"
