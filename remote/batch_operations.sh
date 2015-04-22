@@ -31,10 +31,18 @@ while [ 1 ]; do
 			trigger_command="-s 100"
 			source magrathea_raw_run.sh
 			sleep 240 # 4 minutes
+			cp $magrathea_log_file $final_filename".log"
+			cp $magrathea_raw_log_file $final_filename".raw.log"
+			echo "" > $magrathea_log_file
+			echo "" > $magrathea_raw_log_file
 			;;
 		3)	
 			source magrathea_dld_run.sh
 			sleep 120 # 2 minutes
+			cp $magrathea_log_file $final_filename".log"
+			cp $magrathea_raw_log_file $final_filename".raw.log"
+			echo "" > $magrathea_log_file
+			echo "" > $magrathea_raw_log_file	
 			;;
 		4)
 			trigger_log="Ext"
@@ -42,6 +50,11 @@ while [ 1 ]; do
 			trigger_command="-ext"
 			source magrathea_nor_run.sh
 			sleep 900 # 15 minutes
+			cp $magrathea_log_file $final_filename".log"
+			cp $magrathea_raw_log_file $final_filename".raw.log"
+			echo "" > $magrathea_log_file
+			echo "" > $magrathea_raw_log_file
+			
 			;;
 	esac
 done

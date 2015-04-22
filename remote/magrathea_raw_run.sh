@@ -1,10 +1,7 @@
 #!/bin/bash
 source _magrathea_environment.sh
-source _magrathea_run_number.sh
-source _magrathea_timer.sh
+source _magrathea_filename.sh $raw_data_folder "raw"
 source _magrathea_trigger.sh
-final_filename=$raw_data_folder"/raw"$postfix_filename
-echo "[*] filename selected and injected:  $final_filename"
 $magrathea_command stream -o $final_filename
 $magrathea_command write -x 040700
 $magrathea_command trigger $trigger_command
