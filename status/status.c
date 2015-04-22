@@ -97,27 +97,36 @@ void p_status_loop_fill_map(struct s_interface *interface) {
 	f_chart_flush(&(interface->logic_charts[e_interface_chart_voltage]));
 	for (index = 0; index < v_environment.entries; ++index) {
 		real_index = (first_timestamp-v_environment.values[index].timestamp);
-		f_chart_append_signal(&(interface->logic_charts[e_interface_chart_temperature]), 0, real_index, v_environment.values[index].tfh_mean);
-		f_chart_append_signal(&(interface->logic_charts[e_interface_chart_temperature]), 1, real_index, 
-				v_environment.values[index].temperatures[e_trb_device_temperatures_power]);
-		f_chart_append_signal(&(interface->logic_charts[e_interface_chart_temperature]), 2, real_index,
-				v_environment.values[index].temperatures[e_trb_device_temperatures_adc]);
-		f_chart_append_signal(&(interface->logic_charts[e_interface_chart_temperature]), 3, real_index,
-				v_environment.values[index].temperatures[e_trb_device_temperatures_fpga_A]);
-		f_chart_append_signal(&(interface->logic_charts[e_interface_chart_temperature]), 4, real_index,
-				v_environment.values[index].temperatures[e_trb_device_temperatures_fpga_B]);
-		f_chart_append_signal(&(interface->logic_charts[e_interface_chart_current]), 0, real_index, 
-				v_environment.values[index].currents[e_trb_device_currents_34]);
-		f_chart_append_signal(&(interface->logic_charts[e_interface_chart_current]), 1, real_index, 
-				v_environment.values[index].currents[e_trb_device_currents_33]);
-		f_chart_append_signal(&(interface->logic_charts[e_interface_chart_current]), 2, real_index, 
-				v_environment.values[index].currents[e_trb_device_currents_57]);
-		f_chart_append_signal(&(interface->logic_charts[e_interface_chart_current]), 3, real_index, 
-				v_environment.values[index].currents[e_trb_device_currents_12]);
-		f_chart_append_signal(&(interface->logic_charts[e_interface_chart_voltage]), 0, real_index,
-				v_environment.values[index].voltages[e_trb_device_voltages_HV1]);
-		f_chart_append_signal(&(interface->logic_charts[e_interface_chart_voltage]), 1, real_index,
-				v_environment.values[index].voltages[e_trb_device_voltages_HV2]);
+		if ((interface->logic_charts[e_interface_chart_temperature].axis_x.range[0] <= real_index) &&
+				(interface->logic_charts[e_interface_chart_temperature].axis_x.range[1] >= real_index)) {
+			f_chart_append_signal(&(interface->logic_charts[e_interface_chart_temperature]), 0, real_index, v_environment.values[index].tfh_mean);
+			f_chart_append_signal(&(interface->logic_charts[e_interface_chart_temperature]), 1, real_index, 
+					v_environment.values[index].temperatures[e_trb_device_temperatures_power]);
+			f_chart_append_signal(&(interface->logic_charts[e_interface_chart_temperature]), 2, real_index,
+					v_environment.values[index].temperatures[e_trb_device_temperatures_adc]);
+			f_chart_append_signal(&(interface->logic_charts[e_interface_chart_temperature]), 3, real_index,
+					v_environment.values[index].temperatures[e_trb_device_temperatures_fpga_A]);
+			f_chart_append_signal(&(interface->logic_charts[e_interface_chart_temperature]), 4, real_index,
+					v_environment.values[index].temperatures[e_trb_device_temperatures_fpga_B]);
+		}
+		if ((interface->logic_charts[e_interface_chart_current].axis_x.range[0] <= real_index) &&
+				(interface->logic_charts[e_interface_chart_current].axis_x.range[1] >= real_index)) {
+			f_chart_append_signal(&(interface->logic_charts[e_interface_chart_current]), 0, real_index, 
+					v_environment.values[index].currents[e_trb_device_currents_34]);
+			f_chart_append_signal(&(interface->logic_charts[e_interface_chart_current]), 1, real_index, 
+					v_environment.values[index].currents[e_trb_device_currents_33]);
+			f_chart_append_signal(&(interface->logic_charts[e_interface_chart_current]), 2, real_index, 
+					v_environment.values[index].currents[e_trb_device_currents_57]);
+			f_chart_append_signal(&(interface->logic_charts[e_interface_chart_current]), 3, real_index, 
+					v_environment.values[index].currents[e_trb_device_currents_12]);
+		}
+		if ((interface->logic_charts[e_interface_chart_voltage].axis_x.range[0] <= real_index) &&
+				(interface->logic_charts[e_interface_chart_voltage].axis_x.range[1] >= real_index)) {
+			f_chart_append_signal(&(interface->logic_charts[e_interface_chart_voltage]), 0, real_index,
+					v_environment.values[index].voltages[e_trb_device_voltages_HV1]);
+			f_chart_append_signal(&(interface->logic_charts[e_interface_chart_voltage]), 1, real_index,
+					v_environment.values[index].voltages[e_trb_device_voltages_HV2]);
+		}
 	}
 }
 
