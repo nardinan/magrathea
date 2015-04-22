@@ -40,9 +40,6 @@ typedef enum e_interface_scale_spins {
 	e_interface_scale_spin_NULL
 } e_interface_scale_spins;
 typedef enum e_interface_scale_scales {
-	e_interface_scale_scale_line_R = 0,
-	e_interface_scale_scale_line_G,
-	e_interface_scale_scale_line_B,
 	e_interface_scale_scale_background_R,
 	e_interface_scale_scale_background_G,
 	e_interface_scale_scale_background_B,

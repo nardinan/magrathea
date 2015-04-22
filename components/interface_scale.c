@@ -20,9 +20,6 @@ const char *v_interface_scale_switches[] = {
 	"v_informations",
 	NULL
 }, *v_interface_scale_scales[] = {
-	"v_style_line_color_R",
-	"v_style_line_color_G",
-	"v_style_line_color_B",
 	"v_style_background_color_R",
 	"v_style_background_color_G",
 	"v_style_background_color_B",
