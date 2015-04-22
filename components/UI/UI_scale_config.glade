@@ -28,8 +28,8 @@
     <property name="page_increment">1</property>
   </object>
   <object class="GtkAdjustment" id="v_x_bottom_adjustment">
-    <property name="lower">-8000</property>
-    <property name="upper">8000</property>
+    <property name="lower">-32000</property>
+    <property name="upper">32000</property>
     <property name="step_increment">0.10000000000000001</property>
     <property name="page_increment">1</property>
   </object>
@@ -39,14 +39,14 @@
     <property name="page_increment">10</property>
   </object>
   <object class="GtkAdjustment" id="v_x_top_adjustment">
-    <property name="lower">-8000</property>
-    <property name="upper">8000</property>
+    <property name="lower">-32000</property>
+    <property name="upper">32000</property>
     <property name="step_increment">0.10000000000000001</property>
     <property name="page_increment">1</property>
   </object>
   <object class="GtkAdjustment" id="v_y_bottom_adjustment">
-    <property name="lower">-8000</property>
-    <property name="upper">8000</property>
+    <property name="lower">-32000</property>
+    <property name="upper">32000</property>
     <property name="step_increment">0.10000000000000001</property>
     <property name="page_increment">1</property>
   </object>
@@ -56,8 +56,8 @@
     <property name="page_increment">10</property>
   </object>
   <object class="GtkAdjustment" id="v_y_top_adjustment">
-    <property name="lower">-8000</property>
-    <property name="upper">8000</property>
+    <property name="lower">-32000</property>
+    <property name="upper">32000</property>
     <property name="step_increment">0.10000000000000001</property>
     <property name="page_increment">1</property>
   </object>

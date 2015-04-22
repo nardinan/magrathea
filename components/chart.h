@@ -22,7 +22,7 @@
 #include "interface_scale.h"
 #define d_chart_max_message 128
 #define d_chart_max_message_rows 15
-#define d_chart_bucket 10240
+#define d_chart_bucket 32000
 #define d_chart_max_nested 16
 #define d_chart_font_size 7.0
 #define d_chart_font_size_giant 20.0
