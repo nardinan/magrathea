@@ -82,6 +82,7 @@ void p_trb_device_description_format(unsigned char code, char *destination, size
 		"GB",
 		"TB",
 		"YB",
+		"OMGtoomuchforthisdiskB",
 		NULL
 	};
 	char status[d_string_buffer_size], stream[PATH_MAX];
@@ -169,14 +170,14 @@ int f_trb_device_status(unsigned char code, char **tokens, size_t elements, int 
 	char buffer[d_string_buffer_size], currents[d_string_buffer_size], temperatures[d_string_buffer_size], voltages[d_string_buffer_size],
 	     status[d_string_buffer_size], thresholds[d_string_buffer_size];
 	const char *operations[] = {
-		"REL",
-		"GODLIKE-MODE",
-		"NORMAL",
-		"RAW",
+		"REL MODE",
+		"GODLIKE MODE (maybe a bug)",
+		"NORMAL MODE",
+		"RAW MODE",
 		"GAIN CALIBRATION",
 		"PEDESTAL UPDATE",
 		"DOWNLOAD MODE",
-		"RDL"
+		"RDL MODE"
 	};
 	int argument, operation_code, selected = d_true, viewer = d_false, result = d_true;
 	FILE *process;
