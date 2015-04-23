@@ -426,7 +426,7 @@ int main (int argc, char *argv[]) {
 	if (argc >= 5) {
 		v_view_ladder = atoi(argv[3]);
 		v_view_trb = atoi(argv[2]);
-		v_flags = (e_view_action_filter_raw|e_view_action_filter_compressed);
+		v_flags = (e_view_action_filter_raw|e_view_action_filter_compressed|e_view_action_filter_calibration);
 		if ((v_view_skip_frames = atoi(argv[4])) < 0)
 			v_view_skip_frames = 0;
 		if ((v_view_ladder >= 0) && (v_view_ladder < d_analyze_ladders)) {
