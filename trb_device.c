@@ -445,6 +445,12 @@ int p_trb_device_inject_file(unsigned char code, const char *file, int output) {
 					write(output, buffer, f_string_strlen(buffer));
 					fsync(output);
 				}
+#ifdef d_trb_device_inject_echoing
+				if (output != STDOUT_FILENO) {
+					fprintf(stdout, "%s\n", buffer);
+					fflush(stdout);
+				}
+#endif
 				usleep(d_trb_device_inject_timeout_trb);
 			}
 		}

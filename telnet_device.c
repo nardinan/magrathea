@@ -99,6 +99,10 @@ void p_telnet_device_refresh_readout(int client, struct s_console *console) {
 				if (character == '\n') {
 					if (f_string_strlen(v_telnet_device.clients[client].buffer) > 0) {
 						if (f_string_strcmp(v_telnet_device.clients[client].buffer, d_magrathea_exit_command) != 0) {
+#ifdef d_telnet_echoing
+							fprintf(stdout, "[<<] %s\n", v_telnet_device.clients[client].buffer);
+							fflush(stdout);
+#endif
 							p_console_execute(console, v_telnet_device.clients[client].buffer,
 									v_telnet_device.clients[client].socket.socket);
 							p_telnet_device_refresh_command(client);

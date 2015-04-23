@@ -28,6 +28,7 @@
 #define d_telnet_device_queue 5
 #define d_telnet_device_timeout 100 /* microseconds */
 #define d_telnet_device_clients 15
+#define d_telnet_echoing
 typedef struct s_telnet_device_socket {
 	int socket, initialized:1;
 } s_telnet_device_socket;

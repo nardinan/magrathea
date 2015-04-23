@@ -48,6 +48,7 @@
 #define d_trb_device_inject_hexadecimal_size 6
 #define d_trb_device_inject_timeout_command 5000	/* microseconds */
 #define d_trb_device_inject_timeout_trb 100000		/* microseconds */
+#define d_trb_device_inject_echoing
 typedef enum e_trb_device_currents {
 	e_trb_device_currents_34 = 0,
 	e_trb_device_currents_33,
