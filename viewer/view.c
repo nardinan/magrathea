@@ -261,8 +261,11 @@ void p_view_loop_read_process(struct s_interface *interface, struct s_package *p
 		environment.data.mseconds = package->data.values.tmp.mseconds;
 	} else if (package->trb == v_package_trbs[v_view_trb].code)
 		switch (package->data.kind) {
+			case d_package_cal_workmode:
 			case d_package_raw_workmode:
-				if ((v_flags&e_view_action_filter_raw) == e_view_action_filter_raw) {
+				if ((((v_flags&e_view_action_filter_raw) == e_view_action_filter_raw) && (package->data.kind == d_package_raw_workmode)) ||
+						(((v_flags&e_view_action_filter_calibration) == e_view_action_filter_calibration) &&
+						 (package->data.kind == d_package_cal_workmode))) {
 					v_analyze_adc_pedestal = d_true;
 					v_analyze_adc_pedestal_cn = d_true;
 					for (ladder = 0; ladder < d_package_ladders; ++ladder)
@@ -297,13 +300,13 @@ void p_view_loop_read_process(struct s_interface *interface, struct s_package *p
 											d_view_pedestal_k);
 								if (package->data.values.dld.rms[ladder][channel] == 0xff) { /* bad strip */
 									environment.data.computed_calibrations.ladder[v_view_trb]
-										[package->data.values.dld.ladder[ladder]].flags[channel] = 
+										[package->data.values.dld.ladder[ladder]].flags[channel] =
 										e_stk_math_flag_bad_sigma;
 									environment.data.computed_calibrations.ladder[v_view_trb]
 										[package->data.values.dld.ladder[ladder]].sigma[channel] = 0;
 								} else
 									environment.data.computed_calibrations.ladder[v_view_trb]
-										[package->data.values.dld.ladder[ladder]].sigma[channel] = 
+										[package->data.values.dld.ladder[ladder]].sigma[channel] =
 										((float)package->data.values.dld.rms[ladder][channel]/d_view_rms_k);
 							}
 						}
@@ -342,7 +345,7 @@ int p_view_loop_read(struct s_interface *interface, int delay) {
 	if ((backup = f_package_analyze(&package, environment.buffer, environment.bytes))) {
 		result = d_true;
 		if (backup > environment.buffer) {
-			if (environment.bytes > (backup-environment.buffer)) 
+			if (environment.bytes > (backup-environment.buffer))
 				environment.bytes -= (backup-environment.buffer);
 			else
 				environment.bytes = 0;
@@ -498,9 +501,9 @@ int main (int argc, char *argv[]) {
 				"\t{-k: exit after calibration}\n"
 				"\t{-c <folder>: load an external TRB calibration}\n"
 				"\t{-m <file>: file with bad channels}\n"
-				"\t{-r: only raw data}\n"
-				"\t{-n: only compressed data}\n"
-				"\t{-g: only gain calbration data}\n"
+				"        | {-r: only RAW data}\n"
+				"format -| {-n: only NOR data}\n"
+				"        | {-g: only CAL data}\n"
 				"\t{-d: load download data as calibrations}\n", argv[0]);
 	f_memory_destroy();
 	return 0;

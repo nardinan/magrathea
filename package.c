@@ -145,9 +145,9 @@ unsigned char *p_package_analyze_header_data(struct s_package *package, unsigned
 		if (index >= d_package_data_header_const_size) {
 			if ((size-(pointer-buffer)) > d_package_data_header_info_size) {
 				workmode = (pointer[0]>>4)&0x0f;
-				if ((workmode == d_package_raw_workmode) || 
+				if ((workmode == d_package_raw_workmode) ||
 						(workmode == d_package_cal_workmode) ||
-						(workmode == d_package_nrm_workmode) || 
+						(workmode == d_package_nrm_workmode) ||
 						(workmode == d_package_dld_workmode)) {
 					package->data.kind = workmode;
 					pointer++;
