@@ -31,7 +31,7 @@ source _magrathea_timer.sh
 source _magrathea_hold_delay.sh
 source _magrathea_common_noise.sh
 if [ "$execute_higher_threshold" -eq "1" ]; then
-	source _magrathea_higher_threshold.sh
+	source _magrathea_higher_threshold.sh new
 fi
 while [ "$maximum_loop" -eq "-1" ] || [ "$current_loop" -lt "$maximum_loop" ]; do
 	if [ "$current_status" -gt 4 ]; then
@@ -105,4 +105,6 @@ while [ "$maximum_loop" -eq "-1" ] || [ "$current_loop" -lt "$maximum_loop" ]; d
 			fi
 			;;
 	esac
+
 done
+source _magrathea_environment.sh
