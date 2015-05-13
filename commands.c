@@ -21,7 +21,7 @@ struct s_console_command v_commands[] = {
 		(struct s_console_parameter[]){
 			{"-off", "(flag) shuts off the trigger", d_true, d_true, d_true},
 			{"-ext", "(flag) sets the trigger output as a redirect of the input trigger", d_true, d_true, d_true},
-			{"-s", "<50,100,200 or 300> sets the trigger to a defined speed", d_false, d_true, d_true},
+			{"-s", "<20,50,100,200 or 300> sets the trigger to a defined speed", d_false, d_true, d_true},
 			{.initialized = d_false}
 		},
 		&f_commands_trigger, e_console_level_guest, d_true

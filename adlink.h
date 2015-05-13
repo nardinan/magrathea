@@ -28,6 +28,7 @@
 typedef enum e_adlink_trigger {
 	e_adlink_trigger_disabled,
 	e_adlink_trigger_external,
+	e_adlink_trigger_20 = 20,
 	e_adlink_trigger_50 = 50,
 	e_adlink_trigger_100 = 100,
 	e_adlink_trigger_200 = 200,

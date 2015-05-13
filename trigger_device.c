@@ -25,6 +25,7 @@ void p_trigger_device_description_format(unsigned char code, char *destination, 
 		case e_adlink_trigger_external:
 			snprintf(destination, size, "[trg:  %sext%s]", v_console_styles[e_console_style_green], v_console_styles[e_console_style_reset]);
 			break;
+		case e_adlink_trigger_20:
 		case e_adlink_trigger_50:
 		case e_adlink_trigger_100:
 		case e_adlink_trigger_200:
@@ -44,6 +45,9 @@ int f_trigger_device_trigger(unsigned char code, char **tokens, size_t elements,
 		trigger = e_adlink_trigger_external;
 	else if ((argument = f_console_parameter("-s", tokens, elements, d_false)) != d_console_parameter_null)
 		switch ((speed = atoi(tokens[argument]))) {
+			case 20:
+				trigger = e_adlink_trigger_20;
+				break;
 			case 100:
 				trigger = e_adlink_trigger_100;
 				break;
@@ -72,6 +76,7 @@ int f_trigger_device_trigger(unsigned char code, char **tokens, size_t elements,
 				case e_adlink_trigger_200:
 				case e_adlink_trigger_300:
 				case e_adlink_trigger_50:
+				case e_adlink_trigger_20:
 				default:
 					snprintf(buffer, d_string_buffer_size, "running trigger @ %dHz\n", trigger);
 			}
