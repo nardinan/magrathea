@@ -1,9 +1,11 @@
 #!/bin/bash
+script_path=`echo "$(readlink -f "$0")"|sed -e "s/\/[^\/]*$//"`
+cd $script_path
+trb_id=0
 for parameter in $@;
 do
-	cd ~/Projects/magrathea/convert
-	for trb in 0 1 2 3 4 5 6 7; # add here all TRBs that you need
+	for ladder in $(seq 0 23); # add here all TRBs that you need
 	do
-		./magrathea_convert.bin $parameter $trb &
+		./firefly_exporter.bin $parameter $trb_id $ladder &
 	done
 done
