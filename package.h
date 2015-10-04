@@ -44,6 +44,7 @@
 #define d_package_nrm_workmode 2 /* compressed workmode 	*/
 #define d_package_dld_workmode 6 /* download workmode		*/
 #define d_package_tmp_workmode 8 /* timestamp workmode		*/
+#define d_package_prt_workmode 1 /* part raw workmode		*/
 #define d_package_raw_size (d_package_ladders*(2+(2*d_package_channels)))
 #define d_package_nrm_ladder 0xcc
 #define d_package_nrm_cluster 0xfc
