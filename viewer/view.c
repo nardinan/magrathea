@@ -263,7 +263,10 @@ void p_view_loop_read_process(struct s_interface *interface, struct s_package *p
 		switch (package->data.kind) {
 			case d_package_cal_workmode:
 			case d_package_raw_workmode:
+			case d_package_prt_workmode:
 				if ((((v_flags&e_view_action_filter_raw) == e_view_action_filter_raw) && (package->data.kind == d_package_raw_workmode)) ||
+						(((v_flags&e_view_action_filter_partial) == e_view_action_filter_partial) &&
+						 (package->data.kind == d_package_prt_workmode)) ||
 						(((v_flags&e_view_action_filter_calibration) == e_view_action_filter_calibration) &&
 						 (package->data.kind == d_package_cal_workmode))) {
 					v_analyze_adc_pedestal = d_true;
@@ -429,7 +432,7 @@ int main (int argc, char *argv[]) {
 	if (argc >= 5) {
 		v_view_ladder = atoi(argv[3]);
 		v_view_trb = atoi(argv[2]);
-		v_flags = (e_view_action_filter_raw|e_view_action_filter_compressed|e_view_action_filter_calibration);
+		v_flags = (e_view_action_filter_raw|e_view_action_filter_compressed|e_view_action_filter_calibration|e_view_action_filter_partial);
 		if ((v_view_skip_frames = atoi(argv[4])) < 0)
 			v_view_skip_frames = 0;
 		if ((v_view_ladder >= 0) && (v_view_ladder < d_analyze_ladders)) {
@@ -446,11 +449,14 @@ int main (int argc, char *argv[]) {
 						else if (f_string_strcmp(argv[index], "-k") == 0)
 							v_flags |= e_view_action_close_after_calibrations;
 						else if (f_string_strcmp(argv[index], "-r") == 0)
-							v_flags &= ~(e_view_action_filter_compressed|e_view_action_filter_calibration);
+							v_flags &= ~(e_view_action_filter_compressed|e_view_action_filter_calibration|
+									e_view_action_filter_partial);
 						else if (f_string_strcmp(argv[index], "-n") == 0)
-							v_flags &= ~(e_view_action_filter_calibration|e_view_action_filter_raw);
+							v_flags &= ~(e_view_action_filter_calibration|e_view_action_filter_raw|e_view_action_filter_partial);
 						else if (f_string_strcmp(argv[index], "-g") == 0)
-							v_flags &= ~(e_view_action_filter_compressed|e_view_action_filter_raw);
+							v_flags &= ~(e_view_action_filter_compressed|e_view_action_filter_raw|e_view_action_filter_partial);
+						else if (f_string_strcmp(argv[index], "-p") == 0)
+							v_flags &= ~(e_view_action_filter_calibration|e_view_action_filter_compressed|e_view_action_filter_raw);
 						else if (f_string_strcmp(argv[index], "-d") == 0)
 							v_flags |= e_view_action_filter_download;
 						else if (f_string_strcmp(argv[index], "-e") == 0) {
@@ -504,6 +510,7 @@ int main (int argc, char *argv[]) {
 				"        | {-r: only RAW data}\n"
 				"format -| {-n: only NOR data}\n"
 				"        | {-g: only CAL data}\n"
+				"        | {-p: only PRT data}\n"
 				"\t{-d: load download data as calibrations}\n", argv[0]);
 	f_memory_destroy();
 	return 0;

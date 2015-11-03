@@ -28,7 +28,7 @@ struct s_package_trb v_package_trbs[] = {
 };
 char *v_package_kind[] = {
 	"damaged workmode", 	/* 0 */
-	"unused workmode",	/* 1 */
+	"part workmode",	/* 1 */
 	"compressed workmode",	/* 2 */
 	"raw workmode",		/* 3 */
 	"calibration workmode",	/* 4 */
@@ -159,6 +159,7 @@ unsigned char *p_package_analyze_header_data(struct s_package *package, unsigned
 					switch (workmode) {
 						case d_package_raw_workmode:
 						case d_package_cal_workmode:
+						case d_package_prt_workmode:
 							backup = p_package_analyze_raw(package, pointer, (size-(pointer-buffer)));
 							break;
 						case d_package_dld_workmode:
