@@ -428,6 +428,7 @@ int main (int argc, char *argv[]) {
 	char buffer[d_string_buffer_size], destination[d_string_buffer_size];
 	struct s_interface *main_interface = (struct s_interface *) malloc(sizeof(struct s_interface));
 	int index, ladder;
+	f_memory_init();
 	if (argc >= 5) {
 		v_view_ladder = atoi(argv[3]);
 		v_view_trb = atoi(argv[2]);
