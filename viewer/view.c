@@ -37,7 +37,7 @@ void p_view_action_dump_bad_channels(struct s_interface *interface) {
 void f_view_action_dump(GtkWidget *widget, struct s_interface *interface) {
 	int ladder, channel;
 	float occupancy_mean, occupancy_mean_square, occupancy_rms;
-	if (environment.data.calibrated >= d_analyze_ladders) {
+	if (environment.data.calibrated > 0) {
 		for (ladder = 0; ladder < d_analyze_ladders; ++ladder) {
 			for (channel = 0; channel < d_package_channels; ++channel) {
 				occupancy_mean += environment.data.data[ladder].occupancy[channel];
@@ -122,7 +122,7 @@ void f_view_destroy(GtkWidget *widget, struct s_interface *interface) {
 
 void p_view_loop_analyze(struct s_interface *interface, unsigned short int ladder, unsigned short int *values) {
 	int result = f_analyze_data(&(environment.data), v_view_trb, ladder, values);
-	if (environment.data.calibrated >= d_analyze_ladders) {
+	if (environment.data.calibrated > 0) {
 		if ((v_flags&e_view_action_exports_clusters) == e_view_action_exports_clusters)
 			f_clusters_save(&(environment.data.data[ladder].compressed_event), (environment.data.counters[ladder].data_events-1),
 					environment.data.counters[ladder].trigger_counter, ladder, environment.data.seconds, environment.data.mseconds,
@@ -290,7 +290,7 @@ void p_view_loop_read_process(struct s_interface *interface, struct s_package *p
 						if ((package->data.values.dld.ladder[ladder] >= 0) && (package->data.values.dld.ladder[ladder] <
 									d_analyze_ladders)) {
 							if (!environment.data.calibration[package->data.values.dld.ladder[ladder]].computed)
-								if (++environment.data.calibrated >= d_analyze_ladders)
+								if (++environment.data.calibrated > 0)
 									gtk_widget_set_sensitive(GTK_WIDGET(interface->buttons[e_interface_button_dump]),
 											TRUE);
 							environment.data.calibration[package->data.values.dld.ladder[ladder]].computed = d_true;
@@ -428,7 +428,6 @@ int main (int argc, char *argv[]) {
 	char buffer[d_string_buffer_size], destination[d_string_buffer_size];
 	struct s_interface *main_interface = (struct s_interface *) malloc(sizeof(struct s_interface));
 	int index, ladder;
-	f_memory_init();
 	if (argc >= 5) {
 		v_view_ladder = atoi(argv[3]);
 		v_view_trb = atoi(argv[2]);
