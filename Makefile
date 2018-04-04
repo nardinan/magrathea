@@ -1,8 +1,8 @@
 ImageName = magrathea
 
 TGT_TYPE  = App
-EXTRA_CFLAGS += -D_FILE_OFFSET_BITS=64 -I.. -I../miranda/
-LFLAGS += -L../miranda/ -lmiranda_ground
+EXTRA_CFLAGS += -D_FILE_OFFSET_BITS=64 -I.. -I../miranda/ -I/usr/local/include
+LFLAGS += -L../miranda/ -L/usr/local/lib -lmiranda_ground
 PLX_OBJECTS = \
 	$(OBJ_DIR)/package.o \
 	$(OBJ_DIR)/plx.o \
